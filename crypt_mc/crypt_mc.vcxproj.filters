@@ -1,0 +1,343 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="SRC">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="SRC\features">
+      <UniqueIdentifier>{5afaf96c-2b55-4369-85dc-5e6f0d543c76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\hack">
+      <UniqueIdentifier>{3c129847-825d-4fcc-9b03-2f8a5f76fb2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render">
+      <UniqueIdentifier>{e8089f30-5f27-443e-be54-381aee185cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK">
+      <UniqueIdentifier>{ddd79746-fa49-48d3-bb95-76051554e2f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\utils">
+      <UniqueIdentifier>{7feaf1eb-79e5-4bb6-9419-9b026ba228c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\hooks">
+      <UniqueIdentifier>{cf46da5a-328e-495c-81f5-7b42d6c2eeb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\hack\hookers">
+      <UniqueIdentifier>{6ffc9b2b-4b03-4fa0-8d76-87e688d34e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\hack\hookers\hde">
+      <UniqueIdentifier>{b1b6fb09-2b4a-4d3a-b93f-83a2cdce964f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render\text">
+      <UniqueIdentifier>{c144c892-05e6-4849-8d7c-ca4533d3c237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK\1.7.10">
+      <UniqueIdentifier>{cee4ab53-72f7-4bd2-ae59-dd453f78b830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\fast_place">
+      <UniqueIdentifier>{510f7008-92be-444a-af3e-3802329897f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\timer">
+      <UniqueIdentifier>{fd89eed0-c50f-4880-92c2-b8d3a1b6e8e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\auto_clicker">
+      <UniqueIdentifier>{eb8e219d-4d8a-4868-91fd-ae7fd2b6103f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\aim_assist">
+      <UniqueIdentifier>{5ea3d18a-69f4-4b00-8560-24410fc39174}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\velocity">
+      <UniqueIdentifier>{7ac7e87f-1b0d-4815-b453-8024d250365c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\speed">
+      <UniqueIdentifier>{b4f19ae5-7bcd-4f8e-b635-212a0d13819e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\throwpot">
+      <UniqueIdentifier>{b4b676e7-5308-44e3-bf9b-6bb43d6714f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK\1.8.X">
+      <UniqueIdentifier>{93229119-9e49-4cae-97d2-99ba429ddaad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\visuals">
+      <UniqueIdentifier>{cb186cc8-7dad-4afc-bc77-3f6ce92298c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\reach">
+      <UniqueIdentifier>{b3be9289-3f04-4bf2-8ee8-51d0b1c29b0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\flight">
+      <UniqueIdentifier>{a45a117b-4f62-43a1-b2ab-b4e8c53e1e88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\sprint">
+      <UniqueIdentifier>{3be34eca-eadd-486c-8962-4c3baf0fdb18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\step">
+      <UniqueIdentifier>{9bd4cd41-a35e-4302-a2db-f1d5cc07d86b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\air_control">
+      <UniqueIdentifier>{cd6e3e3d-121c-4e49-a551-ea46a0195f4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render\fmt">
+      <UniqueIdentifier>{6f7e4eed-8138-4dcb-8209-4aa2e50901c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render\gui">
+      <UniqueIdentifier>{b02a333a-0df3-4241-9482-2c69bf8f1690}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aim_assist.cpp">
+      <Filter>SRC\features\aim_assist</Filter>
+    </ClCompile>
+    <ClCompile Include="air_control.cpp">
+      <Filter>SRC\features\air_control</Filter>
+    </ClCompile>
+    <ClCompile Include="auto_clicker.cpp">
+      <Filter>SRC\features\auto_clicker</Filter>
+    </ClCompile>
+    <ClCompile Include="flight.cpp">
+      <Filter>SRC\features\flight</Filter>
+    </ClCompile>
+    <ClCompile Include="fast_place.cpp">
+      <Filter>SRC\features\fast_place</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="precompiled.cpp">
+      <Filter>SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_1.7.10.cpp">
+      <Filter>SRC\SDK\1.7.10</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_1.8.X.cpp">
+      <Filter>SRC\SDK\1.8.X</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk.cpp">
+      <Filter>SRC\SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="font.cpp">
+      <Filter>SRC\render\text</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>SRC\render</Filter>
+    </ClCompile>
+    <ClCompile Include="gettime.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="gldisable.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="swapbuffers.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="wndproc.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="hde64.cpp">
+      <Filter>SRC\hack\hookers\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer.cpp">
+      <Filter>SRC\hack\hookers</Filter>
+    </ClCompile>
+    <ClCompile Include="hook.cpp">
+      <Filter>SRC\hack\hookers</Filter>
+    </ClCompile>
+    <ClCompile Include="trampoline.cpp">
+      <Filter>SRC\hack\hookers</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>SRC\hack</Filter>
+    </ClCompile>
+    <ClCompile Include="version.cpp">
+      <Filter>SRC\hack</Filter>
+    </ClCompile>
+    <ClCompile Include="reach.cpp">
+      <Filter>SRC\features\reach</Filter>
+    </ClCompile>
+    <ClCompile Include="speed.cpp">
+      <Filter>SRC\features\speed</Filter>
+    </ClCompile>
+    <ClCompile Include="sprint.cpp">
+      <Filter>SRC\features\sprint</Filter>
+    </ClCompile>
+    <ClCompile Include="visuals.cpp">
+      <Filter>SRC\features\visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="velocity.cpp">
+      <Filter>SRC\features\velocity</Filter>
+    </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>SRC\features\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="throwpot.cpp">
+      <Filter>SRC\features\throwpot</Filter>
+    </ClCompile>
+    <ClCompile Include="step.cpp">
+      <Filter>SRC\features\step</Filter>
+    </ClCompile>
+    <ClCompile Include="fmt\format.cc">
+      <Filter>SRC\render\fmt</Filter>
+    </ClCompile>
+    <ClCompile Include="fmt\posix.cc">
+      <Filter>SRC\render\fmt</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.cpp">
+      <Filter>SRC\render\gui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aim_assist.h">
+      <Filter>SRC\features\aim_assist</Filter>
+    </ClInclude>
+    <ClInclude Include="air_control.h">
+      <Filter>SRC\features\air_control</Filter>
+    </ClInclude>
+    <ClInclude Include="auto_clicker.h">
+      <Filter>SRC\features\auto_clicker</Filter>
+    </ClInclude>
+    <ClInclude Include="flight.h">
+      <Filter>SRC\features\flight</Filter>
+    </ClInclude>
+    <ClInclude Include="fast_place.h">
+      <Filter>SRC\features\fast_place</Filter>
+    </ClInclude>
+    <ClInclude Include="precompiled.h">
+      <Filter>SRC</Filter>
+    </ClInclude>
+    <ClInclude Include="erase.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="math.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="string.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_1.7.10.h">
+      <Filter>SRC\SDK\1.7.10</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_1.8.X.h">
+      <Filter>SRC\SDK\1.8.X</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk.h">
+      <Filter>SRC\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="font.h">
+      <Filter>SRC\render\text</Filter>
+    </ClInclude>
+    <ClInclude Include="fontstash.h">
+      <Filter>SRC\render\text</Filter>
+    </ClInclude>
+    <ClInclude Include="glfontstash.h">
+      <Filter>SRC\render\text</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_truetype.h">
+      <Filter>SRC\render\text</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
+      <Filter>SRC\render</Filter>
+    </ClInclude>
+    <ClInclude Include="hde64.h">
+      <Filter>SRC\hack\hookers\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="table64.h">
+      <Filter>SRC\hack\hookers\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer.h">
+      <Filter>SRC\hack\hookers</Filter>
+    </ClInclude>
+    <ClInclude Include="MinHook.h">
+      <Filter>SRC\hack\hookers</Filter>
+    </ClInclude>
+    <ClInclude Include="trampoline.h">
+      <Filter>SRC\hack\hookers</Filter>
+    </ClInclude>
+    <ClInclude Include="context.h">
+      <Filter>SRC\hack</Filter>
+    </ClInclude>
+    <ClInclude Include="header.h">
+      <Filter>SRC\hack</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>SRC\hack</Filter>
+    </ClInclude>
+    <ClInclude Include="memory.h">
+      <Filter>SRC\hack</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>SRC\hack</Filter>
+    </ClInclude>
+    <ClInclude Include="feature.h">
+      <Filter>SRC\features</Filter>
+    </ClInclude>
+    <ClInclude Include="reach.h">
+      <Filter>SRC\features\reach</Filter>
+    </ClInclude>
+    <ClInclude Include="speed.h">
+      <Filter>SRC\features\speed</Filter>
+    </ClInclude>
+    <ClInclude Include="sprint.h">
+      <Filter>SRC\features\sprint</Filter>
+    </ClInclude>
+    <ClInclude Include="visuals.h">
+      <Filter>SRC\features\visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="velocity.h">
+      <Filter>SRC\features\velocity</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>SRC\features\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="throwpot.h">
+      <Filter>SRC\features\throwpot</Filter>
+    </ClInclude>
+    <ClInclude Include="step.h">
+      <Filter>SRC\features\step</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\chrono.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\color.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\core.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\format.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\format-inl.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\locale.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\ostream.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\posix.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\printf.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\ranges.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\time.h">
+      <Filter>SRC\render\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>SRC\render\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.h">
+      <Filter>SRC\render\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="hash.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
