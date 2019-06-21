@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="SRC">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="SRC\utils">
+      <UniqueIdentifier>{2187018c-e52a-4679-8390-850676b8ac27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\Injection">
+      <UniqueIdentifier>{80e20270-2880-4410-a757-3fa3b960a402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\Injection\syscall">
+      <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\Injection\target">
+      <UniqueIdentifier>{a9652482-02f1-40ee-8113-fe0966019d76}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="inject.cpp">
+      <Filter>SRC\Injection</Filter>
+    </ClCompile>
+    <ClCompile Include="syscall.cpp">
+      <Filter>SRC\Injection\syscall</Filter>
+    </ClCompile>
+    <ClCompile Include="target.cpp">
+      <Filter>SRC\Injection\target</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hash.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="string.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="context.h">
+      <Filter>SRC</Filter>
+    </ClInclude>
+    <ClInclude Include="inject.h">
+      <Filter>SRC\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="syscall.h">
+      <Filter>SRC\Injection\syscall</Filter>
+    </ClInclude>
+    <ClInclude Include="target.h">
+      <Filter>SRC\Injection\target</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
