@@ -1,5 +1,5 @@
-#include <Windows.h>
 #include "context.h"
+#include <Windows.h>
 #include <iostream>
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
@@ -68,9 +68,9 @@ void close() {
 	printf("> Automatically closing in 5 seconds\n");
 
 	Sleep(500);
-	DWORD finished_inject = GetTickCount();
+	DWORD finished_inject = GetTickCount64();
 	while (!(GetAsyncKeyState(VK_RETURN) < 0)) {
-		DWORD current = GetTickCount();
+		DWORD current = GetTickCount64();
 		if (current > finished_inject + 5000)
 			return;
 
@@ -82,24 +82,61 @@ int main(int argc, char* argv[])
 {
 	setup_console();
 
-	target_process target;
-	int pid = c_target::find_target(&target);
-	if (pid != -1)
-	{
-		printf("> Target: %s \n", target.display_name.c_str());
-		printf("> Process: %s \n", target.process_name.c_str());
-		printf("> Process ID: %i \n", pid);
-		printf("> DLL: %s \n", target.dll_name.c_str());
+	//target_process target;
+	//int pid = c_target::find_target(&target);
+	//if (pid != -1)
+	//{
+	//	printf("> Target: %s \n", target.display_name.c_str());
+	//	printf("> Process: %s \n", target.process_name.c_str());
+	//	printf("> Process ID: %i \n", pid);
+	//	printf("> DLL: %s \n", target.dll_name.c_str());
+	//
+	//	std::string path = make_full_path(target.dll_name);
+	//	printf("> DLL Path: %s \n", path.c_str());
+	//
+	//	Inject(pid, path, target.manual_map);
+	//}
+	//else
+	//{
+	//	printf("> Couldn't find any valid target...\n");
+	//}
 
-		std::string path = make_full_path(target.dll_name);
-		printf("> DLL Path: %s \n", path.c_str());
+	ctx.m_connection.connect();
 
-		Inject(pid, path, target.manual_map);
-	}
-	else
+	// Welcome String
 	{
-		printf("> Couldn't find any valid target...\n");
+		ctx.m_connection.recieve();
+		std::string recv_str((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
+
+		std::cout << std::endl << recv_str << std::endl;
 	}
+
+	//ctx.m_connection.clear_buffer();
+	//ctx.m_connection.recieve();
+	//std::string recv_str1((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
+	//
+	//std::cout << recv_str1 << std::endl;
+	//
+	//ctx.m_connection.clear_buffer();
+	//ctx.m_connection.recieve();
+	//std::string recv_str2((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
+	//
+	//std::cout << std::endl << recv_str2 << std::endl << "> ";
+	//
+	//std::string send_str;
+	//std::cin >> send_str;
+	//
+	//ctx.m_connection.clear_buffer();
+	//ctx.m_connection.set_buffer((const void*)send_str.data(), send_str.size());
+	//ctx.m_connection.send();
+	//
+	//ctx.m_connection.clear_buffer();
+	//ctx.m_connection.recieve();
+	//std::string recv_str3((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
+	//
+	//std::cout << recv_str3 << std::endl;
+
+	getchar();
 
 	close();
 	return 0;

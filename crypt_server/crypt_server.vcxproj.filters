@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="SRC">
+      <UniqueIdentifier>{de545b7c-2dba-48cc-8fa0-78b0ee553436}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\server">
+      <UniqueIdentifier>{0a881248-a946-4eee-ad56-71f39359a143}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\server\connection">
+      <UniqueIdentifier>{33805a9e-f6cf-4251-989b-9325c5bad34a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\utils">
+      <UniqueIdentifier>{cb6beac0-ecfd-401d-ac56-5ed97836b03d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="connection.cpp">
+      <Filter>SRC\server\connection</Filter>
+    </ClCompile>
+    <ClCompile Include="server.cpp">
+      <Filter>SRC\server</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="context.h">
+      <Filter>SRC</Filter>
+    </ClInclude>
+    <ClInclude Include="connection.h">
+      <Filter>SRC\server\connection</Filter>
+    </ClInclude>
+    <ClInclude Include="server.h">
+      <Filter>SRC\server</Filter>
+    </ClInclude>
+    <ClInclude Include="thread_pool.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="console.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

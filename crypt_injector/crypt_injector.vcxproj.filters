@@ -17,6 +17,9 @@
     <Filter Include="SRC\Injection\target">
       <UniqueIdentifier>{a9652482-02f1-40ee-8113-fe0966019d76}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\connection">
+      <UniqueIdentifier>{9422bd02-fff6-4b0b-8437-ef718835e262}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -30,6 +33,9 @@
     </ClCompile>
     <ClCompile Include="target.cpp">
       <Filter>SRC\Injection\target</Filter>
+    </ClCompile>
+    <ClCompile Include="connection.cpp">
+      <Filter>SRC\connection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="target.h">
       <Filter>SRC\Injection\target</Filter>
+    </ClInclude>
+    <ClInclude Include="connection.h">
+      <Filter>SRC\connection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

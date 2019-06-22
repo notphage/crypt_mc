@@ -125,12 +125,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="connection.cpp" />
     <ClCompile Include="inject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="syscall.cpp" />
     <ClCompile Include="target.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="connection.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="inject.h" />
