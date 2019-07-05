@@ -78,9 +78,19 @@ void close() {
 	}
 }
 
-int main(int argc, char* argv[])
+int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd_line, int32_t cmd_show)
 {
-	setup_console();
+	ctx.m_instance = instance;
+	//setup_console();
+	ctx.m_loader_window.create();
+
+	MSG msg;
+	// message loop
+	while (GetMessageA(&msg, ctx.m_window, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessageA(&msg);
+	}
 
 	//target_process target;
 	//int pid = c_target::find_target(&target);
@@ -101,40 +111,8 @@ int main(int argc, char* argv[])
 	//	printf("> Couldn't find any valid target...\n");
 	//}
 
-	ctx.m_connection.connect();
-
-	// Welcome String
-	{
-		ctx.m_connection.recieve();
-		std::string recv_str((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
-
-		std::cout << std::endl << recv_str << std::endl;
-	}
-
-	//ctx.m_connection.clear_buffer();
-	//ctx.m_connection.recieve();
-	//std::string recv_str1((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
-	//
-	//std::cout << recv_str1 << std::endl;
-	//
-	//ctx.m_connection.clear_buffer();
-	//ctx.m_connection.recieve();
-	//std::string recv_str2((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
-	//
-	//std::cout << std::endl << recv_str2 << std::endl << "> ";
-	//
-	//std::string send_str;
-	//std::cin >> send_str;
-	//
-	//ctx.m_connection.clear_buffer();
-	//ctx.m_connection.set_buffer((const void*)send_str.data(), send_str.size());
-	//ctx.m_connection.send();
-	//
-	//ctx.m_connection.clear_buffer();
-	//ctx.m_connection.recieve();
-	//std::string recv_str3((const char*)ctx.m_connection.buffer_data(), ctx.m_connection.buffer_size());
-	//
-	//std::cout << recv_str3 << std::endl;
+	c_client client;
+	client.run();
 
 	getchar();
 

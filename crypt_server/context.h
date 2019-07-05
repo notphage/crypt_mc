@@ -12,6 +12,7 @@
 #include <mutex>
 #include <future>
 #include <iostream>
+#include <fstream>
 
 #include "thread_pool.h"
 #include "console.h"
@@ -30,6 +31,7 @@ class c_context
 {
 public:
 	std::atomic<uint64_t> m_clients = 0;
+	uint64_t m_required_version = 1;
 	c_console m_console;
 };
 

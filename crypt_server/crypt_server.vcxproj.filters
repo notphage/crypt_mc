@@ -41,5 +41,11 @@
     <ClInclude Include="console.h">
       <Filter>SRC\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\packets.h">
+      <Filter>SRC\server</Filter>
+    </ClInclude>
+    <ClInclude Include="game_list.h">
+      <Filter>SRC\server</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

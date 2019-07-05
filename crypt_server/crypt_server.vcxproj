@@ -80,9 +80,11 @@
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\packets.h" />
     <ClInclude Include="connection.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="game_list.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="thread_pool.h" />
   </ItemGroup>

@@ -34,6 +34,8 @@ c_server::c_server(int16_t port)
 
 void c_server::run()
 {
+	srand(time(0));
+
 	int client_socket = -1, c = sizeof(struct sockaddr_in);
 	struct sockaddr_in client;
 
@@ -46,11 +48,11 @@ void c_server::run()
 
 		ctx.m_clients++;
 
-		m_thread_pool.enqueue([this](int client_socket)
+		m_thread_pool.enqueue([this](const std::string& ip, int client_socket)
 			{
-				c_client_handler client_handler(client_socket);
+				c_client_handler client_handler(ip, client_socket);
 				client_handler.run();
-			}, client_socket);
+			}, ip_str, client_socket);
 	}
 
 	if (client_socket < 0)
@@ -68,7 +70,61 @@ c_client_handler::~c_client_handler()
 
 void c_client_handler::run()
 {
-	std::string welcome("Welcome from the Crypt Server!");
-	m_connection.set_buffer(welcome.data(), welcome.size());
-	m_connection.send();
+	// Welcome String
+	{
+		std::string welcome("Welcome from the Crypt Server!");
+		m_connection.set_buffer(welcome.data(), welcome.size());
+		m_connection.send();
+	}
+
+	// Version Packets
+	{
+		auto version_packet = recieve_packet<c_version_packet>();
+
+		if (ctx.m_required_version > version_packet.m_version)
+		{
+			printf("Client %s outdated version: %ull\n", m_client_ip.c_str(), ctx.m_required_version);
+
+			version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, true);
+			m_connection.set_buffer(&version_packet, sizeof version_packet);
+
+			return;
+		}
+
+		printf("Client %s connected with a updated client.\n", m_client_ip.c_str());
+
+		version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, false);
+		m_connection.set_buffer(&version_packet, sizeof version_packet);
+		m_connection.send();
+	}
+
+	// Login Packets
+	{
+		auto login_packet = recieve_packet<c_login_packet>();
+
+		printf("Client %s logged into user %s.\n", m_client_ip.c_str(), login_packet.m_username);
+	}
+
+	// Game Packets
+	{
+		c_games_packet game_packet = m_packet_handler.create_games_packet("", game_packet_status_t::GAME_INVALID, (uint8_t)m_games.size());
+		m_connection.set_buffer(&game_packet, sizeof game_packet);
+		m_connection.send();
+
+		for (auto&& game : m_games)
+		{
+			game_packet = m_packet_handler.create_games_packet(game.m_name, game.m_status, (uint8_t)m_games.size());
+			m_connection.set_buffer(&game_packet, sizeof game_packet);
+			m_connection.send();
+		}
+	}
+
+	// Game Selection
+	{
+		m_connection.recieve();
+		c_login_packet login_packet;
+		memcpy(&login_packet, m_connection.buffer_data(), m_connection.buffer_size());
+
+		m_packet_handler.xor_packet(login_packet);
+	}
 }

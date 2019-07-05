@@ -17,8 +17,20 @@
     <Filter Include="SRC\Injection\target">
       <UniqueIdentifier>{a9652482-02f1-40ee-8113-fe0966019d76}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\connection">
+    <Filter Include="SRC\client">
+      <UniqueIdentifier>{1df26572-29bf-4756-912f-5b6b77b9666c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\connection">
       <UniqueIdentifier>{9422bd02-fff6-4b0b-8437-ef718835e262}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\window">
+      <UniqueIdentifier>{2818650c-6875-43dc-91f9-5677c50ec8b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\window\renderer">
+      <UniqueIdentifier>{8a892140-dabd-41f3-b252-c120b722d6d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\window\input">
+      <UniqueIdentifier>{c9035bc7-3677-474b-8edd-aba141f4b22d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,7 +47,16 @@
       <Filter>SRC\Injection\target</Filter>
     </ClCompile>
     <ClCompile Include="connection.cpp">
-      <Filter>SRC\connection</Filter>
+      <Filter>SRC\client\connection</Filter>
+    </ClCompile>
+    <ClCompile Include="client.cpp">
+      <Filter>SRC\client</Filter>
+    </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>SRC\window</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>SRC\window\input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,7 +79,22 @@
       <Filter>SRC\Injection\target</Filter>
     </ClInclude>
     <ClInclude Include="connection.h">
-      <Filter>SRC\connection</Filter>
+      <Filter>SRC\client\connection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\packets.h">
+      <Filter>SRC\client</Filter>
+    </ClInclude>
+    <ClInclude Include="client.h">
+      <Filter>SRC\client</Filter>
+    </ClInclude>
+    <ClInclude Include="game_list.h">
+      <Filter>SRC\client</Filter>
+    </ClInclude>
+    <ClInclude Include="window.h">
+      <Filter>SRC\window</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>SRC\window\input</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
