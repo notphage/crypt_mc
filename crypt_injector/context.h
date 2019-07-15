@@ -18,8 +18,6 @@ if ( init ) \
 #include "sdk.h"
 #include "hash.h"
 #include "string.h"
-#include "renderer.h"
-#include "window.h"
 #include "inject.h"
 #include "target.h"
 #include "connection.h"
@@ -33,10 +31,12 @@ public:
 	uint64_t m_version = 1;
 	bool m_panic = false;
 
+	uint32_t m_screen_w = 0;
+	uint32_t m_screen_h = 0;
+
 	c_syscall m_syscall;
 	c_inject m_injector;
 	c_target m_target;
-	c_window m_loader_window;
 };
 
 extern c_context ctx;

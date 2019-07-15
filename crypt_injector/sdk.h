@@ -934,12 +934,7 @@ public:
 	ColorF base() const
 	{
 		//returned address of temp value before :>
-		return ColorF(R / 255.0f, G / 255.0f, B / 255.0f, A / 255.f);
-	}
-
-	color_t __base()
-	{
-		return color_t(R / 255.0f, G / 255.0f, B / 255.0f);
+		return ColorF((float)R / 255.0f, (float)G / 255.0f, (float)B / 255.0f, (float)A / 255.f);
 	}
 
 	static color_t blend(const color_t& first, const color_t& second, float t)

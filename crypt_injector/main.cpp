@@ -82,15 +82,6 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd
 {
 	ctx.m_instance = instance;
 	//setup_console();
-	ctx.m_loader_window.create();
-
-	MSG msg;
-	// message loop
-	while (GetMessageA(&msg, ctx.m_window, 0, 0))
-	{
-		TranslateMessage(&msg);
-		DispatchMessageA(&msg);
-	}
 
 	//target_process target;
 	//int pid = c_target::find_target(&target);

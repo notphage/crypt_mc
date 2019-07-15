@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -128,11 +128,9 @@
     <ClCompile Include="client.cpp" />
     <ClCompile Include="connection.cpp" />
     <ClCompile Include="inject.cpp" />
-    <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="syscall.cpp" />
     <ClCompile Include="target.cpp" />
-    <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\packets.h" />
@@ -142,11 +140,10 @@
     <ClInclude Include="game_list.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="inject.h" />
-    <ClInclude Include="input.h" />
+    <ClInclude Include="sdk.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="syscall.h" />
     <ClInclude Include="target.h" />
-    <ClInclude Include="window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
