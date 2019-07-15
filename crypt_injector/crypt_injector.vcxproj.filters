@@ -23,6 +23,18 @@
     <Filter Include="SRC\client\connection">
       <UniqueIdentifier>{9422bd02-fff6-4b0b-8437-ef718835e262}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\window">
+      <UniqueIdentifier>{bd898c77-6ad7-4a0a-a75a-e5e48da29341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\window\input">
+      <UniqueIdentifier>{27f62986-5293-49c2-946a-51d2b1c08da1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\window\renderer">
+      <UniqueIdentifier>{fd34b9fb-d67f-4048-8cb2-b07b13f1cc59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\window\renderer\font">
+      <UniqueIdentifier>{ca369ae2-0515-481f-b3b5-4aa288ae6667}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -42,6 +54,18 @@
     </ClCompile>
     <ClCompile Include="client.cpp">
       <Filter>SRC\client</Filter>
+    </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>SRC\window</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>SRC\window\input</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>SRC\window\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="font.cpp">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,5 +100,17 @@
       <Filter>SRC\client</Filter>
     </ClInclude>
     <ClInclude Include="sdk.h" />
+    <ClInclude Include="window.h">
+      <Filter>SRC\window</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>SRC\window\input</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
+      <Filter>SRC\window\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="font.h">
+      <Filter>SRC\window\renderer\font</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
