@@ -39,14 +39,22 @@ void c_window::create()
 
 	RegisterClass(&wc);
 
+	RECT desk_rect;
+
+	// Get a handle to the desktop window
+	const HWND desk = GetDesktopWindow();
+
+	// Get the size of screen to the variable desktop
+	GetWindowRect(desk, &desk_rect);
+
 	HWND hwnd = CreateWindowEx(
 		0,                              // Optional window styles.
 		CLASS_NAME,                     // Window class
-		"Learn to Program Windows",    // Window text
-		WS_OVERLAPPEDWINDOW,            // Window style
+		"",    // Window text
+		WS_BORDER | WS_EX_TOPMOST,            // Window style
 
 		// Size and position
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		(desk_rect.right / 2) - 160, (desk_rect.bottom / 2) - 120, ctx.m_screen_w, ctx.m_screen_h,
 
 		NULL,       // Parent window    
 		NULL,       // Menu
@@ -59,21 +67,27 @@ void c_window::create()
 
 	ctx.m_window = hwnd;
 
+	SetWindowLong(hwnd, GWL_STYLE, 0);  // Without 1 point border = white rectangle 
+	SetWindowPos(hwnd, HWND_TOPMOST, (desk_rect.right / 2) - 160, (desk_rect.bottom / 2) - 120, ctx.m_screen_w, ctx.m_screen_h, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 	ShowWindow(hwnd, SW_SHOW);
 
-	m_renderer->start();
+	ctx.m_renderer = std::make_unique<c_renderer>(8192);
+
+	ctx.m_renderer->start();
 }
 
 void c_window::render()
 {
-	m_renderer->begin();
+	ctx.m_renderer->begin();
 
-	// drawing goes here
+	m_gui.draw();
+	//ctx.m_renderer->draw_filled_rect({ 0, 0, 200, 200 }, color_t(255, 255, 255, 100));
 
-	m_renderer->end();
+	ctx.m_renderer->render();
+	ctx.m_renderer->end();
 }
 
 void c_window::end()
 {
-	m_renderer->release();
+	ctx.m_renderer->release();
 }

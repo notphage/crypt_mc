@@ -1,12 +1,12 @@
 #include "context.h" 
 
-font::font(renderer* renderer, IDirect3DDevice9* device, const std::string& family, long height, std::uint8_t flags, int width)
-	: m_renderer(renderer), m_device(device), m_family(family), m_height(height), m_flags(flags), m_spacing(0), m_texture(nullptr), m_width(width)
+c_font::c_font(IDirect3DDevice9* device, const std::string& family, long height, std::uint8_t flags, int width)
+	: m_device(device), m_family(family), m_height(height), m_flags(flags), m_spacing(0), m_texture(nullptr), m_width(width)
 {
 	reacquire();
 }
 
-void font::reacquire()
+void c_font::reacquire()
 {
 	HDC gdi_ctx = nullptr;
 
@@ -121,12 +121,12 @@ void font::reacquire()
 	DeleteDC(gdi_ctx);
 }
 
-void font::release()
+void c_font::release()
 {
 	safe_release(m_texture);
 }
 
-void font::create_gdi_font(HDC ctx, HGDIOBJ* gdi_font)
+void c_font::create_gdi_font(HDC ctx, HGDIOBJ* gdi_font)
 {
 	auto scaling_factor = float(GetDeviceCaps(ctx, LOGPIXELSY)) / 96.f; // for the 4k niggas
 
@@ -139,7 +139,7 @@ void font::create_gdi_font(HDC ctx, HGDIOBJ* gdi_font)
 		CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, m_family.c_str());
 }
 
-long font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
+long c_font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
 {
 	SIZE size;
 	char chr[2] = "x";
@@ -184,7 +184,7 @@ long font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
 	return S_OK;
 }
 
-vec2_d font::get_text_extent(const std::string& text)
+vec2 c_font::get_text_extent(const std::string& text)
 {
 	float row_width = 0.f;
 	float row_height = (tex_coords[0][3] - tex_coords[0][1]) * tex_height;
@@ -214,13 +214,13 @@ vec2_d font::get_text_extent(const std::string& text)
 	return { width, height };
 }
 
-void font::draw_text(render_list* render_list, vec2_d pos, const std::string& text, D3DCOLOR color, std::uint8_t flags)
+void c_font::draw_text(const std::unique_ptr<render_list_t>& render_list, vec2 pos, const std::string& text, const color_t& color, std::uint8_t flags)
 {
 	std::size_t num_to_skip = 0;
 
 	if (flags & (TEXT_RIGHT | TEXT_CENTERED))
 	{
-		vec2_d size = get_text_extent(text);
+		vec2 size = get_text_extent(text);
 
 		if (flags & TEXT_RIGHT)
 			pos.x -= size.x;
@@ -239,26 +239,6 @@ void font::draw_text(render_list* render_list, vec2_d pos, const std::string& te
 	{
 		if (num_to_skip > 0 && num_to_skip-- > 0)
 			continue;
-
-		if (flags & TEXT_COLORTAGS && c == '{') // format: {#aarrggbb} or {##rrggbb}, {#aarrggbb} will inherit alpha from color argument.
-		{
-			std::size_t index = &c - &text[0];
-			if (std::size(text) > index + 11)
-			{
-				std::string color_str = text.substr(index, 11);
-				if (color_str[1] == '#')
-				{
-					bool alpha = false;
-					if ((alpha = color_str[10] == '}') || color_str[8] == '}')
-					{
-						num_to_skip += alpha ? 10 : 8;
-						color_str.erase(std::remove_if(std::begin(color_str), std::end(color_str), [](char c) { return !std::isalnum(c); }), std::end(color_str));
-						color = std::stoul(alpha ? color_str : "ff" + color_str, nullptr, 16);
-						continue;
-					}
-				}
-			}
-		}
 
 		if (c == '\n')
 		{
@@ -281,37 +261,65 @@ void font::draw_text(render_list* render_list, vec2_d pos, const std::string& te
 		{
 			vertex_t v[] =
 			{
-				{ vec4_d{ pos.x - 0.5f,     pos.y - 0.5f + h, 0.9f, 1.f }, color, vec2_d{ tx1, ty2 } },
-				{ vec4_d{ pos.x - 0.5f,     pos.y - 0.5f,     0.9f, 1.f }, color, vec2_d{ tx1, ty1 } },
-				{ vec4_d{ pos.x - 0.5f + w, pos.y - 0.5f + h, 0.9f, 1.f }, color, vec2_d{ tx2, ty2 } },
+				{ vec3{ pos.x - 0.5f,     pos.y - 0.5f + h, 0.9f }, color, vec2{ tx1, ty2 } },
+				{ vec3{ pos.x - 0.5f,     pos.y - 0.5f,     0.9f }, color, vec2{ tx1, ty1 } },
+				{ vec3{ pos.x - 0.5f + w, pos.y - 0.5f + h, 0.9f }, color, vec2{ tx2, ty2 } },
 
-				{ vec4_d{ pos.x - 0.5f + w, pos.y - 0.5f,     0.9f, 1.f }, color, vec2_d{ tx2, ty1 } },
-				{ vec4_d{ pos.x - 0.5f + w, pos.y - 0.5f + h, 0.9f, 1.f }, color, vec2_d{ tx2, ty2 } },
-				{ vec4_d{ pos.x - 0.5f,     pos.y - 0.5f,     0.9f, 1.f }, color, vec2_d{ tx1, ty1 } }
+				{ vec3{ pos.x - 0.5f + w, pos.y - 0.5f,     0.9f }, color, vec2{ tx2, ty1 } },
+				{ vec3{ pos.x - 0.5f + w, pos.y - 0.5f + h, 0.9f }, color, vec2{ tx2, ty2 } },
+				{ vec3{ pos.x - 0.5f,     pos.y - 0.5f,     0.9f }, color, vec2{ tx1, ty1 } }
 			};
 
 			if (flags & TEXT_SHADOW)
 			{
-				auto shadow_color = D3DCOLOR_ARGB((color >> 24) & 0xff, 0x00, 0x00, 0x00);
+				auto shadow_color = color_t(0, 0, 0, color.a());
 
-				for (auto& vtx : v) { vtx.m_color = shadow_color; vtx.position.x += 1.f; }
-				m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
+				for (auto& vtx : v) { vtx.m_col = shadow_color.argb(); vtx.m_pos.x += 1.f; }
+				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
 
-				for (auto& vtx : v) { vtx.position.x -= 2.f; }
-				m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
+				for (auto& vtx : v) { vtx.m_pos.x -= 2.f; }
+				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
 
-				for (auto& vtx : v) { vtx.position.x += 1.f; vtx.position.y += 1.f; }
-				m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
+				for (auto& vtx : v) { vtx.m_pos.x += 1.f; vtx.m_pos.y += 1.f; }
+				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
 
-				for (auto& vtx : v) { vtx.position.y -= 2.f; }
-				m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
+				for (auto& vtx : v) { vtx.m_pos.y -= 2.f; }
+				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
 
-				for (auto& vtx : v) { vtx.m_color = color; vtx.position.y -= 1.f; }
+				for (auto& vtx : v) { vtx.m_col = color.argb(); vtx.m_pos.y -= 1.f; }
 			}
 
-			m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
+			ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
 		}
 
 		pos.x += w - (2.f * m_spacing);
 	}
+}
+
+uint32_t c_font::max_characters_to_fit(const std::string& text, uint32_t max_width)
+{
+	size_t first, last, middle, max;
+
+	first = 0;
+	last = text.length();
+	middle = (first + last) / 2;
+	max = 0;
+
+	while (first <= last && max != middle)
+	{
+		vec2 bounds = get_text_extent(text.substr(middle));
+
+		if (bounds.x < max_width)
+		{
+			max = middle;
+			first = middle + 1;
+		}
+		else
+		{
+			last = middle - 1;
+		}
+		middle = (first + last) / 2;
+	}
+
+	return max;
 }

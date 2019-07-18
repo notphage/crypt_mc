@@ -1,17 +1,17 @@
 #pragma once
 #include "renderer.h"
 
-class renderer;
-class render_list;
+class c_renderer;
+class render_list_t;
 
-enum font_flags : std::uint8_t
+enum font_flags_t : std::uint8_t
 {
 	FONT_DEFAULT = 0 << 0,
 	FONT_BOLD = 1 << 0,
 	FONT_ITALIC = 1 << 1
 };
 
-enum text_flags : std::uint8_t
+enum text_flags_t : std::uint8_t
 {
 	TEXT_LEFT = 0 << 0,
 	TEXT_RIGHT = 1 << 1,
@@ -23,32 +23,30 @@ enum text_flags : std::uint8_t
 	TEXT_BUDGET_SHADOW = 1 << 6
 };
 
-class font
+class c_font
 {
-public:
-	font(renderer* renderer, IDirect3DDevice9* device, const std::string& family, long height, std::uint8_t flags = FONT_DEFAULT, int width = 0);
-	void reacquire();
-	void release();
-
-	void draw_text(render_list* render_list, vec2_d position, const std::string& text, D3DCOLOR color, std::uint8_t flags = TEXT_LEFT);
-	vec2_d get_text_extent(const std::string& text);
-
-private:
 	void create_gdi_font(HDC ctx, HGDIOBJ* gdi_font);
 	HRESULT paint_alphabet(HDC ctx, bool measure_only = false);
 
-	IDirect3DDevice9* m_device;
+	IDirect3DDevice9*  m_device;
 	IDirect3DTexture9* m_texture;
-	long                  tex_width;
-	long                  tex_height;
-	float                 text_scale;
-	float                 tex_coords[128 - 32][4];
-	long                  m_spacing;
+	long               tex_width;
+	long               tex_height;
+	float              text_scale;
+	float              tex_coords[128 - 32][4];
+	long               m_spacing;
 
-	std::string           m_family;
-	long                  m_height;
-	int					  m_width;
-	std::uint8_t          m_flags;
+	std::string        m_family;
+	long               m_height;
+	int				   m_width;
+	std::uint8_t       m_flags;
 
-	renderer* m_renderer;
+public:
+	c_font(IDirect3DDevice9* device, const std::string& family, long height, std::uint8_t flags = FONT_DEFAULT, int width = 0);
+	void reacquire();
+	void release();
+
+	void draw_text(const std::unique_ptr<render_list_t>& render_list, vec2 pos, const std::string& text, const color_t& color, std::uint8_t flags = TEXT_LEFT);
+	vec2 get_text_extent(const std::string& text);
+	uint32_t max_characters_to_fit(const std::string& text, uint32_t max_width);
 };

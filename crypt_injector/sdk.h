@@ -926,11 +926,6 @@ public:
 		);
 	}
 
-	/*fColor ToFColor( ) const
-	{
-	return fColor( R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f );
-	}*/
-
 	ColorF base() const
 	{
 		//returned address of temp value before :>

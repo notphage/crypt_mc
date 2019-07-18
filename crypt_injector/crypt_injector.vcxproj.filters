@@ -35,6 +35,9 @@
     <Filter Include="SRC\window\renderer\font">
       <UniqueIdentifier>{ca369ae2-0515-481f-b3b5-4aa288ae6667}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\window\gui">
+      <UniqueIdentifier>{ee8ade36-9c9a-434b-a261-3f902a38a5eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,6 +69,9 @@
     </ClCompile>
     <ClCompile Include="font.cpp">
       <Filter>SRC\window\renderer\font</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.cpp">
+      <Filter>SRC\window\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +117,15 @@
     </ClInclude>
     <ClInclude Include="font.h">
       <Filter>SRC\window\renderer\font</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>SRC\window\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.h">
+      <Filter>SRC\window\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>SRC\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

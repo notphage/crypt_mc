@@ -5,11 +5,7 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
 
-using vec4_d = D3DXVECTOR4;
-using vec3_d = D3DXVECTOR3;
-using vec2_d = D3DXVECTOR2;
-
-class font;
+class c_font;
 #include "font.h"
 
 namespace topology
@@ -34,156 +30,86 @@ void safe_release(type& com_ptr)
 	}
 }
 
-struct font_handle
+struct font_handle_t
 {
-	font_handle() = default;
-	explicit font_handle(std::size_t id);
+	font_handle_t() = default;
+	font_handle_t(std::size_t id)
+		: m_id(id)
+	{ }
 
-	std::size_t id;
+	std::size_t m_id;
 };
 
 struct vertex_t
 {
 	vertex_t() = default;
 
-	vertex_t(vec4_d position, D3DCOLOR color, vec2_d tex);
-	vertex_t(vec4_d position, D3DCOLOR color);
-	vertex_t(vec3_d position, D3DCOLOR color);
-	vertex_t(vec2_d position, D3DCOLOR color);
+	vertex_t(float x, float y, float z, float w, const color_t& col = {}, const vec2& tex = {})
+		: m_pos(x, y, z, w), m_col(col.argb()), m_tex(tex)
+	{}
 
-	vertex_t(float x, float y, float z, D3DCOLOR color);
-	vertex_t(float x, float y, D3DCOLOR color);
+	vertex_t(float x, float y, float z, const color_t& col = {}, const vec2& tex = {})
+		: m_pos(x, y, z, 0.f), m_col(col.argb()), m_tex(tex)
+	{}
 
-	vec4_d position;
-	D3DCOLOR m_color;
-	vec2_d tex{};
+	vertex_t(float x, float y, const color_t& col = {}, const vec2& tex = {})
+		: m_pos(x, y, 0.f, 0.f), m_col(col.argb()), m_tex(tex)
+	{}
+
+	vertex_t(const vec4& pos, const color_t& col = {}, const vec2& tex = {})
+		: m_pos(pos.x, pos.y, pos.z, pos.w), m_col(col.argb()), m_tex(tex)
+	{}
+
+	vertex_t(const vec3& pos, const color_t& col = {}, const vec2& tex = {})
+		: m_pos(pos.x, pos.y, pos.z, 0.f), m_col(col.argb()), m_tex(tex)
+	{}
+
+	vertex_t(const vec2& pos, const color_t& col = {}, const vec2& tex = {})
+		: m_pos(pos.x, pos.y, 0.f, 0.f), m_col(col.argb()), m_tex(tex)
+	{}
+
+	vec4 m_pos;
+	uint32_t m_col;
+	vec2 m_tex;
 };
 
-struct batch
+struct batch_t
 {
-	batch(std::size_t count, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr);
+	batch_t(size_t count, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr)
+		: m_count(count), m_topology(topology), m_texture(texture)
+	{ }
 
-	std::size_t count;
-	D3DPRIMITIVETYPE topology;
-	IDirect3DTexture9* texture;
+	size_t m_count;
+	D3DPRIMITIVETYPE m_topology;
+	IDirect3DTexture9* m_texture;
 };
 
-class render_list
+class render_list_t
 {
+	using ptr = std::unique_ptr<render_list_t>;
+
+	friend class c_renderer;
+	friend class c_font;
+
 public:
-	render_list() = delete;
-	render_list(std::size_t max_vertices);
+	render_list_t() = delete;
+	render_list_t(std::size_t max_vertices);
 
 	void clear();
 
-	friend class Renderer;
-
-	std::vector<vertex_t>	vertices;
-	std::vector<batch>	batches;
+	std::vector<vertex_t> vertices;
+	std::vector<batch_t> batches;
 };
 
-class dx_color
+enum font_t
 {
-	unsigned char _r = 0, _g = 0, _b = 0, _a = 0xFF;
+	font_title,
+	font_normal,
 
-public:
-	dx_color() = default;
-	dx_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255) :
-		_r{ r }, _g{ g }, _b{ b }, _a{ a }{}
-
-	// gay below
-	unsigned char r() const { return _r; }
-	unsigned char g() const { return _g; }
-	unsigned char b() const { return _b; }
-	unsigned char a() const { return _a; }
-
-	void set_r(unsigned char val) { _r = val; }
-	void set_g(unsigned char val) { _g = val; }
-	void set_b(unsigned char val) { _b = val; }
-	void set_a(unsigned char val) { _a = val; }
-
-	DWORD argb() const { return D3DCOLOR_ARGB(_a, _r, _g, _b); }
-	DWORD rgba() const { return D3DCOLOR_ARGB(_r, _g, _b, _a); } // 200iq
-
-	static dx_color from_hsb(float hue, float saturation, float brightness)
-	{
-		float h = hue == 1.0f ? 0 : hue * 6.0f;
-		float f = h - (int)h;
-		float p = brightness * (1.0f - saturation);
-		float q = brightness * (1.0f - saturation * f);
-		float t = brightness * (1.0f - saturation * (1.0f - f));
-
-		if (h < 1)
-		{
-			return dx_color(
-				(unsigned char)(brightness * 255),
-				(unsigned char)(t * 255),
-				(unsigned char)(p * 255)
-			);
-		}
-		if (h < 2)
-		{
-			return dx_color(
-				(unsigned char)(q * 255),
-				(unsigned char)(brightness * 255),
-				(unsigned char)(p * 255)
-			);
-		}
-		if (h < 3)
-		{
-			return dx_color(
-				(unsigned char)(p * 255),
-				(unsigned char)(brightness * 255),
-				(unsigned char)(t * 255)
-			);
-		}
-		if (h < 4)
-		{
-			return dx_color(
-				(unsigned char)(p * 255),
-				(unsigned char)(q * 255),
-				(unsigned char)(brightness * 255)
-			);
-		}
-		if (h < 5)
-		{
-			return dx_color(
-				(unsigned char)(t * 255),
-				(unsigned char)(p * 255),
-				(unsigned char)(brightness * 255)
-			);
-		}
-		return dx_color(
-			(unsigned char)(brightness * 255),
-			(unsigned char)(p * 255),
-			(unsigned char)(q * 255)
-		);
-	}
-
-#define def_color(name, r, g, b, a) \
-	static dx_color name() { return dx_color(r, g, b, a); }
-
-	def_color(black, 0, 0, 0, 255);
-	def_color(navy, 0, 0, 128, 255);
-	def_color(blue, 0, 0, 255, 255);
-	def_color(green, 0, 128, 0, 255);
-	def_color(teal, 0, 128, 128, 255);
-	def_color(lime, 0, 255, 0, 255);
-	def_color(aqua, 0, 255, 255, 255);
-	def_color(maroon, 128, 0, 0, 255);
-	def_color(purple, 128, 0, 128, 255);
-	def_color(olive, 128, 128, 0, 255);
-	def_color(gray, 128, 128, 128, 255);
-	def_color(silver, 192, 192, 192, 255);
-	def_color(red, 255, 0, 0, 255);
-	def_color(fuchsia, 255, 0, 255, 255);
-	def_color(yellow, 255, 255, 0, 255);
-	def_color(white, 255, 255, 255, 255);
-
-#undef def_color
+	font_num
 };
 
-class renderer
+class c_renderer : std::enable_shared_from_this<c_renderer>
 {
 	IDirect3D9* m_d3d = nullptr;
 	IDirect3DDevice9* m_device = nullptr;
@@ -194,17 +120,15 @@ class renderer
 	IDirect3DSurface9* m_backbuffer = nullptr;
 	D3DSURFACE_DESC m_backbuffer_desc{};
 
-	render_list* m_int_render_list = nullptr;
-	render_list* m_render_list = nullptr;
-	std::vector<font*> fonts;
+	render_list_t::ptr m_render_list{};
+	std::vector<std::unique_ptr<c_font>> fonts;
+	font_handle_t m_fonts[font_num];
 
 public:
-	renderer(std::size_t max_vertices);
-	~renderer();
+	c_renderer(std::size_t max_vertices);
+	~c_renderer();
 
-	render_list* make_render_list() const;
-	void force_render_list(render_list* list);
-	void reset_render_list();
+	render_list_t::ptr make_render_list();
 
 	void start();
 	void reacquire();
@@ -213,7 +137,7 @@ public:
 	void begin() const;
 	void end() const;
 
-	void render(render_list* render_list);
+	void render(const render_list_t::ptr& render_list);
 	void render();
 
 	IDirect3DDevice9* get_device() const
@@ -221,7 +145,7 @@ public:
 		return m_device;
 	}
 
-	render_list* get_renderlist() const
+	render_list_t::ptr& get_renderlist()
 	{
 		return m_render_list;
 	}
@@ -236,65 +160,71 @@ public:
 		return m_backbuffer_desc;
 	}
 
-	font_handle create_font(const std::string& family, long size, std::uint8_t flags = 0, int width = 0);
+	font_handle_t get_font(font_t font)
+	{
+		return m_fonts[font];
+	}
+
+	font_handle_t create_font(const std::string& family, long size, std::uint8_t flags = 0, int width = 0);
+
+	void add_vertex(const render_list_t::ptr& render_list, vertex_t& vertex, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr);
+	void add_vertex(vertex_t& vertex, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr);
 
 	template <std::size_t N>
-	void add_vertices(render_list* render_list, const vertex_t(&vertex_t_array)[N], D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr)
+	void add_vertices(const render_list_t::ptr& render_list, vertex_t(&vertexArr)[N], D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr)
 	{
-		std::size_t num_vertices = std::size(render_list->vertices);
-		if (std::empty(render_list->batches) || render_list->batches.back().topology != topology || render_list->batches.back().texture != texture)
+		if (render_list->vertices.size() + N >= m_max_vertices)
+			return; //c_renderer::add_vertices - Vertex buffer exhausted! Increase the size of the vertex buffer or add a custom implementation.
+
+		if (std::empty(render_list->batches) || render_list->batches.back().m_topology != topology
+			|| render_list->batches.back().m_texture != texture)
 			render_list->batches.emplace_back(0, topology, texture);
 
-		render_list->batches.back().count += N;
+		render_list->batches.back().m_count += N;
 
-		for (size_t i = 0; i < N; i++)
-			render_list->vertices.emplace_back(vertex_t_array[i]);
+		render_list->vertices.resize(std::size(render_list->vertices) + N);
+		std::memcpy(&render_list->vertices[std::size(render_list->vertices) - N], &vertexArr[0], N * sizeof(vertex_t));
 
 		switch (topology)
 		{
-		case D3DPT_LINESTRIP:
-		case D3DPT_TRIANGLESTRIP:
-			render_list->batches.emplace_back(0, D3DPT_FORCE_DWORD, nullptr);
-		default:
-			break;
+			case D3DPT_LINESTRIP:
+			case D3DPT_TRIANGLESTRIP:
+				render_list->batches.emplace_back(0, D3DPT_FORCE_DWORD);
+
+			default:
+				break;
 		}
 	}
 
-	void line(float x0, float y0, float x1, float y1, dx_color color);
-	void line(render_list* render_list, float x0, float y0, float x1, float y1, dx_color color);
+	template <std::size_t N>
+	void add_vertices(vertex_t(&vertexArr)[N], size_t topology, IDirect3DTexture9* texture = nullptr)
+	{
+		add_vertices(m_render_list, vertexArr, topology, texture);
+	}
 
-	void gradient_rect(float x, float y, float w, float h, dx_color tl, dx_color tr, dx_color bl, dx_color br);
-	void gradient_rect(render_list* render_list, float x, float y, float w, float h, dx_color tl, dx_color tr, dx_color bl, dx_color br);
+	void draw_pixel(const vec2& pos, const color_t& color);
+	void draw_pixel(const render_list_t::ptr& render_list, const vec2& pos, const color_t& color);
+	void draw_line(const vec2& from, const vec2& to, const color_t& color);
+	void draw_line(const render_list_t::ptr& render_list, const vec2& from, const vec2& to, const color_t& color);
+	void draw_gradient_rect(const vec4& rect, const color_t& tl, const color_t& tr, const color_t& bl, const color_t& br);
+	void draw_gradient_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& tl, const color_t& tr, const color_t& bl, const color_t& br);
+	void draw_filled_rect(const vec4& rect, const color_t& color);
+	void draw_filled_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color);
+	void draw_filled_rounded_rect(const vec4& rect, const color_t& color);
+	void draw_filled_rounded_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color);
+	void draw_rect(const vec4& rect, const color_t& color, float stroke_width = 1.f);
+	void draw_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color, float stroke_width = 1.f);
+	void draw_rounded_rect(const vec4& rect, const color_t& color);
+	void draw_rounded_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color);
+	void draw_outlined_rect(const vec4& rect, float stroke_width, const color_t& stroke_color, const color_t& fill_color);
+	void draw_outlined_rect(const render_list_t::ptr& render_list, const vec4& rect, float stroke_width, const color_t& stroke_color, const color_t& fill_color);
+	void draw_circle(const vec2& pos, float radius, const color_t& color);
+	void draw_circle(const render_list_t::ptr& render_list, const vec2& pos, float radius, const color_t& color);
+	void draw_triangle(const vec2& p0, const vec2& p1, const vec2& p2, const color_t& color);
+	void draw_triangle(const render_list_t::ptr& render_list, const vec2& p0, const vec2& p1, const vec2& p2, const color_t& color);
 
-	void filled_rect(float x, float y, float w, float h, dx_color color);
-	void filled_rect(render_list* render_list, float x, float y, float w, float h, dx_color color);
-
-	void rect(float x, float y, float w, float h, dx_color color, float stroke_width = 1.f);
-	void rect(render_list* render_list, float x, float y, float w, float h, dx_color color, float stroke_width = 1.f);
-
-	void textured_rect(float x, float y, float w, float h, dx_color color, IDirect3DTexture9* texture, float tx = 0, float ty = 0, float tw = 0, float th = 0);
-	void textured_rect(render_list* render_list, float x, float y, float w, float h, dx_color color, IDirect3DTexture9* texture, float tx = 0, float ty = 0, float tw = 0, float th = 0);
-
-	vec2_d get_text_extent(font_handle font, const std::string& text);
-
-	void string(render_list* render_list, font_handle font, float x, float y, const std::string& text, dx_color color, std::uint8_t flags = 0);
-	void string(font_handle font, float x, float y, const std::string& text, dx_color color, std::uint8_t flags = 0);
-
-	void circle(render_list* render_list, float x, float y, float radius, dx_color color);
-	void circle(float x, float y, float radius, dx_color color);
-
-	void arc(render_list* render_list, float x, float y, float radius, float start_angle, float end_angle, dx_color color);
-	void arc(float x, float y, float radius, float start_angle, float end_angle, dx_color color);
-
-	void filled_arc(render_list* render_list, float x, float y, float radius, float start_angle, float end_angle, dx_color color);
-	void filled_arc(float x, float y, float radius, float start_angle, float end_angle, dx_color color);
-
-	void filled_rounded_rect(render_list* render_list, float x, float y, float w, float h, dx_color color);
-	void filled_rounded_rect(float x, float y, float w, float h, dx_color color);
-
-	void rounded_rect(render_list* render_list, float x, float y, float w, float h, dx_color color);
-	void rounded_rect(float x, float y, float w, float h, dx_color color);
-
-	void triangle(float x0, float y0, float x1, float y1, float x2, float y2, dx_color color);
-	void triangle(render_list* render_list, float x0, float y0, float x1, float y1, float x2, float y2, dx_color color);
+	vec2 get_text_extent(const font_handle_t& font, const std::string& text);
+	uint32_t max_characters_to_fit(const font_handle_t& font, const std::string& text, uint32_t max_width);
+	void string(const render_list_t::ptr& render_list, const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags = TEXT_LEFT);
+	void string(const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags = TEXT_LEFT);
 };

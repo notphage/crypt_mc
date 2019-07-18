@@ -1,31 +1,21 @@
 #include "context.h"
 
-renderer::renderer(std::size_t max_vertices) : m_max_vertices(max_vertices)
+c_renderer::c_renderer(std::size_t max_vertices) : m_max_vertices(max_vertices)
 {
-	m_render_list = m_int_render_list = new render_list(m_max_vertices);
+	m_render_list = std::make_unique<render_list_t>(max_vertices);
 }
 
-renderer::~renderer()
+c_renderer::~c_renderer()
 {
 	release();
 }
 
-render_list* renderer::make_render_list() const
+render_list_t::ptr c_renderer::make_render_list()
 {
-	return new render_list(m_max_vertices);
+	return std::make_unique<render_list_t>(m_max_vertices);
 }
 
-void renderer::force_render_list(render_list* list)
-{
-	m_render_list = list;
-}
-
-void renderer::reset_render_list()
-{
-	m_render_list = m_int_render_list;
-}
-
-void renderer::start()
+void c_renderer::start()
 {
 	m_d3d = Direct3DCreate9(D3D_SDK_VERSION);
 
@@ -35,6 +25,7 @@ void renderer::start()
 	d3dpp.Windowed = 1;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	d3dpp.hDeviceWindow = ctx.m_window;
+	d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;
 
 	m_d3d->CreateDevice(D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
@@ -46,410 +37,452 @@ void renderer::start()
 	reacquire();
 }
 
-void renderer::reacquire()
+void c_renderer::reacquire()
 {
+	m_fonts[font_title] = create_font(xors("Segoe UI"), 32);
+	m_fonts[font_normal] = create_font(xors("Segoe UI"), 9);
+
+	// Setup viewport
+	D3DVIEWPORT9 vp;
+	vp.X = vp.Y = 0;
+	vp.Width = (DWORD)ctx.m_screen_w;
+	vp.Height = (DWORD)ctx.m_screen_h;
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+	m_device->SetViewport(&vp);
+
 	m_device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &m_backbuffer);
 
 	m_backbuffer->GetDesc(&m_backbuffer_desc);
 
-	m_device->CreateVertexBuffer(m_max_vertices * sizeof(vertex_t), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
-		D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1, D3DPOOL_DEFAULT, &vertex_buffer, nullptr);
+	if (m_device->CreateVertexBuffer(m_max_vertices * sizeof(vertex_t), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
+		D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1, D3DPOOL_DEFAULT, &vertex_buffer, nullptr) < 0)
+		return;
+
+	m_device->SetRenderState(D3DRS_ZENABLE, FALSE);
+
+	m_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	m_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	m_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	m_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+	m_device->SetRenderState(D3DRS_ALPHAREF, 0x08);
+	m_device->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+
+	m_device->SetRenderState(D3DRS_LIGHTING, TRUE);
+
+	m_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+	m_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	m_device->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+	m_device->SetRenderState(D3DRS_CLIPPING, TRUE);
+	m_device->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+	m_device->SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
+	m_device->SetRenderState(D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE);
+	m_device->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	m_device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+	m_device->SetRenderState(D3DRS_COLORWRITEENABLE, 0xFFFFFFFF);
+
+	m_device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	m_device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	m_device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	m_device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	m_device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	m_device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	m_device->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
+	m_device->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	m_device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	m_device->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	m_device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	m_device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+
+	m_device->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+	m_device->SetTexture(0, nullptr);
+	m_device->SetStreamSource(0, vertex_buffer, 0, sizeof(vertex_t));
+
+	m_device->SetPixelShader(nullptr);
+	m_device->SetVertexShader(nullptr);
+
+	m_device->SetRenderState(D3DRS_SRGBWRITEENABLE, FALSE);
+	m_device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	m_device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	m_device->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+	m_device->SetSamplerState(0, D3DSAMP_SRGBTEXTURE, NULL);
+
+	// Setup orthographic projection matrix
+	// Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
+	// Being agnostic of whether <d3dx9.h> or <DirectXMath.h> can be used, we aren't relying on D3DXMatrixIdentity()/D3DXMatrixOrthoOffCenterLH() or DirectX::XMMatrixIdentity()/DirectX::XMMatrixOrthographicOffCenterLH()
+	{
+		float L = 0.5f;
+		float R = (float)ctx.m_screen_w + 0.5f;
+		float T = 0.5f;
+		float B = (float)ctx.m_screen_h + 0.5f;
+		D3DMATRIX mat_identity = { { { 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 0.0f, 1.0f } } };
+		D3DMATRIX mat_projection =
+		{ { {
+			2.0f / (R - L),   0.0f,         0.0f,  0.0f,
+			0.0f,         2.0f / (T - B),   0.0f,  0.0f,
+			0.0f,         0.0f,         0.5f,  0.0f,
+			(L + R) / (L - R),  (T + B) / (B - T),  0.5f,  1.0f
+		} } };
+		m_device->SetTransform(D3DTS_WORLD, &mat_identity);
+		m_device->SetTransform(D3DTS_VIEW, &mat_identity);
+		m_device->SetTransform(D3DTS_PROJECTION, &mat_projection);
+	}
 }
 
-void renderer::release()
+void c_renderer::release()
 {
 	safe_release(vertex_buffer);
 	safe_release(m_backbuffer);
 	safe_release(m_device);
 	safe_release(m_d3d);
 
-	for (auto font : fonts)
+	for (auto&& font : fonts)
 		font->release();
 
 	fonts.clear();
 }
 
-void renderer::begin() const
+void c_renderer::begin() const
 {
 	m_device->Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(10, 100, 255), 1.f, 0);
 	m_device->BeginScene();
 }
 
-void renderer::end() const
+void c_renderer::end() const
 {
 	m_device->EndScene();
 	m_device->Present(nullptr, nullptr, nullptr, nullptr);
 }
 
-void renderer::render(render_list* render_list)
+void c_renderer::render(const render_list_t::ptr& render_list)
 {
 	std::size_t num_vertices = std::size(render_list->vertices);
 	if (num_vertices > 0)
 	{
 		void* data;
-
+	
 		if (num_vertices > m_max_vertices)
 		{
 			m_max_vertices = num_vertices;
 			release();
 			reacquire();
 		}
-
-		vertex_buffer->Lock(0, 0, &data, D3DLOCK_DISCARD);
-		std::memcpy(data, std::data(render_list->vertices), sizeof(vertex_t) * num_vertices);
+	
+		if (vertex_buffer->Lock(0, 0, &data, D3DLOCK_DISCARD) < 0)
+			return;
+	
+		std::memcpy(data, std::data(render_list->vertices), num_vertices * sizeof vertex_t);
 		vertex_buffer->Unlock();
 	}
-
+	
 	std::size_t pos = 0;
-
-	batch& prev_batch = render_list->batches.front();
-
+	
+	batch_t& prev_batch = render_list->batches.front();
+	
 	for (const auto& batch : render_list->batches)
 	{
-		int order = topology::topology_order(batch.topology);
-		if (batch.count && order > 0)
+		int order = topology::topology_order(batch.m_topology);
+		if (batch.m_count && order > 0)
 		{
-			std::uint32_t primitive_count = batch.count;
-
-			if (topology::is_topology_list(batch.topology))
+			std::uint32_t primitive_count = batch.m_count;
+	
+			if (topology::is_topology_list(batch.m_topology))
 				primitive_count /= order;
 			else
 				primitive_count -= (order - 1);
-
-			m_device->SetTexture(0, batch.texture);
-			m_device->DrawPrimitive(batch.topology, pos, primitive_count);
-			pos += batch.count;
+	
+			m_device->SetTexture(0, batch.m_texture);
+			m_device->DrawPrimitive(batch.m_topology, pos, primitive_count);
+			pos += batch.m_count;
 		}
 	}
-
 }
 
-void renderer::render()
+void c_renderer::render()
 {
 	render(m_render_list);
 	m_render_list->clear();
 }
 
-font_handle renderer::create_font(const std::string& family, long size, std::uint8_t flags, int width)
+font_handle_t c_renderer::create_font(const std::string& family, long size, std::uint8_t flags, int width)
 {
-	fonts.push_back(new font(this, m_device, family, size, flags, width));
-	return font_handle{ fonts.size() - 1 };
+	fonts.push_back(std::make_unique<c_font>(m_device, family, size, flags, width));
+	return font_handle_t{ fonts.size() - 1 };
 }
 
-void renderer::line(render_list* render_list, float x0, float y0, float x1, float y1, dx_color color)
+void c_renderer::add_vertex(const render_list_t::ptr& render_list, vertex_t& vertex, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture)
 {
-	vertex_t vertices[]
+	if (render_list->vertices.size() >= m_max_vertices)
+		return;
+
+	if (std::empty(render_list->batches) || render_list->batches.back().m_topology != topology
+		|| render_list->batches.back().m_texture != texture)
+		render_list->batches.emplace_back(0, topology, texture);
+
+	render_list->batches.back().m_count += 1;
+	render_list->vertices.push_back(vertex);
+}
+
+void c_renderer::add_vertex(vertex_t& vertex, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture)
+{
+	add_vertex(m_render_list, vertex, topology, texture);
+}
+
+void c_renderer::draw_pixel(const vec2& pos, const color_t& color)
+{
+	draw_filled_rect({ pos.x, pos.y, 1.f, 1.f }, color);
+}
+
+void c_renderer::draw_pixel(const render_list_t::ptr& render_list, const vec2& pos, const color_t& color)
+{
+	draw_filled_rect(render_list, { pos.x, pos.y, 1.f, 1.f }, color);
+}
+
+void c_renderer::draw_line(const vec2& from, const vec2& to, const color_t& color)
+{
+	draw_line(m_render_list, from, to, color);
+}
+
+void c_renderer::draw_line(const render_list_t::ptr& render_list, const vec2& from, const vec2& to, const color_t& color)
+{
+	vertex_t v[]
 	{
-		{ x0, y0, color.argb() },
-		{ x1, y1,   color.argb() }
+		{ from, color },
+		{ to,   color }
 	};
 
-	add_vertices(render_list, vertices, D3DPT_LINELIST);
+	add_vertices(render_list, v, D3DPT_LINELIST);
 }
 
-void renderer::gradient_rect(render_list* render_list, float x, float y, float w, float h, dx_color tl, dx_color tr, dx_color bl, dx_color br)
+void c_renderer::draw_gradient_rect(const vec4& rect, const color_t& tl, const color_t& tr, const color_t& bl, const color_t& br)
 {
-	vertex_t vertices[] =
-	{
-		{ x,			y,     tl.argb() },
-		{ x + w,		y,     tr.argb() },
-		{ x,			y + h, bl.argb() },
+	draw_gradient_rect(m_render_list, rect, tl, tr, bl, br);
+}
 
-		{ x + w,		y,     tr.argb() },
-		{ x + w,		y + h, br.argb() },
-		{ x,			y + h, bl.argb() }
+void c_renderer::draw_gradient_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& tl, const color_t& tr, const color_t& bl, const color_t& br)
+{
+	vertex_t v[] =
+	{
+		{ rect.x,				rect.y,			 tl },
+		{ rect.x + rect.z,		rect.y,			 tr },
+		{ rect.x,				rect.y + rect.w, bl },
+
+		{ rect.x + rect.z,		rect.y,			 tr },
+		{ rect.x + rect.z,		rect.y + rect.w, br },
+		{ rect.x,				rect.y + rect.w, bl }
 	};
 
-	add_vertices(render_list, vertices, D3DPT_TRIANGLELIST);
+	add_vertices(render_list, v, D3DPT_TRIANGLELIST);
 }
 
-void renderer::filled_rect(render_list* render_list, float x, float y, float w, float h, dx_color color)
+void c_renderer::draw_filled_rect(const vec4& rect, const color_t& color)
 {
-	gradient_rect(render_list, x, y, w, h, color, color, color, color);
+	draw_filled_rect(m_render_list, rect, color);
 }
 
-void renderer::rect(render_list* render_list, float x, float y, float w, float h, dx_color color, float stroke_width)
+void c_renderer::draw_filled_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color)
 {
-	filled_rect(render_list, x, y, w, stroke_width, color);
-	filled_rect(render_list, x, y + h - stroke_width, w, stroke_width, color);
-	filled_rect(render_list, x, y, stroke_width, h, color);
-	filled_rect(render_list, x + w - stroke_width, y, stroke_width, h, color);
-}
-
-void renderer::textured_rect(render_list* render_list, float x, float y, float w, float h, dx_color color, IDirect3DTexture9* texture, float tx, float ty, float tw, float th)
-{
-	float tx1 = 0, ty1 = 0, tx2 = 1, ty2 = 1;
-	if (tx != 0 || ty != 0 || tw != 0 || th != 0)
+	vertex_t v[]
 	{
-		D3DSURFACE_DESC desc{};
-		texture->GetLevelDesc(0, &desc);
+		{ rect.x,			rect.y,			 color },
+		{ rect.x + rect.z,	rect.y,			 color },
+		{ rect.x,			rect.y + rect.w, color },
 
-		tx1 = tx / desc.Width;
-		ty1 = ty / desc.Height;
-
-		tx2 = (tx + tw) / desc.Width + 0.00000001;
-		ty2 = (ty + th) / desc.Height + 0.00000001;
-	}
-
-	vertex_t vertices[] =
-	{
-		{vec4_d{ x,		y + h,	1, 1 },	color.argb(), vec2_d{ tx1, ty2 }},
-		{vec4_d{ x,		y,		1, 1 },	color.argb(), vec2_d{ tx1, ty1 }},
-		{vec4_d{ x + w,	y,		1, 1 },	color.argb(), vec2_d{ tx2, ty1 }},
-		{vec4_d{ x,		y + h,	1, 1 },	color.argb(), vec2_d{ tx1, ty2 }},
-		{vec4_d{ x + w,	y,		1, 1 },	color.argb(), vec2_d{ tx2, ty1 }},
-		{vec4_d{ x + w,	y + h,	1, 1 },	color.argb(), vec2_d{ tx2, ty2 }}
+		{ rect.x + rect.z,	rect.y,			 color },
+		{ rect.x + rect.z,	rect.y + rect.w, color },
+		{ rect.x,			rect.y + rect.w, color }
 	};
 
-	add_vertices(render_list, vertices, D3DPT_TRIANGLELIST, texture);
+	//m_device->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, v, sizeof vertex_t);
+
+	add_vertices(render_list, v, D3DPT_TRIANGLELIST);
 }
 
-void renderer::arc(render_list* render_list, float x, float y, float radius, float start_angle, float end_angle, dx_color color)
+void c_renderer::draw_filled_rounded_rect(const vec4& rect, const color_t& color)
 {
-	const auto deg2rad = 0.0174532925;
-
-	float px = -1, py = -1;
-	for (int i = 0; i < end_angle - start_angle; i++)
-	{
-		const float theta = deg2rad * (i + start_angle);
-
-		const float cx = x + radius * std::cos(theta),
-			cy = y + radius * std::sin(theta);
-
-		if (px == -1)
-		{
-			px = cx;
-			py = cy;
-		}
-
-		line(px, py, cx, cy, color);
-
-		px = cx;
-		py = cy;
-	}
+	draw_filled_rounded_rect(m_render_list, rect, color);
 }
 
-void renderer::filled_arc(render_list* render_list, float x, float y, float radius, float start_angle, float end_angle, dx_color color)
-{
-	const auto deg2rad = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427 / 180.0;
-
-	start_angle -= 90;
-	end_angle -= 90;
-
-	const int segments = 80;
-
-	const auto start_rad = start_angle * deg2rad;
-	const auto end_rad = end_angle * deg2rad;
-
-	const float step = (end_rad - start_rad) / segments;
-
-	vertex_t vertices[segments + 1];
-
-	for (int i = 0; i <= segments; i++)
-	{
-		const float theta = start_rad + step * i;
-
-		vertices[i] = vertex_t
-		{
-			x + radius * std::cos(theta),
-			y + radius * std::sin(theta),
-			color.argb()
-		};
-	}
-
-	add_vertices(render_list, vertices, D3DPT_TRIANGLEFAN);
-}
-
-void renderer::filled_rounded_rect(render_list* render_list, float x, float y, float w, float h, dx_color color)
+void c_renderer::draw_filled_rounded_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color)
 {
 	auto draw_corner = [&](int x, int y, int x_dir, int y_dir)
 	{
 		auto a = float(color.a()) / 255;
 
-		this->filled_rect(render_list, x + x_dir * 1, y, 1, 1, dx_color(color.r(), color.g(), color.b(), 54 * a));
-		this->filled_rect(render_list, x + x_dir * 2, y, 1, 1, dx_color(color.r(), color.g(), color.b(), 181 * a));
-		this->filled_rect(render_list, x + x_dir * 3, y, 1, 1, dx_color(color.r(), color.g(), color.b(), 235 * a));
+		this->draw_filled_rect(render_list, { x + x_dir * 1, y, 1, 1 }, color_t(color.r(), color.g(), color.b(), 54 * a));
+		this->draw_filled_rect(render_list, { x + x_dir * 2, y, 1, 1 }, color_t(color.r(), color.g(), color.b(), 181 * a));
+		this->draw_filled_rect(render_list, { x + x_dir * 3, y, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235 * a));
 
-		this->filled_rect(render_list, x, y + y_dir * 1, 1, 1, dx_color(color.r(), color.g(), color.b(), 54 * a));
-		this->filled_rect(render_list, x, y + y_dir * 2, 1, 1, dx_color(color.r(), color.g(), color.b(), 181 * a));
-		this->filled_rect(render_list, x, y + y_dir * 3, 1, 1, dx_color(color.r(), color.g(), color.b(), 235 * a));
+		this->draw_filled_rect(render_list, { x, y + y_dir * 1, 1, 1 }, color_t(color.r(), color.g(), color.b(), 54 * a));
+		this->draw_filled_rect(render_list, { x, y + y_dir * 2, 1, 1 }, color_t(color.r(), color.g(), color.b(), 181 * a));
+		this->draw_filled_rect(render_list, { x, y + y_dir * 3, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235 * a));
 
-		this->filled_rect(render_list, x + x_dir * 1, y + y_dir * 1, 1, 1, dx_color(color.r(), color.g(), color.b(), 235 * a));
+		this->draw_filled_rect(render_list, { x + x_dir * 1, y + y_dir * 1, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235 * a));
 	};
 
 	// top
-	draw_corner(x, y, 1, 1);
-	draw_corner(x + w - 1, y, -1, 1);
+	draw_corner(rect.x, rect.y, 1, 1);
+	draw_corner(rect.x + rect.z - 1, rect.y, -1, 1);
 
 	// bottom
-	draw_corner(x, y + h - 1, 1, -1);
-	draw_corner(x + w - 1, y + h - 1, -1, -1);
+	draw_corner(rect.x, rect.y + rect.w - 1, 1, -1);
+	draw_corner(rect.x + rect.z - 1, rect.y + rect.w - 1, -1, -1);
 
 	// center
-	this->filled_rect(render_list, x + 1, y + 2, w - 2, h - 4, color);
-	this->filled_rect(render_list, x + 2, y + 1, w - 4, h - 2, color);
+	this->draw_filled_rect(render_list, { rect.x + 1, rect.y + 2, rect.z - 2, rect.w - 4 }, color);
+	this->draw_filled_rect(render_list, { rect.x + 2, rect.y + 1, rect.z - 4, rect.w - 2 }, color);
 
-	this->filled_rect(render_list, x, y + 4, w, h - 8, color);
-	this->filled_rect(render_list, x + 4, y, w - 8, h, color);
+	this->draw_filled_rect(render_list, { rect.x, rect.y + 4, rect.z, rect.w - 8 }, color);
+	this->draw_filled_rect(render_list, { rect.x + 4, rect.y, rect.z - 8, rect.w }, color);
 }
 
-void renderer::rounded_rect(render_list* render_list, float x, float y, float w, float h, dx_color color)
+void c_renderer::draw_rect(const vec4& rect, const color_t& color, float stroke_width)
+{
+	draw_rect(m_render_list, rect, color, stroke_width);
+}
+
+void c_renderer::draw_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color, float stroke_width)
+{
+	vec4 tmp = rect;
+	tmp.z = stroke_width;
+	draw_filled_rect(render_list, tmp, color);
+	tmp.x = rect.x + rect.z - stroke_width;
+	draw_filled_rect(render_list, tmp, color);
+	tmp.z = rect.z;
+	tmp.x = rect.x;
+	tmp.w = stroke_width;
+	draw_filled_rect(render_list, tmp, color);
+	tmp.y = rect.y + rect.w;
+	draw_filled_rect(render_list, tmp, color);
+}
+
+void c_renderer::draw_rounded_rect(const vec4& rect, const color_t& color)
+{
+	draw_rounded_rect(m_render_list, rect, color);
+}
+
+void c_renderer::draw_rounded_rect(const render_list_t::ptr& render_list, const vec4& rect, const color_t& color)
 {
 	auto draw_corner = [&](int x, int y, int x_dir, int y_dir)
 	{
-		this->filled_rect(render_list, x + x_dir * 1, y, 1, 1, dx_color(color.r(), color.g(), color.b(), 54));
-		this->filled_rect(render_list, x + x_dir * 2, y, 1, 1, dx_color(color.r(), color.g(), color.b(), 235));
-		this->filled_rect(render_list, x + x_dir * 3, y, 1, 1, dx_color(color.r(), color.g(), color.b(), 235));
+		this->draw_filled_rect(render_list, { x + x_dir * 1, y, 1, 1 }, color_t(color.r(), color.g(), color.b(), 54));
+		this->draw_filled_rect(render_list, { x + x_dir * 2, y, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235));
+		this->draw_filled_rect(render_list, { x + x_dir * 3, y, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235));
 
-		this->filled_rect(render_list, x, y + y_dir * 1, 1, 1, dx_color(color.r(), color.g(), color.b(), 54));
-		this->filled_rect(render_list, x, y + y_dir * 2, 1, 1, dx_color(color.r(), color.g(), color.b(), 235));
-		this->filled_rect(render_list, x, y + y_dir * 3, 1, 1, dx_color(color.r(), color.g(), color.b(), 235));
+		this->draw_filled_rect(render_list, { x, y + y_dir * 1, 1, 1 }, color_t(color.r(), color.g(), color.b(), 54));
+		this->draw_filled_rect(render_list, { x, y + y_dir * 2, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235));
+		this->draw_filled_rect(render_list, { x, y + y_dir * 3, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235));
 
-		this->filled_rect(render_list, x + x_dir * 1, y + y_dir * 1, 1, 1, dx_color(color.r(), color.g(), color.b(), 235));
+		this->draw_filled_rect(render_list, { x + x_dir * 1, y + y_dir * 1, 1, 1 }, color_t(color.r(), color.g(), color.b(), 235));
 	};
 
 	// top
-	draw_corner(x, y, 1, 1);
-	draw_corner(x + w - 1, y, -1, 1);
+	draw_corner(rect.x, rect.y, 1, 1);
+	draw_corner(rect.x + rect.z - 1, rect.y, -1, 1);
 
 	// bottom
-	draw_corner(x, y + h - 1, 1, -1);
-	draw_corner(x + w - 1, y + h - 1, -1, -1);
+	draw_corner(rect.x, rect.y + rect.w - 1, 1, -1);
+	draw_corner(rect.x + rect.z - 1, rect.y + rect.w - 1, -1, -1);
 
 	// edges
-	this->filled_rect(render_list, x + 3, y, w - 6, 1, color);
-	this->filled_rect(render_list, x, y + 3, 1, h - 6, color);
+	this->draw_filled_rect(render_list, { rect.x + 3.f, rect.y, rect.z - 6.f, 1.f }, color);
+	this->draw_filled_rect(render_list, { rect.x, rect.y + 3.f, 1.f, rect.w - 6.f }, color);
 
-	this->filled_rect(render_list, x + 3, y + h - 1, w - 6, 1, color);
-	this->filled_rect(render_list, x + w - 1, y + 3, 1, h - 6, color);
+	this->draw_filled_rect(render_list, { rect.x + 3.f, rect.y + rect.w - 1.f, rect.z - 6.f, 1.f }, color);
+	this->draw_filled_rect(render_list, { rect.x + rect.z - 1.f, rect.y + 3.f, 1.f, rect.w - 6.f }, color);
+
 }
 
-void renderer::triangle(render_list* render_list, float x0, float y0, float x1, float y1, float x2, float y2, dx_color color)
+void c_renderer::draw_outlined_rect(const vec4& rect, float stroke_width, const color_t& stroke_color, const color_t& fillColor)
 {
-	vertex_t vertices[] =
+	draw_outlined_rect(m_render_list, rect, stroke_width, stroke_color, fillColor);
+}
+
+void c_renderer::draw_outlined_rect(const render_list_t::ptr& render_list, const vec4& rect, float stroke_width, const color_t& stroke_color, const color_t& fillColor)
+{
+	draw_filled_rect(render_list, rect, fillColor);
+	draw_rect(render_list, rect, stroke_color, stroke_width);
+}
+
+void c_renderer::draw_circle(const vec2& pos, float radius, const color_t& color)
+{
+	draw_circle(m_render_list, pos, radius, color);
+}
+
+void c_renderer::draw_circle(const render_list_t::ptr& render_list, const vec2& pos, float radius, const color_t& color)
+{
+	const int segments = 24;
+
+	vertex_t v[segments + 1];
+
+	for (int i = 0; i <= segments; i++)
 	{
-		{ x0,	y0, color.argb() },
-		{ x1,	y1, color.argb() },
-		{ x2,	y2, color.argb() },
+		float theta = 2.f * M_PI_F * static_cast<float>(i) / static_cast<float>(segments);
+
+		v[i] = vertex_t{
+			pos.x + radius * std::cos(theta),
+			pos.y + radius * std::sin(theta),
+			color
+		};
+	}
+
+	add_vertices(render_list, v, D3DPT_LINELIST);
+}
+
+void c_renderer::draw_triangle(const vec2& p0, const vec2& p1, const vec2& p2, const color_t& color)
+{
+	draw_triangle(m_render_list, p0, p1, p2, color);
+}
+
+void c_renderer::draw_triangle(const render_list_t::ptr& render_list, const vec2& p0, const vec2& p1, const vec2& p2, const color_t& color)
+{
+	vertex_t v[] =
+	{
+		{ p0, color },
+		{ p1, color },
+		{ p2, color },
 	};
 
-	add_vertices(render_list, vertices, D3DPT_TRIANGLELIST);
+	add_vertices(render_list, v, D3DPT_TRIANGLELIST);
 }
 
-vec2_d renderer::get_text_extent(font_handle font, const std::string& text)
+vec2 c_renderer::get_text_extent(const font_handle_t& font, const std::string& text)
 {
-	return fonts[font.id]->get_text_extent(text);
+	return fonts[font.m_id]->get_text_extent(text);
 }
 
-void renderer::line(float x0, float y0, float x1, float y1, dx_color color)
+uint32_t c_renderer::max_characters_to_fit(const font_handle_t& font, const std::string& text, uint32_t max_width)
 {
-	line(m_render_list, x0, y0, x1, y1, color);
+	return fonts[font.m_id]->max_characters_to_fit(text, max_width);
 }
 
-void renderer::gradient_rect(float x, float y, float w, float h, dx_color tl, dx_color tr, dx_color bl, dx_color br)
+void c_renderer::string(const render_list_t::ptr& render_list, const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags)
 {
-	gradient_rect(m_render_list, x, y, w, h, tl, tr, bl, br);
-}
-
-void renderer::filled_rect(float x, float y, float w, float h, dx_color color)
-{
-	filled_rect(m_render_list, x, y, w, h, color);
-}
-
-void renderer::rect(float x, float y, float w, float h, dx_color color, float stroke_width)
-{
-	rect(m_render_list, x, y, w, h, color, stroke_width);
-}
-
-void renderer::textured_rect(float x, float y, float w, float h, dx_color color, IDirect3DTexture9* texture, float tx, float ty, float tw, float th)
-{
-	textured_rect(m_render_list, x, y, w, h, color, texture, tx, ty, tw, th);
-}
-
-void renderer::string(render_list* render_list, font_handle font, float x, float y, const std::string& text, dx_color color, std::uint8_t flags)
-{
-	if (font.id < 0 || font.id >= std::size(fonts))
+	if (font.m_id < 0 || font.m_id >= fonts.size())
 		return;
 
-	fonts[font.id]->draw_text(render_list, { x, y }, text, color.argb(), flags);
+	fonts[font.m_id]->draw_text(render_list, pos, text, color, flags);
 }
 
-void renderer::string(font_handle font, float x, float y, const std::string& text, dx_color color, std::uint8_t flags)
+void c_renderer::string(const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags)
 {
 	if (flags & TEXT_BUDGET_SHADOW)
-		string(m_render_list, font, x + 1, y + 1, text, dx_color::black(), flags);
+		string(m_render_list, font, { pos.x + 1, pos.y + 1 }, text, color_t::black(), flags);
 
-	string(m_render_list, font, x, y, text, color, flags);
+	string(m_render_list, font, pos, text, color, flags);
 }
 
-void renderer::arc(float x, float y, float radius, float start_angle, float end_angle, dx_color color)
-{
-	arc(m_render_list, x, y, radius, start_angle, end_angle, color);
-}
-
-void renderer::filled_arc(float x, float y, float radius, float start_angle, float end_angle, dx_color color)
-{
-	filled_arc(m_render_list, x, y, radius, start_angle, end_angle, color);
-}
-
-void renderer::filled_rounded_rect(float x, float y, float w, float h, dx_color color)
-{
-	filled_rounded_rect(m_render_list, x, y, w, h, color);
-}
-
-void renderer::rounded_rect(float x, float y, float w, float h, dx_color color)
-{
-	rounded_rect(m_render_list, x, y, w, h, color);
-}
-
-void renderer::triangle(float x0, float y0, float x1, float y1, float x2, float y2, dx_color color)
-{
-	triangle(m_render_list, x0, y0, x1, y1, x2, y2, color);
-}
-
-render_list::render_list(std::size_t max_vertices)
+render_list_t::render_list_t(std::size_t max_vertices)
 {
 	vertices.reserve(max_vertices);
 }
 
-void render_list::clear()
+void render_list_t::clear()
 {
 	vertices.clear();
 	batches.clear();
-}
-
-batch::batch(std::size_t count, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture /*= nullptr*/) :
-	count(count), topology(topology), texture(texture)
-{
-}
-
-vertex_t::vertex_t(vec4_d position, D3DCOLOR color) : position(position), m_color(color)
-{
-}
-
-vertex_t::vertex_t(vec4_d position, D3DCOLOR color, vec2_d tex) : position(position), m_color(color), tex(tex)
-{
-}
-
-vertex_t::vertex_t(vec3_d position, D3DCOLOR color) : position(position, 1.f), m_color(color)
-{
-}
-
-vertex_t::vertex_t(vec2_d position, D3DCOLOR color) : position(position.x, position.y, 1.f, 1.f), m_color(color)
-{
-}
-
-vertex_t::vertex_t(float x, float y, float z, D3DCOLOR color) : position(x, y, z, 1.f), m_color(color)
-{
-}
-
-vertex_t::vertex_t(float x, float y, D3DCOLOR color) : position(x, y, 1.f, 1.f), m_color(color)
-{
-}
-
-font_handle::font_handle(std::size_t id) :
-	id(id)
-{
 }
 
 namespace topology

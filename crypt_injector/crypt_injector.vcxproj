@@ -124,9 +124,11 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -135,6 +137,7 @@
     <ClCompile Include="client.cpp" />
     <ClCompile Include="connection.cpp" />
     <ClCompile Include="font.cpp" />
+    <ClCompile Include="gui.cpp" />
     <ClCompile Include="inject.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
@@ -150,14 +153,17 @@
     <ClInclude Include="context.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="game_list.h" />
+    <ClInclude Include="gui.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="inject.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sdk.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="syscall.h" />
     <ClInclude Include="target.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
