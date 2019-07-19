@@ -128,11 +128,11 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd
 	//	printf("> Couldn't find any valid target...\n");
 	//}
 
-	c_client client;
-	client.run();
-
-	getchar();
-
-	close();
+	//c_client client;
+	//client.run();
+	//
+	//getchar();
+	//
+	//close();
 	return 0;
 }

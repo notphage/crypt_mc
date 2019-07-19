@@ -439,7 +439,7 @@ void c_input_manager::press_mouse1()
 	int x, y;
 	get_cursor_pos(x, y);
 
-	SendMessage(ctx.m_window, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(x, y));
+	PostMessageA(ctx.m_window, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(x, y));
 }
 
 void c_input_manager::release_mouse1()
@@ -447,5 +447,5 @@ void c_input_manager::release_mouse1()
 	int x, y;
 	get_cursor_pos(x, y);
 
-	SendMessage(ctx.m_window, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(x, y));
+	PostMessageA(ctx.m_window, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(x, y));
 }

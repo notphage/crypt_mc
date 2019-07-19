@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <queue>
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
