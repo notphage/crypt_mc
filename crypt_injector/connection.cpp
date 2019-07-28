@@ -4,13 +4,12 @@
 int c_connection::send_impl(const void* data, size_t size)
 {
 	const char* data_ptr = (const char*)data;
-	size_t bytes_sent = 0;
+	int32_t bytes_sent = 0;
 
 	while (size > 0)
 	{
-		bytes_sent = ::send(m_conn_socket, data_ptr, size, 0);
-		if (bytes_sent == SOCKET_ERROR)
-			return -1;
+		if ((bytes_sent = ::send(m_conn_socket, data_ptr, size, 0)) == SOCKET_ERROR)
+			return SOCKET_ERROR;
 
 		data_ptr += bytes_sent;
 		size -= bytes_sent;
@@ -22,13 +21,12 @@ int c_connection::send_impl(const void* data, size_t size)
 int c_connection::recieve_impl(void* data, size_t size)
 {
 	char* data_ptr = (char*)data;
-	size_t bytes_recv = 0;
+	int32_t bytes_recv = 0;
 
 	while (size > 0)
 	{
-		bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0);
-		if (bytes_recv <= 0)
-			return bytes_recv;
+		if ((bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0)) == SOCKET_ERROR)
+			return SOCKET_ERROR;
 
 		data_ptr += bytes_recv;
 		size -= bytes_recv;
@@ -106,7 +104,7 @@ cleanup:
 	if (m_conn_socket != INVALID_SOCKET)
 	{
 		// No more data to send
-		retval = shutdown(m_conn_socket, SD_SEND);
+		retval = shutdown(m_conn_socket, SD_BOTH);
 		if (retval == SOCKET_ERROR)
 			printf("> Shutdown failed: %i\n", WSAGetLastError());
 
@@ -125,6 +123,27 @@ cleanup:
 
 	WSACleanup();
 	return false;
+}
+
+void c_connection::disconnect()
+{
+	auto retval = 0;
+
+	if (m_conn_socket != INVALID_SOCKET)
+	{
+		// No more data to send
+		retval = shutdown(m_conn_socket, SD_BOTH);
+		if (retval == SOCKET_ERROR)
+			printf("> Shutdown failed: %i\n", WSAGetLastError());
+
+		retval = closesocket(m_conn_socket);
+		if (retval == SOCKET_ERROR)
+			printf("> closesocket failed: %i\n", WSAGetLastError());
+
+		m_conn_socket = INVALID_SOCKET;
+	}
+
+	WSACleanup();
 }
 
 int c_connection::send()

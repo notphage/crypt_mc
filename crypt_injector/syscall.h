@@ -3,35 +3,6 @@
 #include <Windows.h>
 #include <winternl.h>
 
-class c_stub
-{
-	uint8_t m_stub[11] =
-	{
-		0x4C, 0x8B, 0xD1,                               // mov r10 rcx
-		0xB8, 0x00, 0x00, 0x00, 0x00,                   // eax syscall index
-		0x0F, 0x05,                                     // do syscall
-		0xC3                                            // retn
-	};
-
-public:
-	void set_index(uint32_t syscall_index)
-	{
-		DWORD old_flag;
-		VirtualProtect(m_stub, 11, PAGE_EXECUTE_READWRITE, &old_flag);
-		*(uint32_t*)(&m_stub[4]) = syscall_index;
-	}
-
-	__forceinline bool validate() const
-	{
-		return *(uint32_t*)(&m_stub[4]) != 0;
-	}
-
-	__forceinline uintptr_t addr() const
-	{
-		return uintptr_t(m_stub);
-	}
-};
-
 enum MEMORY_INFORMATION_CLASS
 {
 	MemoryBasicInformation,
@@ -63,18 +34,86 @@ using ZwSetContextThread = NTSTATUS(__stdcall*)(void*, CONTEXT*);
 // BSOD mofo, just call it with 5th parameter as int 6
 using ZwRaiseHardError = NTSTATUS(__stdcall*)(NTSTATUS, uint32_t, uint32_t, void**, int, void*);
 
+extern "C" void* syscaller_stub();
+
+namespace detail
+{
+	template <typename... Args>
+	static inline auto syscall_stub_helper(
+		Args... args
+	) -> void*
+	{
+		auto fn = reinterpret_cast<void* (*)(Args...)>(&syscaller_stub);
+		return fn(args...);
+	}
+
+	template <std::size_t argc, typename>
+	struct argument_remapper
+	{
+		// At least 5 params
+		template<
+			typename First,
+			typename Second,
+			typename Third,
+			typename Fourth,
+			typename... Pack
+		>
+			static auto do_call(
+				std::uint32_t idx,
+				First first,
+				Second second,
+				Third third,
+				Fourth fourth,
+				Pack... pack
+			) -> void*
+		{
+			return syscall_stub_helper(first, second, third, fourth, idx, nullptr, pack...);
+		}
+	};
+
+	template <std::size_t Argc>
+	struct argument_remapper<Argc, std::enable_if_t<Argc <= 4>>
+	{
+		// 4 or less params
+		template<
+			typename First = void*,
+			typename Second = void*,
+			typename Third = void*,
+			typename Fourth = void*
+		>
+			static auto do_call(
+				std::uint32_t idx,
+				First first = First{},
+				Second second = Second{},
+				Third third = Third{},
+				Fourth fourth = Fourth{}
+			) -> void*
+		{
+			return syscall_stub_helper(first, second, third, fourth, idx, nullptr);
+		}
+	};
+}
+
+template<typename Return, typename... Args>
+static inline auto do_syscall(
+	uint32_t idx,
+	Args... args
+) -> Return
+{
+	using mapper = detail::argument_remapper<sizeof...(Args), void>;
+	return (Return)mapper::do_call(idx, args...);
+}
+
 class c_syscall
 {
-	std::map<uintptr_t, c_stub> syscalls;
+	std::map<uintptr_t, uint32_t> syscalls;
 
 	uint8_t* load_ntdll();
 public:
 	bool init();
 
-	template <typename fn>
-	fn get(uintptr_t func_name)
+	__forceinline uint32_t get_idx(uintptr_t str)
 	{
-		return (fn)(syscalls[func_name].addr());
+		return syscalls[str];
 	}
-
 };

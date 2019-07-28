@@ -337,7 +337,8 @@ namespace UI
 			// inner background
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, m_items.at(*m_setting).c_str(), data->m_active ? color_t(153, 153, 153, data->m_alpha) : color_t(92, 92, 92, data->m_alpha));
+			if (!m_items.empty())
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, m_items.at(*m_setting).c_str(), data->m_active ? color_t(153, 153, 153, data->m_alpha) : color_t(92, 92, 92, data->m_alpha));
 
 			// bester arrow
 			const color_t arrow_color(153, 153, 153, data->m_alpha);
@@ -422,7 +423,6 @@ namespace UI
 
 				float scroll_start = scroll_step * m_item_offset;
 
-				ctx.m_renderer->draw_filled_rect({ m_box_end.x - 4.f, m_bounds.y + 4.f + scroll_start, m_box_end.x - 1.f, m_bounds.y + 2.f + scroll_start + scroll_size }, color_t(0, 0, 0, data->m_alpha));
 				ctx.m_renderer->draw_line({ m_box_end.x - 3.f, m_end.y + 4.f + scroll_start + 1.f }, { m_box_end.x - 3.f, m_end.y + 2.f + scroll_start + scroll_size - 1.f }, data->m_color);
 			}
 		}
@@ -464,8 +464,6 @@ namespace UI
 				for (auto i = 0; i < m_items.size() - m_max_items; i++)
 					m_items.pop_back();
 			}
-			else if (!m_items.size())
-				return;
 
 			data->m_y += 78.f;
 
@@ -492,16 +490,19 @@ namespace UI
 			// inner background
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			for (size_t i = 0; i < m_items.size(); i++)
+			if (!m_items.empty())
 			{
-				float x = m_box_start.x + 10.f;
-				float y = m_start.y + i * m_item_height;
+				for (size_t i = 0; i < m_items.size(); i++)
+				{
+					float x = m_box_start.x + 10.f;
+					float y = m_start.y + i * m_item_height;
 
-				if (y + (m_item_height * 0.5f) > m_end.y)
-					continue;
+					if (y + (m_item_height * 0.5f) > m_end.y)
+						continue;
 
-				ctx.m_renderer->draw_filled_rect({ m_box_start.x, y, m_bounds.x, 16.f }, m_items.at(i).m_background);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y - 1.f }, m_items.at(i).m_text, m_items.at(i).m_text_col);
+					ctx.m_renderer->draw_filled_rect({ m_box_start.x, y, m_bounds.x, 16.f }, m_items.at(i).m_background);
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y - 1.f }, m_items.at(i).m_text, m_items.at(i).m_text_col);
+				}
 			}
 		}
 

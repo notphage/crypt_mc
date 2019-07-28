@@ -1,5 +1,14 @@
 #pragma once
 
+enum class connection_stage : uint8_t
+{
+	STAGE_WAITING,
+	STAGE_LOGIN,
+	STAGE_SELECT,
+	STAGE_CLOSE,
+	STAGE_INVALID
+};
+
 enum class packet_type_t : uint64_t
 {
 	PACKET_VERSION,
@@ -46,24 +55,28 @@ struct c_login_packet : public c_packet
 struct c_games_packet : public c_packet
 {
 	char				 m_name[64];
-	game_packet_status_t m_status;
+	uint64_t			 m_expire;
+	uint32_t			 m_version;
 	uint8_t				 m_num; // number of games
+	game_packet_status_t m_status;
 };
 
 #pragma pack(1) 
 struct c_cheat_packet : public c_packet
 {
-	char	 m_name[64];
-	char	 m_process[64];
-	uint64_t m_id;
+	char	 m_window_class[64];
+	uint64_t m_cheat_key;
+	uint8_t  m_id;
 };
 
+#pragma pack(1) 
 struct c_data_packet : public c_packet
 {
-	uint64_t m_id;
 	uint64_t m_len;
-	uint8_t m_buffer[65536];
+	uint8_t  m_buffer[65536];
 };
+
+static constexpr uint64_t max_data_len = 65535;
 
 class c_packet_handler
 {
@@ -90,9 +103,21 @@ public:
 		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
 		constexpr static uint8_t packet_offset = 24; // The offset from the beginning of the packet to be xor'd. Type, Key, and Time are skipped
 
-		uint8_t* p = (uint8_t*)& packet.m_key;
+		uint8_t* p = (uint8_t*)&packet.m_key;
 		uint8_t* login_p = (uint8_t*)& packet;
-		for (auto i = packet_offset; i < sizeof packet; i++)
+		for (size_t i = packet_offset; i < sizeof packet; i++)
+			login_p[i] ^= p[i % 8];
+	}
+
+	template <typename T>
+	void xor_packet(T* packet, size_t size)
+	{
+		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
+		constexpr static uint8_t packet_offset = 24; // The offset from the beginning of the packet to be xor'd. Type, Key, and Time are skipped
+
+		uint8_t* p = (uint8_t*)&packet->m_key;
+		uint8_t* login_p = (uint8_t*)packet;
+		for (size_t i = packet_offset; i < size; i++)
 			login_p[i] ^= p[i % 8];
 	}
 
@@ -123,45 +148,53 @@ public:
 		return login_packet;
 	}
 
-	c_games_packet create_games_packet(const std::string& name, game_packet_status_t status, uint8_t num)
+	c_games_packet create_games_packet(const std::string& name, uint64_t expire, uint32_t version, uint8_t num, game_packet_status_t status)
 	{
 		c_games_packet games_packet;
 		create_base_packet(games_packet, packet_type_t::PACKET_GAMES);
 
 		memcpy(&games_packet.m_name, name.data(), sizeof games_packet.m_name);
-		games_packet.m_status = status;
+		games_packet.m_expire = expire;
+		games_packet.m_version = version;
 		games_packet.m_num = num;
+		games_packet.m_status = status;
 
 		xor_packet(games_packet);
 
 		return games_packet;
 	}
 
-	c_cheat_packet create_cheat_packet(const std::string& name, const std::string& process, uint64_t id)
+	c_cheat_packet create_cheat_packet(const std::string& window_class, uint64_t id)
 	{
 		c_cheat_packet cheat_packet;
 		create_base_packet(cheat_packet, packet_type_t::PACKET_CHEAT);
 
-		memcpy(cheat_packet.m_name, name.data(), sizeof cheat_packet.m_name);
-		memcpy(cheat_packet.m_process, process.data(), sizeof cheat_packet.m_process);
+		uint64_t key = 0;
+		uint8_t* p = (uint8_t*)& key;
+		for (auto i = 0; i < 8; i++)
+			p[i] = (uint8_t)(1 + rand() / (RAND_MAX / (255) + 1)); // better randomness than rand() % 255
+
+		memcpy(cheat_packet.m_window_class, window_class.data(), sizeof cheat_packet.m_window_class);
+		cheat_packet.m_cheat_key = key;
 		cheat_packet.m_id = id;
-
+	
 		xor_packet(cheat_packet);
-
+	
 		return cheat_packet;
 	}
 
-	std::unique_ptr<c_data_packet> create_cheat_packet(uint64_t id, uint64_t size, uint8_t* buffer)
+	c_data_packet* create_data_packet(size_t size, const uint8_t* buffer, size_t& bytes_read)
 	{
-		std::unique_ptr<c_data_packet> data_packet = std::make_unique<c_data_packet>();
+		c_data_packet* data_packet = new c_data_packet;
 		create_base_packet(*data_packet, packet_type_t::PACKET_DATA);
-
-		data_packet->m_id = id;
-		data_packet->m_len = size;
-		memcpy(data_packet->m_buffer, buffer, size);
-
-		xor_packet(*data_packet);
-
+		auto bytes_to_read = std::min(sizeof data_packet->m_buffer, size - bytes_read);
+	
+		data_packet->m_len = std::min(size, sizeof data_packet->m_buffer);
+		memcpy(data_packet->m_buffer + bytes_read, buffer, bytes_to_read);
+		bytes_read += bytes_to_read;
+	
+		xor_packet(data_packet, sizeof *data_packet);
+	
 		return data_packet;
 	}
 };

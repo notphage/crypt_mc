@@ -4,26 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <tlhelp32.h>
-
-class c_messagebox
-{
-public:
-
-	struct data_t
-	{
-		uintptr_t messagebox_func; //void*, char*, char*, UINT
-		char text[255];
-		char caption[255];
-	};
-
-	//simulated dllmain
-	static int __stdcall dllmain(data_t* data, DWORD reason, void* reserved)
-	{
-		auto msgbox = reinterpret_cast<int(WINAPI*)(HWND, LPCSTR, LPCSTR, UINT)>(data->messagebox_func);
-		msgbox(nullptr, data->text, data->caption, MB_OK);
-		return 1;
-	}
-};
+#include <ntstatus.h>
 
 class c_loader
 {
@@ -140,202 +121,38 @@ public:
 	}
 };
 
-int c_inject::find_hijack_thread(int pid)
+CLIENT_ID c_inject::find_process()
 {
-	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-	THREADENTRY32 te32{ };
-	te32.dwSize = sizeof(THREADENTRY32);
+	CLIENT_ID pid = {};
+	GetWindowThreadProcessId(FindWindowA(ctx.m_window_class.c_str(), nullptr), (PDWORD)&pid.UniqueProcess);
 
-	Thread32First(snapshot, &te32);
-	while (Thread32Next(snapshot, &te32))
-	{
-		if (te32.th32OwnerProcessID == pid)
-		{
-			CloseHandle(snapshot);
-			return te32.th32ThreadID;
-		}
-	}
-
-	CloseHandle(snapshot);
-	return 0;
+	return pid;
 }
 
-bool c_inject::execute_shellcode(int pid, void* process_handle, void* shellcode_address)
+bool c_inject::write_virtual_memory(HANDLE handle, void* addr, void* buf, size_t size)
 {
-	HANDLE process = (HANDLE)process_handle;
-
-	//find thread to hijack
-	int thread_index = find_hijack_thread(pid);
-	if (!thread_index)
-	{
-		printf("couldnt find thread to hijack\n");
+	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtProtectVirtualMemory")), handle, &addr, PAGE_EXECUTE_READWRITE, nullptr); status != STATUS_SUCCESS)
 		return false;
-	}
-
-	//open thread
-	//static auto zw_ot = ctx.m_syscall.get<ZwOpenProcess>(fnvc("ZwOpenProcess"));
-	//HANDLE thread;
-	//CLIENT_ID client_id;
-	//OBJECT_ATTRIBUTES object_atributes;
-	//PHANDLE tid;
-	//if (auto status = zw_ot(&thread, PROCESS_ALL_ACCESS, &object_atributes, &client_id); status != NT_SUCCESS)
-
-
-	HANDLE thread = OpenThread(THREAD_ALL_ACCESS | THREAD_GET_CONTEXT, false, thread_index);
-	if (!thread)
-	{
-		printf("couldnt open thread to hijack\n");
+	
+	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), handle, addr, buf, size, nullptr); status != STATUS_SUCCESS)
 		return false;
-	}
 
-	//suspend thread
-	SuspendThread(thread);
-
-	//get thread context
-	CONTEXT ctx;
-	memset(&ctx, 0, sizeof(CONTEXT));
-	ctx.ContextFlags = CONTEXT_FULL;
-	GetThreadContext(thread, &ctx);
-
-#ifdef _WIN64
-	//make room on stack
-	ctx.Rsp -= sizeof(uintptr_t);
-
-	//when shellcode is done and calls ret, we jump back to where we left off, so we dont fuck shit up
-	WriteProcessMemory(process, (void*)ctx.Rsp, &ctx.Rip, sizeof(ctx.Rip), nullptr);
-
-	//point thread at shellcode
-	ctx.Rip = uintptr_t(shellcode_address);
-#else
-	//make room on stack
-	ctx.Esp -= sizeof(uintptr_t);
-
-	//when shellcode is done and calls ret, we jump back to where we left off, so we dont fuck shit up
-	WriteProcessMemory(process, (void*)ctx.Esp, &ctx.Eip, sizeof(ctx.Eip), nullptr);
-
-	//point thread at shellcode
-	ctx.Eip = uintptr_t(shellcode_address);
-#endif
-
-	//set thread context
-	SetThreadContext(thread, &ctx);
-
-	//resume thread
-	ResumeThread(thread);
-
-	//close thread handle
-	CloseHandle(thread);
-
-	return true;
+	return false;
 }
 
-bool c_inject::hijack_call_dllmain(int pid, void* process_handle, uintptr_t func_address, uintptr_t argument)
+bool c_inject::inject_from_memory(uint8_t* dll)
 {
-	HANDLE process = (HANDLE)process_handle;
+	HANDLE process = {};
 
-	//generate shellcode
-#ifdef _WIN64
-	uint8_t shellcode[]
+	// Process Handle
 	{
-		0x9C, 0x50, 0x53, 0x51, 0x52, 0x41, 0x50, 0x41, 0x51, 0x41, 0x52, 0x41, 0x53,   // push     push registers
-		0x48, 0x83, 0xEC, 0x28,                                                         // sub      rsp 0x28
-		0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                     // movabs   rcx 0x0000000000000000 
-		0x48, 0xC7, 0xC2, 0x01, 0x00, 0x00, 0x00,                                       // mov      rdx 0x1
-		0x4D, 0x31, 0xC0,                                                               // xor      r8 r8
-		0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                     // movabs   rax 0x0000000000000000
-		0xFF, 0xD0,                                                                     // call     rax
-		0x48, 0x83, 0xC4, 0x28,                                                         // add      rsp 0x28
-		0x41, 0x5B, 0x41, 0x5A, 0x41, 0x59, 0x41, 0x58, 0x5A, 0x59, 0x5B, 0x58, 0x9D,   // pop      pop registers
-		0xC3                                                                            // ret
-	};
+		auto proc_id = find_process();
+		static OBJECT_ATTRIBUTES zoa = { sizeof(zoa) };
+		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtOpenProcess")), &process, PROCESS_ALL_ACCESS, &zoa, &proc_id); status != STATUS_SUCCESS)
+			return false;
 
-	*(uintptr_t*)(shellcode + 19) = uintptr_t(argument);
-	*(uintptr_t*)(shellcode + 39) = uintptr_t(func_address);
-#else
-	uint8_t shellcode[]
-	{
-		0x9C,                           // pushfd   push flags
-		0x60,                           // pushad   push registers
-		0x68, 0x00, 0x00, 0x00, 0x00,   // push     nullptr (0x0)
-		0x68, 0x01, 0x00, 0x00, 0x00,   // push     DLL_PROCESS_ATTACH (0x1)
-		0x68, 0x00, 0x00, 0x00, 0x00,   // push     0x00000000
-		0xB8, 0x00, 0x00, 0x00, 0x00,   // mov      eax 0x00000000
-		0xFF, 0xD0,	                    // call     eax
-		0x61,                           // popad    pop registers	
-		0x9D,                           // popfd    pop flags
-		0xC3                            // ret
-	};
-
-	*(uintptr_t*)(shellcode + 13) = uintptr_t(argument);
-	*(uintptr_t*)(shellcode + 18) = uintptr_t(func_address);
-#endif
-
-	//write shellcode
-	void* shellcode_address = VirtualAllocEx(process, nullptr, sizeof(shellcode) + 1, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	WriteProcessMemory(process, shellcode_address, shellcode, sizeof(shellcode), nullptr);
-
-	//execute shellcode
-	return execute_shellcode(pid, process, shellcode_address);
-}
-
-bool c_inject::hijack_loadlib(int pid, void* process_handle, const char* dll)
-{
-	HANDLE process = (HANDLE)process_handle;
-
-	//write library path
-	void* lib_path_address = VirtualAllocEx(process, nullptr, strlen(dll) + 1, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-	WriteProcessMemory(process, lib_path_address, dll, strlen(dll) + 1, nullptr);
-
-	//get loadlib address
-	void* loadlib_address = GetProcAddress(GetModuleHandleA("kernel32.dll"), "LoadLibraryA");
-
-#ifdef _WIN64
-	//generate shellcode
-	uint8_t shellcode[]
-	{
-		0x9C, 0x50, 0x53, 0x51, 0x52, 0x41, 0x50, 0x41, 0x51, 0x41, 0x52, 0x41, 0x53, // push     push registers
-		0x48, 0x83, 0xEC, 0x28,                                                       // sub      rsp, 0x28
-		0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // movabs   rcx, 0x0000000000000000
-		0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // movabs   rax, 0x0000000000000000
-		0xFF, 0xD0,                                                                   // call     rax
-		0x48, 0x83, 0xC4, 0x28,                                                       // add      rsp, 0x28
-		0x41, 0x5B, 0x41, 0x5A, 0x41, 0x59, 0x41, 0x58, 0x5A, 0x59, 0x5B, 0x58, 0x9D, // pop      pop registers
-		0xC3                                                                          // ret
-	};
-
-	*(uintptr_t*)(shellcode + 19) = uintptr_t(lib_path_address);
-	*(uintptr_t*)(shellcode + 29) = uintptr_t(loadlib_address);
-#else
-	uint8_t shellcode[]
-	{
-		0x9C, 0x50, 0x53, 0x51, 0x52, 0x41, 0x50, 0x41, 0x51, 0x41, 0x52, 0x41, 0x53, // push     push registers
-		0x48, 0x83, 0xEC, 0x28,                                                       // sub      rsp, 0x28
-		0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // movabs   rcx, 0x0000000000000000
-		0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // movabs   rax, 0x0000000000000000
-		0xFF, 0xD0,                                                                   // call     rax
-		0x48, 0x83, 0xC4, 0x28,                                                       // add      rsp, 0x28
-		0x41, 0x5B, 0x41, 0x5A, 0x41, 0x59, 0x41, 0x58, 0x5A, 0x59, 0x5B, 0x58, 0x9D, // pop      pop registers
-		0xC3                                                                          // ret
-	};
-#endif
-
-	//write shellcode
-	void* shellcode_address = VirtualAllocEx(process, nullptr, sizeof(shellcode) + 1, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	WriteProcessMemory(process, shellcode_address, shellcode, sizeof(shellcode), nullptr);
-
-	//execute shellcode
-	return execute_shellcode(pid, process, shellcode_address);
-}
-
-bool c_inject::inject_from_memory(int pid, uint8_t* dll)
-{
-	printf("> injecting from memory \n");
-
-	HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-	if (!process)
-	{
-		printf("> unable to open process! \n");
-		return false;
+		if (!process)
+			return false;
 	}
 
 	//get headers
@@ -357,11 +174,22 @@ bool c_inject::inject_from_memory(int pid, uint8_t* dll)
 	uintptr_t reloc_section = nt_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
 	uintptr_t import_section = nt_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 
-	//allocate data for image
-	void* module_address = VirtualAllocEx(process, nullptr, size_of_image, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+	void* module_address = nullptr;
+
+	//Allocate image
+	{
+		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), process, &module_address, 0, &size_of_image, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); status != STATUS_SUCCESS)
+			return false;
+
+		if (!module_address)
+			return false;
+	}
 
 	//write headers
-	WriteProcessMemory(process, module_address, dll, size_of_headers, nullptr);
+	if (!write_virtual_memory(process, module_address, dll, size_of_headers))
+		return false;
+
+	//WriteProcessMemory(process, module_address, dll, size_of_headers, nullptr);
 
 	//write sections
 	for (size_t i = 0; i < section_count; i++)
@@ -370,6 +198,10 @@ bool c_inject::inject_from_memory(int pid, uint8_t* dll)
 		uintptr_t raw_data_address = section_header[i].PointerToRawData;
 		uintptr_t raw_data_size = section_header[i].SizeOfRawData;
 
+		//{
+		//	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), process, (void*)virtual_address, &dll[raw_data_address], size_of_image, nullptr); status != STATUS_SUCCESS)
+		//		return false;
+		//}
 		WriteProcessMemory(process, (void*)virtual_address, &dll[raw_data_address], raw_data_size, nullptr);
 	}
 
@@ -384,8 +216,25 @@ bool c_inject::inject_from_memory(int pid, uint8_t* dll)
 		(uintptr_t)MessageBoxA
 	);
 
-	void* loader_data_address = VirtualAllocEx(process, nullptr, sizeof(c_loader::data_t), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	void* loader_code_address = VirtualAllocEx(process, nullptr, 0x4000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+	void* loader_data_address = nullptr;
+	void* loader_code_address = nullptr;
+
+	//Allocate code and data
+	{
+		auto data_size = sizeof(c_loader::data_t);
+		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), process, &loader_data_address, 0, &data_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); status != STATUS_SUCCESS)
+			return false;
+
+		if (!loader_data_address)
+			return false;
+
+		auto code_size = 0x4000;
+		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), process, &loader_code_address, 0, &data_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); status != STATUS_SUCCESS)
+			return false;
+
+		if (!loader_data_address)
+			return false;
+	}
 
 	WriteProcessMemory(process, loader_data_address, &loader_data, sizeof(c_loader::data_t), nullptr);
 	WriteProcessMemory(process, loader_code_address, c_loader::loader_code, 0x4000, nullptr);
@@ -397,94 +246,8 @@ bool c_inject::inject_from_memory(int pid, uint8_t* dll)
 		return false;
 	}
 
-	//hijack_call_dllmain(pid, process, uintptr_t(loader_code_address), uintptr_t(loader_data_address));
-
 	CloseHandle(thread);
 	CloseHandle(process);
-
-	return true;
-}
-
-bool c_inject::inject_from_path(int pid, const char* dll)
-{
-	printf("> injecting from path \n");
-	printf("> opening: %s \n", dll);
-
-	HANDLE file_handle = CreateFileA(dll, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-	if (file_handle == INVALID_HANDLE_VALUE)
-	{
-		printf("> unable to open DLL file! \n");
-		return false;
-	}
-
-	DWORD file_size = GetFileSize(file_handle, nullptr);
-	uint8_t* buffer = new uint8_t[file_size];
-
-	printf("> reading: %s \n", dll);
-	if (!ReadFile(file_handle, buffer, file_size, nullptr, nullptr))
-	{
-		printf("> unable to read DLL file! \n");
-		CloseHandle(file_handle);
-		delete[] buffer;
-		return false;
-	}
-	CloseHandle(file_handle);
-
-	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buffer; //file start 
-	if (dos_header->e_magic != IMAGE_DOS_SIGNATURE)
-	{
-		printf("> does not look like a valid DLL! \n");
-		delete[] buffer;
-		return false;
-	}
-
-	printf("> valid DLL loaded \n");
-
-	inject_from_memory(pid, buffer);
-	//hijack_messagebox_test( pid );
-
-	delete[] buffer;
-	return true;
-}
-
-bool c_inject::hijack_messagebox_test(int pid)
-{
-	printf("> messagebox test \n");
-
-	HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-	if (!process)
-	{
-		printf("> unable to open process! \n");
-		return false;
-	}
-
-	c_messagebox::data_t msgbox_data;
-	msgbox_data.messagebox_func = uintptr_t(GetProcAddress(GetModuleHandleA("User32.dll"), "MessageBoxA"));
-	strncpy_s(msgbox_data.text, 8, "NIGGAS", 8);
-	strncpy_s(msgbox_data.caption, 7, "HELLO", 7);
-
-	//write loader data
-	void* loader_data_address = VirtualAllocEx(process, nullptr, sizeof(msgbox_data) + 1, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	WriteProcessMemory(process, loader_data_address, &msgbox_data, sizeof(msgbox_data), nullptr);
-	printf("> loader_data_addr 0x%p\n", loader_data_address);
-
-	//write function
-	void* dllmain_address = VirtualAllocEx(process, nullptr, 0x1000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	WriteProcessMemory(process, dllmain_address, c_messagebox::dllmain, 0x1000, nullptr);
-	printf("> dllmain_addr 0x%p\n", dllmain_address);
-
-	//hijack_call_dllmain(pid, process, uintptr_t(dllmain_address), uintptr_t(loader_data_address));
-	HANDLE thread = CreateRemoteThread(process, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(dllmain_address), loader_data_address, 0, nullptr);
-	if (!thread)
-	{
-		printf("> thread creation failed 0x%X\n", GetLastError());
-		return false;
-	}
-
-	CloseHandle(thread);
-	CloseHandle(process);
-
-	getchar();
 
 	return true;
 }

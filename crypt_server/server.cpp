@@ -1,8 +1,10 @@
 #include "context.h"
+#include "cheat.h"
 
 #include <sys/socket.h>
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h>    //write
+#include <cmath>
 
 c_server::c_server(int16_t port)
 	: m_thread_pool(std::thread::hardware_concurrency()), m_port(port)
@@ -41,10 +43,13 @@ void c_server::run()
 
 	while ((client_socket = accept(m_socket_desc, (struct sockaddr*)&client, (socklen_t*)&c)))
 	{
+		struct timeval tv;
+		tv.tv_sec = 60;
+		tv.tv_usec = 0;
+		setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
 		static char ip_str[INET_ADDRSTRLEN];
 		inet_ntop(AF_INET, &client.sin_addr, ip_str, INET_ADDRSTRLEN);
-
-		ctx.m_console.write(std::string("Accepting connection from ") + ip_str);
 
 		ctx.m_clients++;
 
@@ -58,40 +63,43 @@ void c_server::run()
 	if (client_socket < 0)
 		throw std::runtime_error("Accept Failed");
 
+	close(m_socket_desc);
+
 	return;
 }
 
 c_client_handler::~c_client_handler()
 {
-	shutdown(m_client_socket, SHUT_RDWR);
+	m_connection.disconnect();
 
 	ctx.m_clients--;
 }
 
 void c_client_handler::run()
 {
-	// Welcome String
-	{
-		std::string welcome("Welcome from the Crypt Server!");
-		m_connection.set_buffer(welcome.data(), welcome.size());
-		m_connection.send();
-	}
-
 	// Version Packets
 	{
-		auto version_packet = recieve_packet<c_version_packet>();
+		c_version_packet version_packet;
+		if (!recieve_packet<c_version_packet>(version_packet))
+		{
+			m_connection.disconnect();
+			return;
+		}
 
 		if (ctx.m_required_version > version_packet.m_version)
 		{
-			printf("Client %s outdated version: %ull\n", m_client_ip.c_str(), ctx.m_required_version);
+			ctx.m_console.write(std::string("Client ") + m_client_ip + std::string(" connected with an outdated version: ") + std::to_string(version_packet.m_version));
 
 			version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, true);
 			m_connection.set_buffer(&version_packet, sizeof version_packet);
+			m_connection.send();
+
+			m_connection.disconnect();
 
 			return;
 		}
 
-		printf("Client %s connected with a updated client.\n", m_client_ip.c_str());
+		ctx.m_console.write(std::string("Client ") + m_client_ip + std::string(" connected with an updated client"));
 
 		version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, false);
 		m_connection.set_buffer(&version_packet, sizeof version_packet);
@@ -100,31 +108,63 @@ void c_client_handler::run()
 
 	// Login Packets
 	{
-		auto login_packet = recieve_packet<c_login_packet>();
+		c_login_packet login_packet;
+		if (!recieve_packet<c_login_packet>(login_packet))
+		{
+			m_connection.disconnect();
+			return;
+		}
 
-		printf("Client %s logged into user %s.\n", m_client_ip.c_str(), login_packet.m_username);
+		ctx.m_console.write(std::string("Client ") + m_client_ip + std::string(" logged into user ") + login_packet.m_username);
 	}
 
 	// Game Packets
 	{
-		c_games_packet game_packet = m_packet_handler.create_games_packet("", game_packet_status_t::GAME_INVALID, (uint8_t)m_games.size());
+		c_games_packet game_packet = m_packet_handler.create_games_packet("", 0, 0, (uint8_t)m_games.size(), game_packet_status_t::GAME_INVALID);
 		m_connection.set_buffer(&game_packet, sizeof game_packet);
 		m_connection.send();
 
 		for (auto&& game : m_games)
 		{
-			game_packet = m_packet_handler.create_games_packet(game.m_name, game.m_status, (uint8_t)m_games.size());
+			game_packet = m_packet_handler.create_games_packet(game.m_name, 1, 30, (uint8_t)m_games.size(), game.m_status);
 			m_connection.set_buffer(&game_packet, sizeof game_packet);
 			m_connection.send();
 		}
 	}
 
-	// Game Selection
-	{
-		m_connection.recieve();
-		c_login_packet login_packet;
-		memcpy(&login_packet, m_connection.buffer_data(), m_connection.buffer_size());
+	size_t num_packets = (size_t)std::ceil((float)crypt_mc_dll_size / (float)max_data_len);
 
-		m_packet_handler.xor_packet(login_packet);
+	// Game Selection
+	c_cheat_packet cheat_packet;
+	{
+		if (!recieve_packet<c_cheat_packet>(cheat_packet))
+		{
+			m_connection.disconnect();
+			return;
+		}
+
+		cheat_packet = m_packet_handler.create_cheat_packet("LWJGL", cheat_packet.m_id);
+		m_connection.set_buffer(&cheat_packet, sizeof cheat_packet);
+		m_connection.send();
+	}
+
+	// Send Cheat
+	{
+		m_connection.set_buffer(crypt_mc_dll, crypt_mc_dll_size);
+		m_connection.send();
+
+		//size_t bytes_read = 0;
+		//for (auto i = 0; i < num_packets; i++)
+		//{
+		//	c_data_packet* data_packet = m_packet_handler.create_data_packet(crypt_mc_dll_size, crypt_mc_dll, bytes_read);
+		//	m_connection.set_buffer(data_packet, sizeof *data_packet);
+		//	m_connection.send();
+		//
+		//	if (data_packet)
+		//	{
+		//		delete data_packet;
+		//		data_packet = nullptr;
+		//	}
+		//}
 	}
 }

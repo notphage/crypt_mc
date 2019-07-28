@@ -47,5 +47,8 @@
     <ClInclude Include="game_list.h">
       <Filter>SRC\server</Filter>
     </ClInclude>
+    <ClInclude Include="cheat.h">
+      <Filter>SRC\server</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

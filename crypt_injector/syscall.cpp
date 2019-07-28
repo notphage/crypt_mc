@@ -88,7 +88,11 @@ bool c_syscall::init()
 		// we got a syscall, time to get the index
 		if (code == 0xB8D18B4C)
 		{
-			syscalls[fnvr(name)].set_index(index);
+			syscalls.emplace(fnvr(name), index);
+			if (name[2] == 'O' && name[6] == 'P' && name[8] == 'o')
+			{
+				printf("NtOpenProcess\n");
+			}
 		}
 	}
 

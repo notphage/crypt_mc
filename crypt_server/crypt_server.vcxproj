@@ -74,6 +74,12 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <MultiProcNumber>16</MultiProcNumber>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <MultiProcNumber>16</MultiProcNumber>
+  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="connection.cpp" />
     <ClCompile Include="main.cpp" />
@@ -81,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\packets.h" />
+    <ClInclude Include="cheat.h" />
     <ClInclude Include="connection.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="context.h" />
@@ -91,6 +98,10 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <CppLanguageStandard>c++17</CppLanguageStandard>
+      <UnrollLoops>true</UnrollLoops>
+      <LinkTimeOptimization>true</LinkTimeOptimization>
+      <RelaxIEEE>true</RelaxIEEE>
+      <HideInlineMethods>true</HideInlineMethods>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;</LibraryDependencies>

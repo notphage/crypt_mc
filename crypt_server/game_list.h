@@ -4,11 +4,12 @@ struct c_game_entry
 {
 	std::string m_name;
 	std::string m_process_name;
+	uint32_t m_version;
 	game_packet_status_t m_status;
 	std::vector<uint8_t> m_cheat;
 
-	c_game_entry(const std::string& name, const std::string& process, const std::string& file, game_packet_status_t status)
-		: m_name(name), m_process_name(process), m_status(status)
+	c_game_entry(const std::string& name, const std::string& process, const std::string& file, uint32_t version, game_packet_status_t status)
+		: m_name(name), m_process_name(process), m_version(version), m_status(status)
 	{
 		//std::ifstream ifs(std::string("/cheats/") + file, std::ios::binary | std::ios::ate);
 		//

@@ -11,4 +11,9 @@ public:
 	void create();
 	void render();
 	void end();
+
+	c_gui& get_gui()
+	{
+		return m_gui;
+	}
 };

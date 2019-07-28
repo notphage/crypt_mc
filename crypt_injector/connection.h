@@ -10,6 +10,7 @@ class c_connection
 	int recieve_impl(void* data, size_t size);
 public:
 	bool connect();
+	void disconnect();
 	int send();
 	int recieve();
 

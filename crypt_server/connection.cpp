@@ -1,15 +1,15 @@
 #include "context.h"
 #include <iostream>
+#include <unistd.h>
 
 int c_connection::send_impl(const void* data, size_t size)
 {
 	const char* data_ptr = (const char*)data;
-	size_t bytes_sent = 0;
+	int32_t bytes_sent = 0;
 
 	while (size > 0)
 	{
-		bytes_sent = ::send(m_conn_socket, data_ptr, size, 0);
-		if (bytes_sent == 0)
+		if ((bytes_sent = ::send(m_conn_socket, data_ptr, size, 0)) == -1)
 			return -1;
 
 		data_ptr += bytes_sent;
@@ -22,19 +22,38 @@ int c_connection::send_impl(const void* data, size_t size)
 int c_connection::recieve_impl(void* data, size_t size)
 {
 	char* data_ptr = (char*)data;
-	size_t bytes_recv = 0;
+	int32_t bytes_recv = 0;
 
 	while (size > 0)
 	{
-		bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0);
-		if (bytes_recv <= 0)
-			return (int)bytes_recv;
+		if ((bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0)) == -1)
+			return -1;
 
 		data_ptr += bytes_recv;
 		size -= bytes_recv;
 	}
 
 	return 1;
+}
+
+void c_connection::disconnect()
+{
+	if (shutdown(m_conn_socket, SHUT_RDWR) < 0)
+	{
+		ctx.m_console.write(std::string("Client ") + m_ip + std::string(" errored on disconnect: ") + strerror(errno));
+		force_disconnect();
+
+		return;
+	}
+
+	ctx.m_console.write(std::string("Client ") + m_ip + std::string(" was disconnected gracefully"));
+	close(m_conn_socket);
+}
+
+void c_connection::force_disconnect()
+{
+	close(m_conn_socket);
+	ctx.m_console.write(std::string("Client ") + m_ip + std::string(" was disconnected forcefully"));
 }
 
 int c_connection::send()

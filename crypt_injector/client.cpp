@@ -1,75 +1,154 @@
 #include "context.h"
+#include <chrono>
+
+unsigned char message[] = {
+  0x48, 0x83, 0xec, 0x28, 0x48, 0x83, 0xe4, 0xf0, 0x65, 0x4c, 0x8b, 0x24,
+  0x25, 0x60, 0x00, 0x00, 0x00, 0x4d, 0x8b, 0x64, 0x24, 0x18, 0x4d, 0x8b,
+  0x64, 0x24, 0x20, 0x4d, 0x8b, 0x24, 0x24, 0x4d, 0x8b, 0x7c, 0x24, 0x20,
+  0x4d, 0x8b, 0x24, 0x24, 0x4d, 0x8b, 0x64, 0x24, 0x20, 0xba, 0x8e, 0x4e,
+  0x0e, 0xec, 0x4c, 0x89, 0xe1, 0xe8, 0x68, 0x00, 0x00, 0x00, 0xeb, 0x34,
+  0x59, 0xff, 0xd0, 0xba, 0xa8, 0xa2, 0x4d, 0xbc, 0x48, 0x89, 0xc1, 0xe8,
+  0x56, 0x00, 0x00, 0x00, 0x48, 0x89, 0xc3, 0x4d, 0x31, 0xc9, 0xeb, 0x2c,
+  0x41, 0x58, 0xeb, 0x3a, 0x5a, 0x48, 0x31, 0xc9, 0xff, 0xd3, 0xba, 0x70,
+  0xcd, 0x3f, 0x2d, 0x4c, 0x89, 0xf9, 0xe8, 0x37, 0x00, 0x00, 0x00, 0x48,
+  0x31, 0xc9, 0xff, 0xd0, 0xe8, 0xc7, 0xff, 0xff, 0xff, 0x75, 0x73, 0x65,
+  0x72, 0x33, 0x32, 0x2e, 0x64, 0x6c, 0x6c, 0x00, 0xe8, 0xcf, 0xff, 0xff,
+  0xff, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x66, 0x75, 0x6e,
+  0x21, 0x00, 0xe8, 0xc1, 0xff, 0xff, 0xff, 0x30, 0x78, 0x64, 0x65, 0x61,
+  0x64, 0x62, 0x65, 0x65, 0x66, 0x00, 0x49, 0x89, 0xcd, 0x67, 0x41, 0x8b,
+  0x45, 0x3c, 0x67, 0x45, 0x8b, 0xb4, 0x05, 0x88, 0x00, 0x00, 0x00, 0x45,
+  0x01, 0xee, 0x67, 0x45, 0x8b, 0x56, 0x18, 0x67, 0x41, 0x8b, 0x5e, 0x20,
+  0x44, 0x01, 0xeb, 0x67, 0xe3, 0x3f, 0x41, 0xff, 0xca, 0x67, 0x42, 0x8b,
+  0x34, 0x93, 0x44, 0x01, 0xee, 0x31, 0xff, 0x31, 0xc0, 0xfc, 0xac, 0x84,
+  0xc0, 0x74, 0x07, 0xc1, 0xcf, 0x0d, 0x01, 0xc7, 0xeb, 0xf4, 0x39, 0xd7,
+  0x75, 0xdd, 0x67, 0x41, 0x8b, 0x5e, 0x24, 0x44, 0x01, 0xeb, 0x31, 0xc9,
+  0x66, 0x67, 0x42, 0x8b, 0x0c, 0x53, 0x67, 0x41, 0x8b, 0x5e, 0x1c, 0x44,
+  0x01, 0xeb, 0x67, 0x8b, 0x04, 0x8b, 0x44, 0x01, 0xe8, 0xc3
+};
+unsigned int message_len = 262;
 
 void c_client::run()
 {
-	m_connection.connect();
-
-	// Welcome String
+	while (m_stage != connection_stage::STAGE_INVALID)
 	{
-		m_connection.recieve();
-		std::string recv_str((const char*)m_connection.buffer_data(), m_connection.buffer_size());
-
-		std::cout << std::endl << recv_str << std::endl;
-	}
-
-	// Version Packet
-	{
-		c_version_packet version_packet = m_packet_handler.create_version_packet(ctx.m_version, false);
-		m_connection.set_buffer(&version_packet, sizeof version_packet);
-		m_connection.send();
-
-		version_packet = recieve_packet<c_version_packet>();
-
-		if (version_packet.m_upgrade_required)
+		switch (m_stage)
 		{
-			printf("Crypt Loader outdated. Required version: %llu Current Version: %llu\n", version_packet.m_version, ctx.m_version);
-			return;
+			case connection_stage::STAGE_WAITING:
+			{
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+
+				break;
+			}
+
+			case connection_stage::STAGE_LOGIN:
+			{
+				ctx.m_loader_window.get_gui().insert_text("Connecting...", color_t(255, 255, 255));
+
+				if (!m_connection.connect())
+				{
+					m_stage = connection_stage::STAGE_INVALID;
+					ctx.m_loader_window.get_gui().insert_text("Couldn't establish a connection.", color_t(255, 0, 0));
+
+					return;
+				}
+
+				ctx.m_loader_window.get_gui().insert_text("Success.", color_t(255, 255, 255));
+
+				// Version Packet
+				{
+					c_version_packet version_packet = m_packet_handler.create_version_packet(ctx.m_version, false);
+					m_connection.set_buffer(&version_packet, sizeof version_packet);
+					m_connection.send();
+
+					if (!recieve_packet<c_version_packet>(version_packet))
+					{
+						m_stage = connection_stage::STAGE_CLOSE;
+						break;
+					}
+
+					if (version_packet.m_upgrade_required)
+					{
+						ctx.m_loader_window.get_gui().insert_text(std::string("OUTDATED. Required: ") + std::to_string(version_packet.m_version) + std::string(" Current: ") + std::to_string(ctx.m_version), color_t(255, 255, 255));
+						m_stage = connection_stage::STAGE_INVALID;
+
+						return;
+					}
+
+					ctx.m_loader_window.get_gui().insert_text(std::string("UPDATED. Version: ") + std::to_string(ctx.m_version), color_t(255, 255, 255));
+				}
+
+				// Login Packet
+				{
+					c_login_packet login_packet = m_packet_handler.create_login_packet("Yur fucking gay", 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
+
+					m_connection.set_buffer(&login_packet, sizeof login_packet);
+					m_connection.send();
+				}
+
+				// Games Packets
+				{
+					c_games_packet games_packet;
+					if (!recieve_packet<c_games_packet>(games_packet))
+					{
+						m_stage = connection_stage::STAGE_CLOSE;
+						break;
+					}
+
+					std::lock_guard<std::mutex> lock(ctx.m_game_list_mutex);
+
+					for (auto i = 0; i < games_packet.m_num; i++)
+					{
+						if (!recieve_packet<c_games_packet>(games_packet))
+						{
+							m_stage = connection_stage::STAGE_CLOSE;
+							break;
+						}
+
+						ctx.m_game_list.emplace_back(std::string(games_packet.m_name), games_packet.m_version, games_packet.m_status);
+					}
+				}
+
+				m_stage = connection_stage::STAGE_WAITING;
+				break;
+			}
+
+			case connection_stage::STAGE_SELECT:
+			{
+				c_cheat_packet cheat_packet = m_packet_handler.create_cheat_packet("", ctx.m_selected_cheat);
+
+				// Cheat Packets
+				{
+					m_connection.set_buffer(&cheat_packet, sizeof cheat_packet);
+					m_connection.send();
+
+					if (!recieve_packet<c_cheat_packet>(cheat_packet))
+					{
+						m_stage = connection_stage::STAGE_CLOSE;
+						break;
+					}
+
+					ctx.m_loader_window.get_gui().insert_text(std::string("Class: ") + cheat_packet.m_window_class, color_t(255, 255, 255));
+					ctx.m_window_class = cheat_packet.m_window_class;
+				}
+
+				// Cheat Data
+				{
+					m_connection.recieve();
+					std::copy(m_connection.get_buffer().data(), m_connection.get_buffer().data() + m_connection.get_buffer().size(), std::back_inserter(ctx.m_buffer));
+				}
+
+				ctx.m_injector.inject_from_memory(ctx.m_buffer.data());
+				ctx.m_buffer.clear();
+
+				m_stage = connection_stage::STAGE_CLOSE;
+				break;
+			}
+
+			case connection_stage::STAGE_CLOSE:
+			{
+				m_connection.disconnect();
+				return;
+			}
 		}
-
-		printf("Crypt Loader is an updated version.\n");
 	}
-
-	// Login Packet
-	{
-		c_login_packet login_packet = m_packet_handler.create_login_packet("Yur fucking gay", 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
-
-		m_connection.set_buffer(&login_packet, sizeof login_packet);
-		m_connection.send();
-	}
-
-	// Games Packets
-	{
-		auto games_packet = recieve_packet<c_games_packet>();
-
-		for (auto i = 0; i < games_packet.m_num; i++)
-		{
-			games_packet = recieve_packet<c_games_packet>();
-
-			c_game_entry game_entry;
-			game_entry.m_name = std::string(games_packet.m_name);
-			game_entry.m_status = games_packet.m_status;
-			m_games.push_back(game_entry);
-		}
-	}
-
-	size_t selected_game = handle_game_selection();
-}
-
-size_t c_client::handle_game_selection()
-{
-	if (m_games.empty())
-	{
-		printf("No games are currently available.\n");
-		return 0;
-	}
-
-	size_t selected_game;
-
-	for (auto i = 0; i < m_games.size(); i++)
-		printf("> %i: %s (%s)\n", i, m_games.at(i).m_name.c_str(), game_status_to_string(m_games.at(i).m_status).c_str());
-
-	printf("Please select your game: ");
-	std::cin >> selected_game;
-
-	return selected_game;
 }

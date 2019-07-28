@@ -5,15 +5,18 @@
 class c_connection
 {
 	int m_conn_socket = -1;
+	std::string m_ip;
 	std::vector<uint8_t> m_buffer;
 
 	int send_impl(const void* data, size_t size);
 	int recieve_impl(void* data, size_t size);
 public:
-	c_connection(int conn_socket)
-		: m_conn_socket(conn_socket)
+	c_connection(int conn_socket, const std::string& ip)
+		: m_conn_socket(conn_socket), m_ip(ip)
 	{ }
 
+	void disconnect();
+	void force_disconnect();
 	int send();
 	int recieve();
 
