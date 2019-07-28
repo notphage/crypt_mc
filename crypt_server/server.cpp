@@ -46,6 +46,7 @@ void c_server::run()
 		struct timeval tv;
 		tv.tv_sec = 60;
 		tv.tv_usec = 0;
+		setsockopt(client_socket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
 		setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
 		static char ip_str[INET_ADDRSTRLEN];
@@ -81,10 +82,7 @@ void c_client_handler::run()
 	{
 		c_version_packet version_packet;
 		if (!recieve_packet<c_version_packet>(version_packet))
-		{
-			m_connection.disconnect();
 			return;
-		}
 
 		if (ctx.m_required_version > version_packet.m_version)
 		{
@@ -93,8 +91,6 @@ void c_client_handler::run()
 			version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, true);
 			m_connection.set_buffer(&version_packet, sizeof version_packet);
 			m_connection.send();
-
-			m_connection.disconnect();
 
 			return;
 		}
@@ -110,10 +106,7 @@ void c_client_handler::run()
 	{
 		c_login_packet login_packet;
 		if (!recieve_packet<c_login_packet>(login_packet))
-		{
-			m_connection.disconnect();
 			return;
-		}
 
 		ctx.m_console.write(std::string("Client ") + m_client_ip + std::string(" logged into user ") + login_packet.m_username);
 	}
@@ -138,10 +131,7 @@ void c_client_handler::run()
 	c_cheat_packet cheat_packet;
 	{
 		if (!recieve_packet<c_cheat_packet>(cheat_packet))
-		{
-			m_connection.disconnect();
 			return;
-		}
 
 		cheat_packet = m_packet_handler.create_cheat_packet("LWJGL", cheat_packet.m_id);
 		m_connection.set_buffer(&cheat_packet, sizeof cheat_packet);

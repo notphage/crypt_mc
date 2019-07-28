@@ -186,10 +186,10 @@ bool c_inject::inject_from_memory(uint8_t* dll)
 	}
 
 	//write headers
-	if (!write_virtual_memory(process, module_address, dll, size_of_headers))
-		return false;
+	//if (!write_virtual_memory(process, module_address, dll, size_of_headers))
+	//	return false;
 
-	//WriteProcessMemory(process, module_address, dll, size_of_headers, nullptr);
+	WriteProcessMemory(process, module_address, dll, size_of_headers, nullptr);
 
 	//write sections
 	for (size_t i = 0; i < section_count; i++)

@@ -13,8 +13,8 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd
 	ctx.m_loader_window.create();
 
 	MSG msg;
-	PeekMessageA(&msg, ctx.m_window, 0, 0, PM_REMOVE);
-	while (msg.message != WM_QUIT)
+	PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE);
+	while (msg.message != WM_QUIT && !ctx.m_panic)
 	{
 		if (PeekMessageA(&msg, ctx.m_window, 0, 0, PM_REMOVE))
 		{

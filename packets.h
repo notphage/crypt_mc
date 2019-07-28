@@ -40,7 +40,7 @@ struct c_packet
 struct c_version_packet : public c_packet
 {
 	uint64_t m_version;
-	uint8_t  m_upgrade_required;
+	bool  m_upgrade_required;
 };
 
 #pragma pack(1) 

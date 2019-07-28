@@ -2,6 +2,14 @@
 
 long long __stdcall c_window::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam, int64_t param)
 {
+	if (msg == WM_DESTROY)
+	{
+		ctx.m_panic = true;
+		PostQuitMessage(0);
+
+		return 0; 
+	}
+
 	if (GetActiveWindow() != hwnd)
 	{
 		if (g_input.is_any_input_active())
@@ -13,14 +21,6 @@ long long __stdcall c_window::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam,
 	if (msg == WM_MOUSEMOVE)
 		g_input.capture_mouse_move(param);
 
-	if (msg == WM_DESTROY)
-	{
-		ctx.m_panic = true;
-		PostQuitMessage(0);
-
-		return 0;
-	}
-
 	g_input.register_key_press(static_cast<VirtualKeyEvents_t>(msg), static_cast<VirtualKeys_t>(uparam));
 
 	return DefWindowProcA(hwnd, msg, uparam, param);
@@ -29,7 +29,7 @@ long long __stdcall c_window::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam,
 void c_window::create()
 {
 	// Register the window class.
-	const char CLASS_NAME[] = "Sample Window Class";
+	const char CLASS_NAME[] = " ";
 
 	WNDCLASS wc = { };
 
