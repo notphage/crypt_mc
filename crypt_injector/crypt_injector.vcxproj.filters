@@ -96,7 +96,6 @@
     <ClInclude Include="game_list.h">
       <Filter>SRC\client</Filter>
     </ClInclude>
-    <ClInclude Include="sdk.h" />
     <ClInclude Include="window.h">
       <Filter>SRC\window</Filter>
     </ClInclude>
@@ -116,6 +115,18 @@
       <Filter>SRC\window\gui</Filter>
     </ClInclude>
     <ClInclude Include="util.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lazy_import.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk.h">
+      <Filter>SRC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\asmlib\asmlib.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\asmlib\asmlibran.h">
       <Filter>SRC\utils</Filter>
     </ClInclude>
   </ItemGroup>

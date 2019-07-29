@@ -5,7 +5,7 @@ long long __stdcall c_window::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam,
 	if (msg == WM_DESTROY)
 	{
 		ctx.m_panic = true;
-		PostQuitMessage(0);
+		LI_FN(PostQuitMessage).cached()(0);
 
 		return 0; 
 	}
@@ -37,17 +37,17 @@ void c_window::create()
 	wc.hInstance = ctx.m_instance;
 	wc.lpszClassName = CLASS_NAME;
 
-	RegisterClass(&wc);
+	LI_FN(RegisterClassA).cached()(&wc);
 
-	RECT desk_rect;
+	RECT desk_rect{};
 
 	// Get a handle to the desktop window
-	const HWND desk = GetDesktopWindow();
+	const HWND desk = LI_FN(GetDesktopWindow).cached()();
 
 	// Get the size of screen to the variable desktop
-	GetWindowRect(desk, &desk_rect);
+	LI_FN(GetWindowRect).cached()(desk, &desk_rect);
 
-	HWND hwnd = CreateWindowEx(
+	HWND hwnd = LI_FN(CreateWindowExA).cached()(
 		0,                              // Optional window styles.
 		CLASS_NAME,                     // Window class
 		"",    // Window text
@@ -67,9 +67,9 @@ void c_window::create()
 
 	ctx.m_window = hwnd;
 
-	SetWindowLong(hwnd, GWL_STYLE, 0);  // Without 1 point border = white rectangle 
-	SetWindowPos(hwnd, HWND_TOPMOST, (desk_rect.right / 2) - 160, (desk_rect.bottom / 2) - 120, ctx.m_screen_w, ctx.m_screen_h, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
-	ShowWindow(hwnd, SW_SHOW);
+	LI_FN(SetWindowLongA).cached()(hwnd, GWL_STYLE, 0);  // Without 1 point border = white rectangle 
+	LI_FN(SetWindowPos).cached()(hwnd, HWND_TOPMOST, (desk_rect.right / 2) - 160, (desk_rect.bottom / 2) - 120, ctx.m_screen_w, ctx.m_screen_h, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+	LI_FN(ShowWindow).cached()(hwnd, SW_SHOW);
 
 	ctx.m_renderer = std::make_unique<c_renderer>(8192);
 

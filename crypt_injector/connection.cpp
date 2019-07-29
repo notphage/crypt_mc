@@ -29,7 +29,7 @@ int c_connection::recieve_impl(void* data, size_t size)
 	time_out.tv_usec = 0; //30 Microseconds for Polling
 
 	auto ret = 0;
-	if ((ret = select(m_conn_socket + 1, &read_fds, nullptr, nullptr, &time_out)) <= 0)
+	if ((ret = ::select(m_conn_socket + 1, &read_fds, nullptr, nullptr, &time_out)) <= 0)
 		return -1;
 
 	char* data_ptr = (char*)data;
@@ -58,12 +58,12 @@ bool c_connection::connect()
 		goto cleanup;
 	}
 
-	memset(&hints, 0, sizeof addrinfo);
+	RtlSecureZeroMemory(&hints, sizeof addrinfo);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	if ((retval = getaddrinfo(xors("127.0.0.1"), xors("8123"), &hints, &results)))
+	if ((retval = LI_FN(getaddrinfo).cached()(xors("127.0.0.1"), xors("8123"), &hints, &results)))
 	{
 		//printf("> getaddrinfo failed: %i\n", retval);
 		goto cleanup;
@@ -78,7 +78,7 @@ bool c_connection::connect()
 	addr = results;
 	while (addr)
 	{
-		if ((m_conn_socket = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) == INVALID_SOCKET)
+		if ((m_conn_socket = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) == INVALID_SOCKET)
 		{
 			//printf("> socket failed: %i\n", WSAGetLastError());
 			goto cleanup;
@@ -86,7 +86,7 @@ bool c_connection::connect()
 
 		if ((retval = ::connect(m_conn_socket, addr->ai_addr, (socklen_t)addr->ai_addrlen)) == SOCKET_ERROR)
 		{
-			retval = closesocket(m_conn_socket);
+			retval = LI_FN(closesocket).cached()(m_conn_socket);
 			//if (retval == SOCKET_ERROR)
 				//printf("> closesocket failed: %i\n", WSAGetLastError());
 
@@ -98,7 +98,7 @@ bool c_connection::connect()
 			break;
 	}
 
-	freeaddrinfo(results);
+	LI_FN(freeaddrinfo).cached()(results);
 	results = nullptr;
 
 	if (m_conn_socket == INVALID_SOCKET)
@@ -116,11 +116,11 @@ cleanup:
 	if (m_conn_socket != INVALID_SOCKET)
 	{
 		// No more data to send
-		retval = shutdown(m_conn_socket, SD_BOTH);
+		retval = LI_FN(shutdown).cached()(m_conn_socket, SD_BOTH);
 		//if (retval == SOCKET_ERROR)
 			//printf("> Shutdown failed: %i\n", WSAGetLastError());
 
-		retval = closesocket(m_conn_socket);
+		retval = LI_FN(closesocket).cached()(m_conn_socket);
 		//if (retval == SOCKET_ERROR)
 			//printf("> closesocket failed: %i\n", WSAGetLastError());
 
@@ -129,11 +129,11 @@ cleanup:
 
 	if (results != nullptr)
 	{
-		freeaddrinfo(results);
+		LI_FN(freeaddrinfo).cached()(results);
 		results = nullptr;
 	}
 
-	WSACleanup();
+	LI_FN(WSACleanup).cached()();
 	return false;
 }
 
@@ -144,18 +144,18 @@ void c_connection::disconnect()
 	if (m_conn_socket != INVALID_SOCKET)
 	{
 		// No more data to send
-		retval = shutdown(m_conn_socket, SD_BOTH);
+		retval = LI_FN(shutdown).cached()(m_conn_socket, SD_BOTH);
 		//if (retval == SOCKET_ERROR)
 			//printf("> Shutdown failed: %i\n", WSAGetLastError());
 
-		retval = closesocket(m_conn_socket);
+		retval = LI_FN(closesocket).cached()(m_conn_socket);
 		//if (retval == SOCKET_ERROR)
 			//printf("> closesocket failed: %i\n", WSAGetLastError());
 
 		m_conn_socket = INVALID_SOCKET;
 	}
 
-	WSACleanup();
+	LI_FN(WSACleanup).cached()();
 }
 
 int c_connection::send()

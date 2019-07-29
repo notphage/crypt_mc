@@ -12,8 +12,8 @@ void c_input_manager::capture_mouse_move(long lparam)
 
 void c_input_manager::clear()
 {
-	memset(m_pressed_keys, 0, sizeof(m_pressed_keys));
-	memset(m_mouse_pos, 0, sizeof(m_mouse_pos));
+	A_memset(m_pressed_keys, 0, sizeof(m_pressed_keys));
+	A_memset(m_mouse_pos, 0, sizeof(m_mouse_pos));
 
 	m_scroll_wheel_state = 0;
 	char m_keyboard_char = 0;
@@ -439,7 +439,7 @@ void c_input_manager::press_mouse1()
 	int x, y;
 	get_cursor_pos(x, y);
 
-	SendMessage(ctx.m_window, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(x, y));
+	LI_FN(SendMessageA).cached()(ctx.m_window, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(x, y));
 }
 
 void c_input_manager::release_mouse1()
@@ -447,5 +447,5 @@ void c_input_manager::release_mouse1()
 	int x, y;
 	get_cursor_pos(x, y);
 
-	SendMessage(ctx.m_window, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(x, y));
+	LI_FN(SendMessageA).cached()(ctx.m_window, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(x, y));
 }

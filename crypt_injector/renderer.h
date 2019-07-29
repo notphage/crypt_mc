@@ -183,7 +183,7 @@ public:
 		render_list->batches.back().m_count += N;
 
 		render_list->vertices.resize(std::size(render_list->vertices) + N);
-		std::memcpy(&render_list->vertices[std::size(render_list->vertices) - N], &vertexArr[0], N * sizeof(vertex_t));
+		memcpy(&render_list->vertices[std::size(render_list->vertices) - N], &vertexArr[0], N * sizeof(vertex_t));
 
 		switch (topology)
 		{

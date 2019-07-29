@@ -5,23 +5,23 @@ uint8_t* c_syscall::load_dll(const std::string& name)
 	// we load ntdll from disk, as u cant edit this ( causes bsod unless patchguard is disabled )
 	// could even compare ntdll in process to disk, to find potentially malicious users
 
-	char path[MAX_PATH];
-	GetSystemDirectoryA(path, MAX_PATH);
+	char path[MAX_PATH]{};
+	LI_FN(GetSystemDirectoryA).cached()(path, MAX_PATH);
 
 	std::string dll_path(path);
 	dll_path += name;
 
-	FILE* file;
-	if (fopen_s(&file, dll_path.c_str(), xors("rb")) != 0)
+	FILE* file = nullptr;
+	if (LI_FN(fopen_s).cached()(&file, dll_path.c_str(), xors("rb")) != 0)
 		return nullptr;
 
-	fseek(file, 0, SEEK_END);
-	size_t dll_size = ftell(file);
-	rewind(file);
+	LI_FN(fseek).cached()(file, 0, SEEK_END);
+	size_t dll_size = LI_FN(ftell).cached()(file);
+	LI_FN(rewind).cached()(file);
 
 	uint8_t* dll = new uint8_t[dll_size];
-	fread(dll, dll_size, 1, file);
-	fclose(file);
+	LI_FN(fread).cached()(dll, dll_size, 1, file);
+	LI_FN(fclose).cached()(file);
 
 	return dll;
 }

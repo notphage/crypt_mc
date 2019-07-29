@@ -122,10 +122,23 @@ public:
 	}
 };
 
+// SHOUTS TO DEX
 CLIENT_ID c_inject::find_process()
 {
 	CLIENT_ID pid = {};
-	GetWindowThreadProcessId(FindWindowA(ctx.m_window_class.c_str(), nullptr), (PDWORD)&pid.UniqueProcess);
+	UNICODE_STRING sys_str;
+	UNICODE_STRING sys_window_name{};
+	sys_str.Length = ctx.m_window_class.length();
+	sys_str.MaximumLength = 64;
+	sys_str.Buffer = new wchar_t[64];
+
+	mbstowcs(sys_str.Buffer, ctx.m_window_class.c_str(), ctx.m_window_class.length());
+
+	HWND hwnd = do_syscall<HWND>(ctx.m_syscall.get_idx(fnvc("NtUserFindWindowEx")), nullptr, nullptr, &sys_str, &sys_window_name, 0);
+	if (!hwnd)
+		return pid;
+
+	pid.UniqueProcess = do_syscall<HANDLE>(ctx.m_syscall.get_idx(fnvr("NtUserQueryWindow")), hwnd, 0);
 
 	return pid;
 }
@@ -233,8 +246,8 @@ bool c_inject::inject_from_memory(uint8_t* dll)
 	if (!thread)
 		return false;
 
-	CloseHandle(thread);
-	CloseHandle(process);
+	LI_FN(CloseHandle).cached()(thread);
+	LI_FN(CloseHandle).cached()(process);
 
 	return true;
 }

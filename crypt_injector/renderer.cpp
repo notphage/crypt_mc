@@ -20,7 +20,7 @@ void c_renderer::start()
 	m_d3d = Direct3DCreate9(D3D_SDK_VERSION);
 
 	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory(&d3dpp, sizeof d3dpp);
+	RtlSecureZeroMemory(&d3dpp, sizeof d3dpp);
 
 	d3dpp.Windowed = 1;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -173,7 +173,7 @@ void c_renderer::render(const render_list_t::ptr& render_list)
 		if (vertex_buffer->Lock(0, 0, &data, D3DLOCK_DISCARD) < 0)
 			return;
 	
-		std::memcpy(data, std::data(render_list->vertices), num_vertices * sizeof vertex_t);
+		memcpy(data, std::data(render_list->vertices), num_vertices * sizeof vertex_t);
 		vertex_buffer->Unlock();
 	}
 	
@@ -294,8 +294,6 @@ void c_renderer::draw_filled_rect(const render_list_t::ptr& render_list, const v
 		{ rect.x + rect.z,	rect.y + rect.w, color },
 		{ rect.x,			rect.y + rect.w, color }
 	};
-
-	//m_device->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, v, sizeof vertex_t);
 
 	add_vertices(render_list, v, D3DPT_TRIANGLELIST);
 }

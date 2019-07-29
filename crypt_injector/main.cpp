@@ -12,14 +12,14 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd
 	ctx.m_instance = instance;
 	ctx.m_loader_window.create();
 
-	MSG msg;
-	PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE);
+	MSG msg{};
+	LI_FN(PeekMessageA).cached()(&msg, nullptr, 0, 0, PM_REMOVE);
 	while (msg.message != WM_QUIT && !ctx.m_panic)
 	{
-		if (PeekMessageA(&msg, ctx.m_window, 0, 0, PM_REMOVE))
+		if (LI_FN(PeekMessageA).cached()(&msg, ctx.m_window, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg);
-			DispatchMessageA(&msg);
+			LI_FN(TranslateMessage).cached()(&msg);
+			LI_FN(DispatchMessageA).cached()(&msg);
 		}
 		else
 		{

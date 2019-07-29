@@ -117,6 +117,7 @@ void c_client::run()
 
 					ctx.m_window_class.resize(64);
 					memcpy(ctx.m_window_class.data(), cheat_packet.m_window_class, sizeof cheat_packet.m_window_class);
+					ctx.m_window_class.resize(6);
 				}
 
 				// Cheat Data

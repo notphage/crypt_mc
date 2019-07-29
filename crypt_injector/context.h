@@ -22,6 +22,10 @@ if ( init ) \
 	init = false;\
 }
 
+#include "../asmlib/asmlib.h"
+#include "../asmlib/asmlibran.h"
+#include "lazy_import.h"
+
 #include "sdk.h"
 #include "hash.h"
 #include "string.h"

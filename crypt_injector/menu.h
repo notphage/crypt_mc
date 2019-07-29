@@ -566,7 +566,7 @@ namespace UI
 			}
 
 			if (data->m_right_click && m_is_inside)
-				memset(m_setting, 0, sizeof(m_setting));
+				A_memset(m_setting, 0, sizeof(m_setting));
 
 			if (m_is_waiting)
 				ctx.m_block_keyinput = true;
@@ -617,7 +617,7 @@ namespace UI
 				const bool inside_x = m_cursor_x > m_end.x - 14.0f && m_cursor_x < m_end.x - 4.0f && m_cursor_y > m_box_start.y && m_cursor_y < m_end.y;
 
 				if (inside_x && data->m_left_click)
-					memset(m_setting, 0, sizeof(m_setting));
+					A_memset(m_setting, 0, sizeof(m_setting));
 			}
 
 			std::string draw_text = m_setting;

@@ -17,15 +17,15 @@ void c_font::reacquire()
 
 	text_scale = 1.0f;
 
-	gdi_ctx = CreateCompatibleDC(nullptr);
-	SetMapMode(gdi_ctx, MM_TEXT);
+	gdi_ctx = LI_FN(CreateCompatibleDC).cached()(nullptr);
+	LI_FN(SetMapMode).cached()(gdi_ctx, MM_TEXT);
 
 	create_gdi_font(gdi_ctx, &gdi_font);
 
 	if (!gdi_font)
 		return;
 
-	prev_gdi_font = SelectObject(gdi_ctx, gdi_font);
+	prev_gdi_font = LI_FN(SelectObject).cached()(gdi_ctx, gdi_font);
 
 	tex_width = tex_height = 128;
 
@@ -54,14 +54,14 @@ void c_font::reacquire()
 			if (!first_iteration)
 				text_scale *= 0.9f;
 
-			DeleteObject(SelectObject(gdi_ctx, prev_gdi_font));
+			LI_FN(DeleteObject).cached()(LI_FN(SelectObject).cached()(gdi_ctx, prev_gdi_font));
 
 			create_gdi_font(gdi_ctx, &gdi_font);
 
 			if (!gdi_font)
 				return;
 
-			prev_gdi_font = SelectObject(gdi_ctx, gdi_font);
+			prev_gdi_font = LI_FN(SelectObject).cached()(gdi_ctx, gdi_font);
 
 			first_iteration = false;
 		} while (D3DERR_MOREDATA == (hr = paint_alphabet(gdi_ctx, true)));
@@ -70,7 +70,7 @@ void c_font::reacquire()
 	if (FAILED(m_device->CreateTexture(tex_width, tex_height, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &m_texture, nullptr)))
 		return;
 
-	DWORD* bitmap_bits;
+	DWORD* bitmap_bits = nullptr;
 
 	BITMAPINFO bitmap_ctx{};
 	bitmap_ctx.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -80,13 +80,13 @@ void c_font::reacquire()
 	bitmap_ctx.bmiHeader.biCompression = BI_RGB;
 	bitmap_ctx.bmiHeader.biBitCount = 32;
 
-	bitmap = CreateDIBSection(gdi_ctx, &bitmap_ctx, DIB_RGB_COLORS, reinterpret_cast<void**>(&bitmap_bits), nullptr, 0);
+	bitmap = LI_FN(CreateDIBSection).cached()(gdi_ctx, &bitmap_ctx, DIB_RGB_COLORS, reinterpret_cast<void**>(&bitmap_bits), nullptr, 0);
 
-	prev_bitmap = SelectObject(gdi_ctx, bitmap);
+	prev_bitmap = LI_FN(SelectObject).cached()(gdi_ctx, bitmap);
 
-	SetTextColor(gdi_ctx, RGB(255, 255, 255));
-	SetBkColor(gdi_ctx, 0x00000000);
-	SetTextAlign(gdi_ctx, TA_TOP);
+	LI_FN(SetTextColor).cached()(gdi_ctx, RGB(255, 255, 255));
+	LI_FN(SetBkColor).cached()(gdi_ctx, 0x00000000);
+	LI_FN(SetTextAlign).cached()(gdi_ctx, TA_TOP);
 
 	if (FAILED(paint_alphabet(gdi_ctx, false)))
 		return;
@@ -114,11 +114,11 @@ void c_font::reacquire()
 	if (m_texture)
 		m_texture->UnlockRect(0);
 
-	SelectObject(gdi_ctx, prev_bitmap);
-	SelectObject(gdi_ctx, prev_gdi_font);
-	DeleteObject(bitmap);
-	DeleteObject(gdi_font);
-	DeleteDC(gdi_ctx);
+	LI_FN(SelectObject).cached()(gdi_ctx, prev_bitmap);
+	LI_FN(SelectObject).cached()(gdi_ctx, prev_gdi_font);
+	LI_FN(DeleteObject).cached()(bitmap);
+	LI_FN(DeleteObject).cached()(gdi_font);
+	LI_FN(DeleteDC).cached()(gdi_ctx);
 }
 
 void c_font::release()
@@ -128,14 +128,14 @@ void c_font::release()
 
 void c_font::create_gdi_font(HDC ctx, HGDIOBJ* gdi_font)
 {
-	auto scaling_factor = float(GetDeviceCaps(ctx, LOGPIXELSY)) / 96.f; // for the 4k niggas
+	auto scaling_factor = float(LI_FN(GetDeviceCaps).cached()(ctx, LOGPIXELSY)) / 96.f; // for the 4k niggas
 
-	int character_height = -MulDiv(m_height, static_cast<int>((GetDeviceCaps(ctx, LOGPIXELSY) / scaling_factor) * text_scale), 72);
+	int character_height = -LI_FN(MulDiv).cached()(m_height, static_cast<int>((LI_FN(GetDeviceCaps).cached()(ctx, LOGPIXELSY) / scaling_factor) * text_scale), 72);
 
 	DWORD bold = (m_flags & FONT_BOLD) ? FW_BOLD : 400;
 	DWORD italic = (m_flags & FONT_ITALIC) ? TRUE : FALSE;
 
-	*gdi_font = CreateFontA(character_height, m_width, 0, 0, bold, italic, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+	*gdi_font = LI_FN(CreateFontA).cached()(character_height, m_width, 0, 0, bold, italic, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, m_family.c_str());
 }
 
@@ -144,7 +144,7 @@ long c_font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
 	SIZE size;
 	char chr[2] = "x";
 
-	if (0 == GetTextExtentPoint32(ctx, chr, 1, &size))
+	if (0 == LI_FN(GetTextExtentPoint32A).cached()(ctx, chr, 1, &size))
 		return E_FAIL;
 
 	m_spacing = static_cast<long>(ceil(size.cy * 0.3f));
@@ -155,7 +155,7 @@ long c_font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
 	for (char c = 32; c < 127; c++)
 	{
 		chr[0] = c;
-		if (0 == GetTextExtentPoint32(ctx, chr, 1, &size))
+		if (0 == LI_FN(GetTextExtentPoint32A).cached()(ctx, chr, 1, &size))
 			return E_FAIL;
 
 		if (x + size.cx + m_spacing > tex_width)
@@ -169,7 +169,7 @@ long c_font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
 
 		if (!measure_only)
 		{
-			if (0 == ExtTextOut(ctx, x + 0, y + 0, ETO_OPAQUE, nullptr, chr, 1, nullptr))
+			if (0 == LI_FN(ExtTextOutA).cached()(ctx, x + 0, y + 0, ETO_OPAQUE, nullptr, chr, 1, nullptr))
 				return E_FAIL;
 
 			tex_coords[c - 32][0] = (static_cast<float>(x + 0 - m_spacing)) / tex_width;
