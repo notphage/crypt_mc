@@ -19,6 +19,9 @@ void c_gui::draw_login()
 		password.handle(loader.data(), xors("password"), password_str, true);
 
 		login.handle(loader.data(), xors("login"), []() {
+			client.set_login_info(username_str, fnvr(password_str), 0xFFFFFFFFFFFFFFFF);
+			RtlSecureZeroMemory(password_str, sizeof password_str);
+
 			client.set_stage(connection_stage::STAGE_LOGIN);
 			loader.m_current_stage = PAGE_LANDING;
 			});
@@ -55,7 +58,7 @@ void c_gui::draw_landing()
 	if (ctx.m_selected_cheat != old_cheat && !ctx.m_game_list.empty())
 	{
 		const auto& cheat = ctx.m_game_list.at(ctx.m_selected_cheat);
-		loader_console.insert(cheat.m_name + std::string(": ") + client.game_status_to_string(cheat.m_status) + std::string(" (") + std::to_string(cheat.m_version) + ")", color_t(255, 255, 255));
+		loader_console.insert(cheat.m_name + std::string(xors(": ")) + client.game_status_to_string(cheat.m_status) + std::string(xors(" (")) + std::to_string(cheat.m_version) + xors(")"), color_t(255, 255, 255));
 		old_cheat = ctx.m_selected_cheat;
 	}
 }

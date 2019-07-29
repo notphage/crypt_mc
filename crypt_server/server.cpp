@@ -6,10 +6,12 @@
 #include <unistd.h>    //write
 #include <cmath>
 
+static constexpr size_t thread_num = 200;
+
 c_server::c_server(int16_t port)
-	: m_thread_pool(std::thread::hardware_concurrency()), m_port(port)
+	: m_thread_pool(thread_num), m_port(port)
 {
-	printf("Crypt Server starting up... Initializing with %i threads running on port %i.\n", std::thread::hardware_concurrency(), m_port);
+	printf("Crypt Server starting up... Initializing with %i threads running on port %i.\n", thread_num, m_port);
 
 	struct sockaddr_in server;
 

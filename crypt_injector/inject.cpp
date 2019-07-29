@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <tlhelp32.h>
 #include <ntstatus.h>
+#include <locale>
 
 class c_loader
 {
@@ -79,7 +80,7 @@ public:
 			HMODULE import_module = loadlib((LPCSTR)(base + import_directory->Name));
 
 			if (!import_module)
-				msgbox(nullptr, (LPCSTR)(base + import_directory->Name), "LIB", MB_OK);
+				msgbox(nullptr, (LPCSTR)(base + import_directory->Name), xors("LIB"), MB_OK);
 
 			//bb got dat func in da thunk
 			while (original_first_thunk->u1.AddressOfData)
@@ -91,7 +92,7 @@ public:
 					uintptr_t func_addr = (uintptr_t)get_proc_address(import_module, func_name);
 
 					if (!func_addr)
-						msgbox(nullptr, (LPCSTR)(base + import_directory->Name), "ORD", MB_OK);
+						msgbox(nullptr, (LPCSTR)(base + import_directory->Name), xors("ORD"), MB_OK);
 
 					first_thunk->u1.Function = func_addr;
 				}
@@ -103,7 +104,7 @@ public:
 					uintptr_t func_addr = (uintptr_t)get_proc_address(import_module, func_name);
 
 					if (!func_addr)
-						msgbox(nullptr, (LPCSTR)(base + import_directory->Name), "IBM", MB_OK);
+						msgbox(nullptr, (LPCSTR)(base + import_directory->Name), xors("IBM"), MB_OK);
 
 					first_thunk->u1.Function = func_addr;
 				}
@@ -127,17 +128,6 @@ CLIENT_ID c_inject::find_process()
 	GetWindowThreadProcessId(FindWindowA(ctx.m_window_class.c_str(), nullptr), (PDWORD)&pid.UniqueProcess);
 
 	return pid;
-}
-
-bool c_inject::write_virtual_memory(HANDLE handle, void* addr, void* buf, size_t size)
-{
-	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtProtectVirtualMemory")), handle, &addr, PAGE_EXECUTE_READWRITE, nullptr); status != STATUS_SUCCESS)
-		return false;
-	
-	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), handle, addr, buf, size, nullptr); status != STATUS_SUCCESS)
-		return false;
-
-	return false;
 }
 
 bool c_inject::inject_from_memory(uint8_t* dll)
@@ -185,11 +175,8 @@ bool c_inject::inject_from_memory(uint8_t* dll)
 			return false;
 	}
 
-	//write headers
-	//if (!write_virtual_memory(process, module_address, dll, size_of_headers))
-	//	return false;
-
-	WriteProcessMemory(process, module_address, dll, size_of_headers, nullptr);
+	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), process, module_address, dll, size_of_headers, nullptr); status != STATUS_SUCCESS)
+		return false;
 
 	//write sections
 	for (size_t i = 0; i < section_count; i++)
@@ -198,11 +185,8 @@ bool c_inject::inject_from_memory(uint8_t* dll)
 		uintptr_t raw_data_address = section_header[i].PointerToRawData;
 		uintptr_t raw_data_size = section_header[i].SizeOfRawData;
 
-		//{
-		//	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), process, (void*)virtual_address, &dll[raw_data_address], size_of_image, nullptr); status != STATUS_SUCCESS)
-		//		return false;
-		//}
-		WriteProcessMemory(process, (void*)virtual_address, &dll[raw_data_address], raw_data_size, nullptr);
+		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), process, (void*)virtual_address, &dll[raw_data_address], raw_data_size, nullptr); status != STATUS_SUCCESS)
+			return false;
 	}
 
 	//do da loada
@@ -221,30 +205,33 @@ bool c_inject::inject_from_memory(uint8_t* dll)
 
 	//Allocate code and data
 	{
-		auto data_size = sizeof(c_loader::data_t);
+		uint64_t data_size = sizeof(c_loader::data_t);
 		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), process, &loader_data_address, 0, &data_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); status != STATUS_SUCCESS)
 			return false;
 
 		if (!loader_data_address)
 			return false;
 
-		auto code_size = 0x4000;
-		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), process, &loader_code_address, 0, &data_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); status != STATUS_SUCCESS)
+		uint64_t code_size = 0x4000;
+		if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), process, &loader_code_address, 0, &code_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); status != STATUS_SUCCESS)
 			return false;
 
 		if (!loader_data_address)
 			return false;
 	}
 
-	WriteProcessMemory(process, loader_data_address, &loader_data, sizeof(c_loader::data_t), nullptr);
-	WriteProcessMemory(process, loader_code_address, c_loader::loader_code, 0x4000, nullptr);
-
-	HANDLE thread = CreateRemoteThread(process, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(loader_code_address), loader_data_address, 0, nullptr);
-	if (!thread)
-	{
-		printf("> thread creation failed 0x%X\n", GetLastError());
+	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), process, loader_data_address, &loader_data, sizeof(c_loader::data_t), nullptr); status != STATUS_SUCCESS)
 		return false;
-	}
+
+	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtWriteVirtualMemory")), process, loader_code_address, c_loader::loader_code, 0x4000, nullptr); status != STATUS_SUCCESS)
+		return false;
+
+	HANDLE thread = nullptr;
+	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtCreateThreadEx")), &thread, 0x1FFFFF, 0, process, reinterpret_cast<LPTHREAD_START_ROUTINE>(loader_code_address), loader_data_address, 0, nullptr, nullptr, nullptr, nullptr); status != STATUS_SUCCESS)
+		return false;
+
+	if (!thread)
+		return false;
 
 	CloseHandle(thread);
 	CloseHandle(process);

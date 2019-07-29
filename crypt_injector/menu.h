@@ -76,8 +76,8 @@ namespace UI
 			ctx.m_renderer->draw_gradient_rect({ m_start.x + 70.f, m_start.y + 2.f, 128.f, 4.f }, color_t(234, 10, 30), color_t(187, 10, 30), color_t(234, 10, 30), color_t(187, 10, 30));
 			ctx.m_renderer->draw_gradient_rect({ m_start.x + 198.f, m_start.y + 2.f, 120.f, 4.f }, color_t(187, 10, 30), color_t(234, 10, 30), color_t(187, 10, 30), color_t(234, 10, 30));
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 98, 10 }, "C", color_t(234, 10, 30));
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 125, 10 }, "RYPT", color_t(255, 255, 255));
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 98, 10 }, xors("C"), color_t(234, 10, 30));
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 125, 10 }, xors("RYPT"), color_t(255, 255, 255));
 		}
 
 	public:
@@ -582,7 +582,7 @@ namespace UI
 						if (length > 0)
 							m_setting[length - 1] = 0;
 					}
-					else if (length < buffer_size /*&& UI::text_width( m_setting ) < ( m_bounds.x - 20.f ) */)
+					else if (length < buffer_size)
 					{
 						if (util::is_valid_text(data->m_keyboard_input))
 						{

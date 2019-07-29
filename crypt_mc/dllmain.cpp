@@ -168,8 +168,6 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		//DisableThreadLibraryCalls(instance);
-
 #ifdef TESTBUILD
 		if (AllocConsole())
 		{

@@ -16,13 +16,13 @@ void c_client::run()
 
 			case connection_stage::STAGE_LOGIN:
 			{
-				ctx.m_loader_window.get_gui().insert_text("Connecting...", color_t(255, 255, 255));
+				ctx.m_loader_window.get_gui().insert_text(xors("Connecting..."), color_t(255, 255, 255));
 
 				if (!m_connection.connect())
 				{
 					m_stage = connection_stage::STAGE_INVALID;
-					ctx.m_loader_window.get_gui().insert_text("Couldn't establish a connection.", color_t(255, 0, 0));
-					ctx.m_loader_window.get_gui().insert_text(std::string("Closing in 5 seconds..."), color_t(255, 255, 255));
+					ctx.m_loader_window.get_gui().insert_text(xors("Couldn't establish a connection."), color_t(255, 0, 0));
+					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
 
 					std::this_thread::sleep_for(std::chrono::seconds(5));
 
@@ -30,7 +30,7 @@ void c_client::run()
 					return;
 				}
 
-				ctx.m_loader_window.get_gui().insert_text("Success.", color_t(255, 255, 255));
+				ctx.m_loader_window.get_gui().insert_text(xors("Success."), color_t(255, 255, 255));
 
 				// Version Packet
 				{
@@ -50,23 +50,16 @@ void c_client::run()
 
 					if (version_packet.m_upgrade_required)
 					{
-						ctx.m_loader_window.get_gui().insert_text(std::string("OUTDATED. Required: ") + std::to_string(version_packet.m_version) + std::string(" Current: ") + std::to_string(ctx.m_version), color_t(255, 255, 255));
-						m_stage = connection_stage::STAGE_INVALID;
-
-						ctx.m_loader_window.get_gui().insert_text(std::string("Closing in 5 seconds..."), color_t(255, 255, 255));
-
-						std::this_thread::sleep_for(std::chrono::seconds(5));
-
-						ctx.m_panic = true;
-						return;
+						ctx.m_loader_window.get_gui().insert_text(std::string(xors("Please update the loader")), color_t(255, 255, 255));
+						
+						m_stage = connection_stage::STAGE_CLOSE;
+						break;
 					}
-
-					ctx.m_loader_window.get_gui().insert_text(std::string("UPDATED. Version: ") + std::to_string(ctx.m_version), color_t(255, 255, 255));
 				}
 
 				// Login Packet
 				{
-					c_login_packet login_packet = m_packet_handler.create_login_packet("Yur fucking gay", 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
+					c_login_packet login_packet = m_packet_handler.create_login_packet(m_username.c_str(), m_password, m_hwid);
 
 					m_connection.set_buffer(&login_packet, sizeof login_packet);
 					if (m_connection.send() == SOCKET_ERROR)
@@ -122,8 +115,8 @@ void c_client::run()
 						break;
 					}
 
-					ctx.m_loader_window.get_gui().insert_text(std::string("Class: ") + cheat_packet.m_window_class, color_t(255, 255, 255));
-					ctx.m_window_class = cheat_packet.m_window_class;
+					ctx.m_window_class.resize(64);
+					memcpy(ctx.m_window_class.data(), cheat_packet.m_window_class, sizeof cheat_packet.m_window_class);
 				}
 
 				// Cheat Data
@@ -142,8 +135,8 @@ void c_client::run()
 			case connection_stage::STAGE_CLOSE:
 			{
 				m_connection.disconnect();
-				ctx.m_loader_window.get_gui().insert_text(std::string("Disconnected from server"), color_t(255, 255, 255));
-				ctx.m_loader_window.get_gui().insert_text(std::string("Closing in 5 seconds..."), color_t(255, 255, 255));
+				ctx.m_loader_window.get_gui().insert_text(std::string(xors("Disconnected from server")), color_t(255, 255, 255));
+				ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
 
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 				ctx.m_panic = true;

@@ -64,7 +64,7 @@ struct c_games_packet : public c_packet
 #pragma pack(1) 
 struct c_cheat_packet : public c_packet
 {
-	char	 m_window_class[64];
+	wchar_t	 m_window_class[64];
 	uint64_t m_cheat_key;
 	uint8_t  m_id;
 };
@@ -174,7 +174,7 @@ public:
 		for (auto i = 0; i < 8; i++)
 			p[i] = (uint8_t)(1 + rand() / (RAND_MAX / (255) + 1)); // better randomness than rand() % 255
 
-		memcpy(cheat_packet.m_window_class, window_class.data(), sizeof cheat_packet.m_window_class);
+		memcpy(cheat_packet.m_window_class, window_class.data(), std::min(sizeof cheat_packet.m_window_class, sizeof(window_class.data())));
 		cheat_packet.m_cheat_key = key;
 		cheat_packet.m_id = id;
 	

@@ -58,7 +58,7 @@ namespace detail
 			typename Fourth,
 			typename... Pack
 		>
-			static auto do_call(
+			static __forceinline auto do_call(
 				std::uint32_t idx,
 				First first,
 				Second second,
@@ -81,7 +81,7 @@ namespace detail
 			typename Third = void*,
 			typename Fourth = void*
 		>
-			static auto do_call(
+			static __forceinline auto do_call(
 				std::uint32_t idx,
 				First first = First{},
 				Second second = Second{},
@@ -95,7 +95,7 @@ namespace detail
 }
 
 template<typename Return, typename... Args>
-static inline auto do_syscall(
+static __forceinline auto do_syscall(
 	uint32_t idx,
 	Args... args
 ) -> Return
@@ -108,7 +108,8 @@ class c_syscall
 {
 	std::map<uintptr_t, uint32_t> syscalls;
 
-	uint8_t* load_ntdll();
+	uint8_t* load_dll(const std::string& name);
+	bool scan_dll(uint8_t* dll);
 public:
 	bool init();
 

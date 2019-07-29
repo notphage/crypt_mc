@@ -54,7 +54,7 @@ bool c_connection::connect()
 
 	if ((retval = WSAStartup(MAKEWORD(2, 2), &m_wsa_data)))
 	{
-		printf("> WSAStartup failed: %i\n", retval);
+		//printf("> WSAStartup failed: %i\n", retval);
 		goto cleanup;
 	}
 
@@ -63,15 +63,15 @@ bool c_connection::connect()
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	if ((retval = getaddrinfo("127.0.0.1", "8123", &hints, &results)))
+	if ((retval = getaddrinfo(xors("127.0.0.1"), xors("8123"), &hints, &results)))
 	{
-		printf("> getaddrinfo failed: %i\n", retval);
+		//printf("> getaddrinfo failed: %i\n", retval);
 		goto cleanup;
 	}
 
 	if (!results)
 	{
-		printf("> localhost could not be resolved.\n");
+		//printf("> localhost could not be resolved.\n");
 		goto cleanup;
 	}
 
@@ -80,15 +80,15 @@ bool c_connection::connect()
 	{
 		if ((m_conn_socket = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) == INVALID_SOCKET)
 		{
-			printf("> socket failed: %i\n", WSAGetLastError());
+			//printf("> socket failed: %i\n", WSAGetLastError());
 			goto cleanup;
 		}
 
 		if ((retval = ::connect(m_conn_socket, addr->ai_addr, (socklen_t)addr->ai_addrlen)) == SOCKET_ERROR)
 		{
 			retval = closesocket(m_conn_socket);
-			if (retval == SOCKET_ERROR)
-				printf("> closesocket failed: %i\n", WSAGetLastError());
+			//if (retval == SOCKET_ERROR)
+				//printf("> closesocket failed: %i\n", WSAGetLastError());
 
 			m_conn_socket = INVALID_SOCKET;
 
@@ -103,11 +103,11 @@ bool c_connection::connect()
 
 	if (m_conn_socket == INVALID_SOCKET)
 	{
-		printf("> Unable to establish a connection...\n");
+		//printf("> Unable to establish a connection...\n");
 		goto cleanup;
 	}
 
-	printf("> Connection established...\n");
+	//printf("> Connection established...\n");
 
 	return true;
 
@@ -117,12 +117,12 @@ cleanup:
 	{
 		// No more data to send
 		retval = shutdown(m_conn_socket, SD_BOTH);
-		if (retval == SOCKET_ERROR)
-			printf("> Shutdown failed: %i\n", WSAGetLastError());
+		//if (retval == SOCKET_ERROR)
+			//printf("> Shutdown failed: %i\n", WSAGetLastError());
 
 		retval = closesocket(m_conn_socket);
-		if (retval == SOCKET_ERROR)
-			printf("> closesocket failed: %i\n", WSAGetLastError());
+		//if (retval == SOCKET_ERROR)
+			//printf("> closesocket failed: %i\n", WSAGetLastError());
 
 		m_conn_socket = INVALID_SOCKET;
 	}
@@ -145,12 +145,12 @@ void c_connection::disconnect()
 	{
 		// No more data to send
 		retval = shutdown(m_conn_socket, SD_BOTH);
-		if (retval == SOCKET_ERROR)
-			printf("> Shutdown failed: %i\n", WSAGetLastError());
+		//if (retval == SOCKET_ERROR)
+			//printf("> Shutdown failed: %i\n", WSAGetLastError());
 
 		retval = closesocket(m_conn_socket);
-		if (retval == SOCKET_ERROR)
-			printf("> closesocket failed: %i\n", WSAGetLastError());
+		//if (retval == SOCKET_ERROR)
+			//printf("> closesocket failed: %i\n", WSAGetLastError());
 
 		m_conn_socket = INVALID_SOCKET;
 	}

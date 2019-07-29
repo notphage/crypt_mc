@@ -7,6 +7,9 @@ class c_client
 {
 	std::thread m_connection_thread;
 	std::atomic<connection_stage> m_stage;
+	std::string m_username;
+	uint64_t m_password;
+	uint64_t m_hwid;
 
 	c_connection m_connection;
 	c_packet_handler m_packet_handler;
@@ -66,5 +69,12 @@ public:
 		default:
 			return xors("INVALID");
 		}
+	}
+
+	__forceinline void set_login_info(const std::string& username, uint64_t password, uint64_t hwid)
+	{
+		m_username = username;
+		m_password = password;
+		m_hwid = hwid;
 	}
 };

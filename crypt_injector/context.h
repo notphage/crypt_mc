@@ -1,6 +1,7 @@
 #pragma once
 
 #define NOMINMAX
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <chrono>
 #include <iostream>
@@ -43,6 +44,7 @@ public:
 	bool m_block_keyinput = false;
 	std::vector<uint8_t> m_buffer;
 	std::string m_window_class;
+	std::string m_username;
 
 	float m_frametime = 0.f;
 

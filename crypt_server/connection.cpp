@@ -21,12 +21,24 @@ int c_connection::send_impl(const void* data, size_t size)
 
 int c_connection::recieve_impl(void* data, size_t size)
 {
+	fd_set read_fds;
+	FD_ZERO(&read_fds);
+	FD_SET(m_conn_socket, &read_fds);
+
+	timeval time_out;
+	time_out.tv_sec = 60;
+	time_out.tv_usec = 0; //30 Microseconds for Polling
+
+	auto ret = 0;
+	if ((ret = select(m_conn_socket + 1, &read_fds, nullptr, nullptr, &time_out)) <= 0)
+		return -1;
+
 	char* data_ptr = (char*)data;
 	int32_t bytes_recv = 0;
 
 	while (size > 0)
 	{
-		if ((bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0)) == -1)
+		if ((bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0)) <= 0)
 			return -1;
 
 		data_ptr += bytes_recv;
