@@ -513,38 +513,38 @@ void c_gui::draw()
 
 	switch (menu.m_current_tab)
 	{
-	case TABS_COMBAT:
-	{
-		tab_combat();
-		break;
-	}
-
-	case TABS_PLAYER:
-	{
-		tab_player();
-		break;
-	}
-
-	case TABS_MOVEMENT:
-	{
-		tab_movement();
-		break;
-	}
-
-	case TABS_VISUALS:
-	{
-		tab_visuals();
-		break;
-	}
-
-	case TABS_CONFIG:
-	{
-		tab_config();
-		break;
-	}
-
-	default:
-		break;
+		case TABS_COMBAT:
+		{
+			tab_combat();
+			break;
+		}
+		
+		case TABS_PLAYER:
+		{
+			tab_player();
+			break;
+		}
+		
+		case TABS_MOVEMENT:
+		{
+			tab_movement();
+			break;
+		}
+		
+		case TABS_VISUALS:
+		{
+			tab_visuals();
+			break;
+		}
+		
+		case TABS_CONFIG:
+		{
+			tab_config();
+			break;
+		}
+		
+		default:
+			break;
 	}
 
 	cursor.handle();

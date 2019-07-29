@@ -228,15 +228,6 @@
     <ClInclude Include="font.h">
       <Filter>SRC\render\text</Filter>
     </ClInclude>
-    <ClInclude Include="fontstash.h">
-      <Filter>SRC\render\text</Filter>
-    </ClInclude>
-    <ClInclude Include="glfontstash.h">
-      <Filter>SRC\render\text</Filter>
-    </ClInclude>
-    <ClInclude Include="stb_truetype.h">
-      <Filter>SRC\render\text</Filter>
-    </ClInclude>
     <ClInclude Include="renderer.h">
       <Filter>SRC\render</Filter>
     </ClInclude>

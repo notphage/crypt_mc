@@ -1,6 +1,6 @@
 #include "context.h"
 #include "renderer.h"
-#include "glfontstash.h"
+#include "font.h"
 
 #include <gl/GL.h>
 #pragma comment (lib, "opengl32.lib")
@@ -30,11 +30,6 @@ bool gl_lite_init()
 		return true;
 }
 
-FONScontext* c_renderer::make_font_context() const
-{
-	return glfonsCreate(2048, 8192, FONS_ZERO_TOPLEFT);
-}
-
 render_list_t::ptr c_renderer::make_render_list() const
 {
 	return std::make_unique<render_list_t>(m_max_vertices);
@@ -42,8 +37,10 @@ render_list_t::ptr c_renderer::make_render_list() const
 
 void c_renderer::draw_scene()
 {
-	//anti_rin(
-	//)
+	anti_rin(
+		m_fonts[font_title] = create_font(xors("Segoe UI"), 32);
+		m_fonts[font_normal] = create_font(xors("Segoe UI"), 9);
+	)
 
 	// Backup GL state
 	glGetIntegerv(GL_TEXTURE_BINDING_2D, &m_last_texture);
@@ -151,12 +148,10 @@ void c_renderer::game_end()
 	glPopMatrix();
 }
 
-font_handle_t c_renderer::create_font(const std::string& family, float size)
+font_handle_t c_renderer::create_font(const std::string& family, long size, std::uint8_t flags, int width)
 {
-	auto tmp = std::make_unique<c_font>(this, family, size);
-
-	m_fonts.push_back(std::move(tmp));
-	return font_handle_t{ m_fonts.size() - 1 };
+	fonts.push_back(std::make_unique<c_font>(this, family, size, flags, width));
+	return font_handle_t{ fonts.size() - 1 };
 }
 
 void c_renderer::add_vertex(const render_list_t::ptr& render_list, vertex_t& vertex, size_t topology, size_t tex_id, const vec4& clip_rect)
@@ -395,48 +390,29 @@ void c_renderer::draw_triangle(const render_list_t::ptr& render_list, const vec2
 
 vec2 c_renderer::get_text_extent(const font_handle_t& font, const std::string& text)
 {
-	return m_fonts[font.m_id]->get_text_extent(text);
+	return fonts[font.m_id]->get_text_extent(text);
 }
 
 uint32_t c_renderer::max_characters_to_fit(const font_handle_t& font, const std::string& text, uint32_t max_width)
 {
-	return m_fonts[font.m_id]->max_characters_to_fit(text, max_width);
+	return fonts[font.m_id]->max_characters_to_fit(text, max_width);
 }
 
 void c_renderer::string(const render_list_t::ptr& render_list, const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags)
 {
-	if (font.m_id < 0 || font.m_id >= std::size(m_fonts))
+	if (font.m_id < 0 || font.m_id >= fonts.size())
 		return;
 
-	m_fonts[font.m_id]->draw_text(render_list, pos, text, color, flags);
+	fonts[font.m_id]->draw_text(render_list, pos, text, color, flags);
 }
 
 void c_renderer::string(const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags)
 {
+	if (flags & TEXT_BUDGET_SHADOW)
+		string(m_render_list, font, { pos.x + 1, pos.y + 1 }, text, color_t::black(), flags);
+
 	string(m_render_list, font, pos, text, color, flags);
 }
-
-//float c_renderer::text_width(font_t font, const char* fmt, ...)
-//{
-//	char buffer[256];
-//	va_list args;
-//	va_start(args, fmt);
-//	vsprintf(buffer, fmt, args);
-//	va_end(args);
-//
-//	return fonsTextBounds(ctx.m_font.get_stash(), 0, 0, buffer, nullptr, nullptr);;
-//}
-//
-//void c_renderer::string(font_t font, color_t color, float size, float x, float y, bool centered, const char* fmt, ...)
-//{
-//	char buffer[256];
-//	va_list args;
-//	va_start(args, fmt);
-//	vsprintf(buffer, fmt, args);
-//	va_end(args);
-//
-//	ctx.m_font.draw_text(font, color, size, x, y + 10, centered, buffer);
-//}
 
 batch_t::batch_t(size_t count, size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, (float)ctx.m_screen_w, (float)ctx.m_screen_h })
 	: m_count(count), m_topology(topology), m_tex_id(tex_id), m_clip_rect(clip_rect)

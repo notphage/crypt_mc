@@ -14,7 +14,6 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 
 		ctx.m_renderer = std::make_shared<c_renderer>();
 		ctx.m_renderer->m_render_list = ctx.m_renderer->make_render_list();
-		ctx.m_renderer->m_font_context = ctx.m_renderer->make_font_context();
 		ctx.m_gui = std::make_shared<c_gui>();
 
 		ctx.m_init = true;

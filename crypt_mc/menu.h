@@ -6,16 +6,16 @@
 
 namespace UI
 {
-	void string(color_t, float, float, bool, const char*, ...)
-	{
-
-	}
-
-	float text_width(const char*, ...)
-	{
-		return 0.f;
-	}
-
+	//void string(color_t, float, float, bool, const char*, ...)
+	//{
+	//
+	//}
+	//
+	//uint32_t text_width(const char*, ...)
+	//{
+	//	return 0;
+	//}
+	
 	class c_cursor
 	{
 		int cursor_x{}, cursor_y{};
@@ -142,10 +142,10 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ x, y, w, h }, color_t(1, 1, 1, m_data.m_alpha));
 
 			// draw grey edge
-			ctx.m_renderer->draw_filled_rect({ x + 1.f, y + 1.f, w - 1.f, h - 1.f }, color_t(44, 44, 44, m_data.m_alpha));
+			ctx.m_renderer->draw_filled_rect({ x + 1.f, y + 1.f, w - 2.f, h - 2.f }, color_t(44, 44, 44, m_data.m_alpha));
 
 			// draw inner box
-			ctx.m_renderer->draw_filled_rect({ x + 2.f, y + 2.f, w - 2.f, h - 2.f }, color_t(9, 9, 9, m_data.m_alpha));
+			ctx.m_renderer->draw_filled_rect({ x + 2.f, y + 2.f, w - 4.f, h - 4.f }, color_t(9, 9, 9, m_data.m_alpha));
 		};
 
 	public:
@@ -273,8 +273,8 @@ namespace UI
 			float tab_x = m_pos_setting->x + 10.f + (tab_width + tab_spacing) * 0;
 			float tab_y = m_pos_setting->y + 25.f;
 
-			UI::string(color_t(0, 0, 0, m_data.m_alpha), (tab_x + (tab_width * 0.5f)) + 1.f, (tab_y - 14.f) + 1.f, true, tab.c_str());
-			UI::string(color_t(206, 206, 206, m_data.m_alpha), tab_x + (tab_width * 0.5f), tab_y - 14.f, true, tab.c_str());
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { (tab_x + (tab_width * 0.5f)) + 1.f, (tab_y - 14.f) + 1.f }, tab, color_t(0, 0, 0, m_data.m_alpha));
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { tab_x + (tab_width * 0.5f), tab_y - 14.f }, tab, color_t(206, 206, 206, m_data.m_alpha));
 
 			ctx.m_renderer->draw_filled_rect({ tab_x, tab_y, tab_width, 4.f }, tab_color_selected);
 			ctx.m_renderer->draw_filled_rect({ tab_x, tab_y + 2.f, tab_width, 4.f }, tab_color_shadow);
@@ -322,10 +322,10 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ x, y, w, h }, color_t(1, 1, 1, m_data.m_alpha));
 
 			// draw grey edge
-			ctx.m_renderer->draw_filled_rect({ x + 1.f, y + 1.f, w - 1.f, h - 1.f }, color_t(44, 44, 44, m_data.m_alpha));
+			ctx.m_renderer->draw_filled_rect({ x + 1.f, y + 1.f, w - 2.f, h - 2.f }, color_t(44, 44, 44, m_data.m_alpha));
 
 			// draw inner box
-			ctx.m_renderer->draw_filled_rect({ x + 2.f, y + 2.f, w - 2.f, h - 2.f }, color_t(9, 9, 9, m_data.m_alpha));
+			ctx.m_renderer->draw_filled_rect({ x + 2.f, y + 2.f, w - 4.f, h - 4.f }, color_t(9, 9, 9, m_data.m_alpha));
 		};
 
 		void draw_watermark(float x, float y, float w, float h)
@@ -336,13 +336,13 @@ namespace UI
 			std::string time = xors(__DATE__);
 			std::string watermark = time + xors(" | ") + ctx.m_username;
 
-			float text_w = UI::text_width(watermark.c_str());
+			float text_w = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), watermark).x;
 
 			float text_x = x + w - text_w - 5.f;
 			float text_y = y + h - 16.f;
 
-			UI::string(text_shadow, text_x + 1.f, text_y + 1.f, false, watermark.c_str());
-			UI::string(text_color, text_x, text_y, false, watermark.c_str());
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { text_x + 1.f, text_y + 1.f }, watermark, text_shadow);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { text_x, text_y }, watermark, text_color);
 		};
 
 	public:
@@ -435,16 +435,16 @@ namespace UI
 			ctx.m_renderer->draw_rect({ m_start.x, m_start.y, m_bounds.x, m_bounds.y }, color_t(1, 1, 1, m_data.m_alpha));
 
 			// draw outer light grey box
-			ctx.m_renderer->draw_rect({ m_start.x + 1.f, m_start.y + 1.f, m_bounds.x - 1.f, m_bounds.y - 1.f }, color_t(57, 57, 57, m_data.m_alpha));
+			ctx.m_renderer->draw_rect({ m_start.x + 1.f, m_start.y + 1.f, m_bounds.x - 2.f, m_bounds.y - 2.f }, color_t(57, 57, 57, m_data.m_alpha));
 
 			// draw dark grey box
-			ctx.m_renderer->draw_filled_rect({ m_start.x + 2.f, m_start.y + 2.f, m_bounds.x - 2.f, m_bounds.y - 2.f }, color_t(35, 35, 35, m_data.m_alpha * 0.5f));
+			ctx.m_renderer->draw_filled_rect({ m_start.x + 2.f, m_start.y + 2.f, m_bounds.x - 4.f, m_bounds.y - 4.f }, color_t(35, 35, 35, m_data.m_alpha * 0.5f));
 
 			// draw inner light grey box
-			ctx.m_renderer->draw_rect({ m_start.x + 5.f, m_start.y + 5.f, m_bounds.x - 5.f, m_bounds.y - 5.f }, color_t(57, 57, 57, m_data.m_alpha));
+			ctx.m_renderer->draw_rect({ m_start.x + 5.f, m_start.y + 5.f, m_bounds.x - 10.f, m_bounds.y - 10.f }, color_t(57, 57, 57, m_data.m_alpha));
 
 			// draw main menu background
-			ctx.m_renderer->draw_filled_rect({ m_start.x + 6.f, m_start.y + 6.f, m_bounds.x - 6.f, m_bounds.y - 6.f }, color_t(4, 4, 4, m_data.m_alpha * 0.5f));
+			ctx.m_renderer->draw_filled_rect({ m_start.x + 6.f, m_start.y + 6.f, m_bounds.x - 12.f, m_bounds.y - 12.f }, color_t(4, 4, 4, m_data.m_alpha * 0.5f));
 
 			// draw main box
 			draw_box(m_start.x + 20.f, m_start.y + 40.f, m_window_size.x, m_window_size.y);
@@ -479,8 +479,8 @@ namespace UI
 				float text_x = tab_x + (tab_width * 0.5f);
 				float text_y = tab_y - 14.f;
 
-				UI::string(text_color_shadow, text_x + 1.f, text_y + 1.f, true, tabs.at(i).c_str());
-				UI::string(text_color, text_x, text_y, true, tabs.at(i).c_str());
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { text_x + 1.f, text_y + 1.f }, tabs.at(i), text_color_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { text_x, text_y }, tabs.at(i), text_color);
 
 				ctx.m_renderer->draw_filled_rect({ tab_x, tab_y, tab_width, 4.f }, m_current_tab == i ? tab_color_selected : tab_color);
 				ctx.m_renderer->draw_filled_rect({ tab_x, tab_y + 2.f, tab_width, 4.f }, tab_color_shadow);
@@ -556,7 +556,7 @@ namespace UI
 
 			float width = 211.f;
 
-			float text_width = UI::text_width(m_text);
+			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text);
 
 			// top
 			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
@@ -572,8 +572,8 @@ namespace UI
 
 			if (strlen(m_text) > 0)
 			{
-				UI::string(shadow_color, m_start.x + 10.f + 1.f, m_start.y + 1.f - 6.f, false, m_text);
-				UI::string(text_color, m_start.x + 10.f, m_start.y - 6.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 11.f, m_start.y - 5.f }, m_text, shadow_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 10.f, m_start.y - 6.f }, m_text, text_color);
 
 				// dont leave it around in memory unencrypted
 				memset(m_text, 0, m_text_length);
@@ -594,8 +594,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 20.f + 1.f, m_start.y + 1.f - 3.f, false, m_text);
-				UI::string(text_color, m_start.x + 20.f, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 3.f }, m_text, text_color);
 			}
 		}
 
@@ -628,8 +628,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 20.f + 1.f, m_start.y + 1.f - 3.f, false, m_text);
-				UI::string(text_color, m_start.x + 20.f, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 3.f }, m_text, text_color);
 			}
 
 			// outer edge
@@ -678,7 +678,7 @@ namespace UI
 			// setup coord for next item
 			data->m_y += 15.f;
 
-			float text_width = m_text ? UI::text_width(m_text) : 0.f;
+			float text_width = m_text ? ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x : 0.f;
 
 			m_is_inside = m_cursor_x > m_start.x && m_cursor_x < m_start.x + 20.f + text_width + 5.f && m_cursor_y > m_start.y - 3.f && m_cursor_y < m_end.y + 3.f;
 
@@ -795,14 +795,16 @@ namespace UI
 	public:
 		void draw(c_window_data* data)
 		{
+			color_t text_color(206, 206, 206, data->m_alpha);
+			color_t text_shadow(0, 0, 0, data->m_alpha);
+
 			if (m_text)
 			{
-				const color_t text_color(206, 206, 206, data->m_alpha);
-				const color_t text_shadow(0, 0, 0, data->m_alpha);
-
-				UI::string(text_shadow, m_start.x + 20.f + 1.f, m_start.y + 1.f - 3.f, false, m_text);
-				UI::string(text_color, m_start.x + 20.f, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 3.f }, m_text, text_color);
 			}
+
+			text_color = { 255, 255, 255, data->m_alpha };
 
 			// outer edge
 			ctx.m_renderer->draw_filled_rect({ m_slider_start.x - 1.f, m_slider_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
@@ -827,19 +829,20 @@ namespace UI
 			// plus/minus
 			if (m_min != *m_value)
 			{
-				UI::string(color_t(0, 0, 0, data->m_alpha), m_minus_pos.x + (m_minus_bounds.x * 0.5f) + 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f, true, xors("-"));
-				UI::string(color_t(255, 255, 255, data->m_alpha), m_minus_pos.x + (m_minus_bounds.x * 0.5f), m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f), true, xors("-"));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) + 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f }, xors("-"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f), m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) }, xors("-"), text_color);
 			}
 
 			if (m_max != *m_value)
 			{
-				UI::string(color_t(0, 0, 0, data->m_alpha), m_plus_pos.x + (m_plus_bounds.x * 0.5f) + 1.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f, true, xors("+"));
-				UI::string(color_t(255, 255, 255, data->m_alpha), m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f), true, xors("+"));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) + 1.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
 
 			std::string text_value(std::string(m_formatting) + std::string(m_suffix));
-			UI::string(color_t(0, 0, 0, data->m_alpha), m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f, true, text_value.c_str(), *m_value);
-			UI::string(color_t(255, 255, 255, data->m_alpha), m_slider_start.x + m_slider_pos, m_slider_start.y, true, text_value.c_str(), *m_value);
+
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, std::to_string(*m_value), text_shadow);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, std::to_string(*m_value), text_color);
 		}
 
 		void handle(c_window_data* data, const char* name, float* setting, float min, float max, float step = 1.f, std::string formatting = "%.2f", std::string suffix = "")
@@ -981,14 +984,16 @@ namespace UI
 	public:
 		void draw(c_window_data* data)
 		{
+			color_t text_color(206, 206, 206, data->m_alpha);
+			color_t text_shadow(0, 0, 0, data->m_alpha);
+
 			if (m_text)
 			{
-				const color_t text_color(206, 206, 206, data->m_alpha);
-				const color_t text_shadow(0, 0, 0, data->m_alpha);
-
-				UI::string(text_shadow, m_start.x + 20.f + 1.f, m_start.y + 1.f - 3.f, false, m_text);
-				UI::string(text_color, m_start.x + 20.f, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 3.f }, m_text, text_color);
 			}
+
+			text_color = { 255, 255, 255, data->m_alpha };
 
 			// outer edge
 			ctx.m_renderer->draw_filled_rect({ m_slider_start.x - 1.f, m_slider_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
@@ -1013,19 +1018,19 @@ namespace UI
 			// plus/minus
 			if (m_min != *m_value)
 			{
-				UI::string(color_t(0, 0, 0, data->m_alpha), m_minus_pos.x + (m_minus_bounds.x * 0.5f) + 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f, true, xors("-"));
-				UI::string(color_t(255, 255, 255, data->m_alpha), m_minus_pos.x + (m_minus_bounds.x * 0.5f), m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f), true, xors("-"));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) + 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f }, xors("-"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f), m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) }, xors("-"), text_color);
 			}
 
 			if (m_max != *m_value)
 			{
-				UI::string(color_t(0, 0, 0, data->m_alpha), m_plus_pos.x + (m_plus_bounds.x * 0.5f) + 1.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f, true, xors("+"));
-				UI::string(color_t(255, 255, 255, data->m_alpha), m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f), true, xors("+"));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) + 1.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
 
 			std::string text_value(std::string("%d") + std::string(m_suffix));
-			UI::string(color_t(0, 0, 0, data->m_alpha), m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f, true, text_value.c_str(), *m_value);
-			UI::string(color_t(255, 255, 255, data->m_alpha), m_slider_start.x + m_slider_pos, m_slider_start.y, true, text_value.c_str(), *m_value);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, std::to_string(*m_value), text_shadow);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, std::to_string(*m_value), text_color);
 		}
 
 		void handle(c_window_data* data, const char* name, int* setting, int min, int max, int step = 1, std::string suffix = "")
@@ -1132,8 +1137,10 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ m_start.x - 1.f, m_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_start.x, m_start.y, m_bounds.x, m_bounds.y }, color);
 
+			auto text_color = m_is_inside && data->m_left_click ? data->m_color : color_t(153, 153, 153, data->m_alpha);
+
 			if (m_text)
-				string(m_is_inside && data->m_left_click ? data->m_color : color_t(153, 153, 153, data->m_alpha), m_start.x + m_bounds.x * 0.5f, m_start.y + (m_bounds.y * 0.5f) - 6.0f, true, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + m_bounds.x * 0.5f, m_start.y + (m_bounds.y * 0.5f) - 6.0f }, m_text, text_color);
 		}
 
 		void handle(c_window_data* data, const char* text, const std::function<void()>& function)
@@ -1308,8 +1315,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 1.f, m_start.y + 1.f - 3.f, false, m_text); //supwemacy dont have no shadow
-				UI::string(text_color, m_start.x, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
 			}
 
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
@@ -1317,17 +1324,10 @@ namespace UI
 
 			//supwemacy does m_box_start.y + 4.f, but it looks off (cuz it is off)
 			if (m_is_waiting && !m_key->key)
-				UI::string(data->m_color, m_box_start.x + 10.0f, m_box_start.y + 3.f, false, xors("press key"));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.0f, m_box_start.y + 3.f }, xors("press key"), data->m_color);
 
 			if (m_key->key > KEYS_NONE || m_key->type == kt_always)
 			{
-				/*				const auto key_name = ( std::string( g_input.get_key_name( ( VirtualKeys_t ) m_key->key ) ) + std::string ( xors( ", " ) ) ).c_str( );
-				if ( !m_is_waiting )
-					UI::string( color_t( 153, 153, 153, data->m_alpha ), m_box_start.x + 10.f, m_box_start.y + 3.f, false, key_name );
-				const auto buffer = m_items[m_key->type].c_str( );
-				const float x_pos = UI::text_width( key_name ) + 2.0f;
-				UI::string( !m_type_dropdown ? color_t( 153, 153, 153, data->m_alpha ) : data->m_color, x_pos, m_box_start.y + 3.f, false, buffer );*/
-
 				if (m_key->key > KEYS_NONE)
 				{
 					const auto yeeter = g_input.get_key_name((VirtualKeys_t)m_key->key);
@@ -1338,20 +1338,19 @@ namespace UI
 						alpha = 100;
 
 					if (!m_is_waiting)
-						UI::string(color_t(153, 153, 153, alpha), m_box_start.x + 10.f, m_box_start.y + 3.f, false, yeeter.c_str());
+						ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.0f, m_box_start.y + 3.f }, yeeter, color_t(153, 153, 153, alpha));
 					else
-						UI::string(color_t(data->m_color.r(), data->m_color.g(), data->m_color.b(), alpha), m_box_start.x + 10.f, m_box_start.y + 3.f, false, yeeter.c_str());
+						ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.0f, m_box_start.y + 3.f }, yeeter, color_t(data->m_color.r(), data->m_color.g(), data->m_color.b(), alpha));
 				}
 
+				text_color = !m_type_dropdown ? color_t(153, 153, 153, data->m_alpha) : data->m_color;
+
 				if (m_key->key <= KEYS_NONE && m_key->type == kt_always)
-				{
-					const auto buffer = m_items[m_key->type].c_str();
-					UI::string(!m_type_dropdown ? color_t(153, 153, 153, data->m_alpha) : data->m_color, m_box_start.x + 10.f, m_box_start.y + 3.f, false, buffer);
-				}
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.0f, m_box_start.y + 3.f }, m_items[m_key->type], text_color);
 				else
 				{
-					const auto buffer = m_items[m_key->type].c_str();
-					UI::string(!m_type_dropdown ? color_t(153, 153, 153, data->m_alpha) : data->m_color, m_bounds.x - (UI::text_width(buffer) + 10.0f), m_box_start.y + 3.f, false, buffer);
+					auto buffer_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_items[m_key->type]).x;
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_bounds.x - (buffer_width + 10.0f), m_box_start.y + 3.f }, m_items[m_key->type], text_color);
 				}
 			}
 		}
@@ -1391,7 +1390,7 @@ namespace UI
 				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end)
 					continue;
 
-				UI::string(m_key->type == i ? data->m_color : color_t(153, 153, 153, data->m_alpha), x, y, false, m_items[i].c_str());
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y }, m_items[i], m_key->type == i ? data->m_color : color_t(153, 153, 153, data->m_alpha));
 			}
 		}
 	};
@@ -1518,8 +1517,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 1.f, m_start.y + 1.f - 3.f, false, m_text); //supwemacy dont have no shadow
-				UI::string(text_color, m_start.x, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
 			}
 
 			// outer edge
@@ -1528,7 +1527,8 @@ namespace UI
 			// inner background
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			UI::string(data->m_active ? color_t(153, 153, 153, data->m_alpha) : color_t(92, 92, 92, data->m_alpha), m_box_start.x + 10.f, m_box_start.y + 3.f, false, m_items.at(*m_setting).c_str());
+			text_color = data->m_active ? color_t(153, 153, 153, data->m_alpha) : color_t(92, 92, 92, data->m_alpha);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, m_items.at(*m_setting), text_color);
 
 			// bester arrow
 			const color_t arrow_color(153, 153, 153, data->m_alpha);
@@ -1599,7 +1599,7 @@ namespace UI
 				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end)
 					continue;
 
-				UI::string(*m_setting == start + i ? data->m_color : color_t(153, 153, 153, data->m_alpha), x, y, false, m_items.at(start + i).c_str());
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y }, m_items.at(start + i), *m_setting == start + i ? data->m_color : color_t(153, 153, 153, data->m_alpha));
 			}
 
 			// draw scrollbar
@@ -1705,8 +1705,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 1.f, m_start.y + 1.f - 3.f, false, m_text); //supwemacy dont have no shadow
-				UI::string(text_color, m_start.x, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
 			}
 
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
@@ -1722,7 +1722,7 @@ namespace UI
 
 					const float width_limit = 120.f;
 
-					float new_width = UI::text_width(std::string(items_text + m_items.at(i).m_text).c_str());
+					float new_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), items_text + m_items.at(i).m_text);
 
 					if (new_width > width_limit)
 					{
@@ -1740,7 +1740,8 @@ namespace UI
 			{
 				items_text = "-";
 			}
-			UI::string(color_t(153, 153, 153, data->m_alpha), m_box_start.x + 10.f, m_box_start.y + 3.f, false, items_text.c_str());
+
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, items_text, color_t(153, 153, 153, data->m_alpha));
 
 			// bester arrow
 			const color_t arrow_color(153, 153, 153, data->m_alpha);
@@ -1802,7 +1803,7 @@ namespace UI
 				if (y + (m_item_height * 0.5f) > m_end.y + 2.f + m_dropdown_end)
 					continue;
 
-				UI::string(*m_items.at(i).m_setting ? data->m_color : color_t(153, 153, 153), x, y, false, m_items.at(i).m_text.c_str());
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y }, m_items.at(i).m_text, *m_items.at(i).m_setting ? data->m_color : color_t(153, 153, 153));
 			}
 		}
 	};
@@ -1836,8 +1837,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 20.f + 1.f, m_start.y + 1.f - 3.f, false, m_text);
-				UI::string(text_color, m_start.x + 20.f, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 3.f }, m_text, text_color);
 			}
 
 			// outer edge
@@ -2057,8 +2058,8 @@ namespace UI
 
 			if (m_text)
 			{
-				UI::string(text_shadow, m_start.x + 1.f, m_start.y + 1.f - 3.f, false, m_text); //supwemacy dont have no shadow
-				UI::string(text_color, m_start.x, m_start.y - 3.f, false, m_text);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y - 2.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
 			}
 
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
@@ -2066,7 +2067,7 @@ namespace UI
 
 			if (strlen(m_setting) > 0)
 			{
-				UI::string(color_t(150, 150, 150, data->m_alpha), m_end.x - 12.0f, m_box_start.y + 3.0f, false, "x");
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_end.x - 12.0f, m_box_start.y + 3.0f }, "x", color_t(150, 150, 150, data->m_alpha));
 
 				const bool inside_x = m_cursor_x > m_end.x - 14.0f && m_cursor_x < m_end.x - 4.0f && m_cursor_y > m_box_start.y && m_cursor_y < m_end.y;
 
@@ -2075,14 +2076,16 @@ namespace UI
 			}
 
 			std::string draw_text = m_setting;
+			auto setting_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_setting).x;
+			auto w_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), "W").x;
 
 			const float max_time = 5.f;
 
 			if (m_is_waiting)
 			{
-				if (UI::text_width(m_setting) > (m_bounds.x - 20.f))
+				if (setting_width > (m_bounds.x - 20.f))
 				{
-					int overlapping_chars = ((UI::text_width(m_setting) - (m_bounds.x)) / UI::text_width("W")) + 2;
+					int overlapping_chars = ((setting_width - (m_bounds.x)) / w_width) + 2;
 					draw_text.erase(0, overlapping_chars);
 				}
 
@@ -2093,15 +2096,15 @@ namespace UI
 			{
 				// 1 step closer to skeet polish!?
 				if (strlen(m_setting) < 1)
-					UI::string(color_t(100, 100, 100, data->m_alpha), m_box_start.x + 10.f, m_box_start.y + 3.f, false, xors("..."));
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, xors("..."), color_t(100, 100, 100, data->m_alpha));
 			}
 
-			if ((UI::text_width(m_setting) > (m_bounds.x - 20.f)) && !m_is_waiting)
+			if ((setting_width > (m_bounds.x - 20.f)) && !m_is_waiting)
 			{
 				float temp = 1.5f;
 
 				//amount we "overshoot" the box
-				int overlapping_chars = ((UI::text_width(m_setting) - (m_bounds.x)) / UI::text_width("W")) + 1;
+				int overlapping_chars = ((setting_width - (m_bounds.x)) / w_width) + 1;
 
 				//printf("%d\n", overshot_ammount);
 
@@ -2116,7 +2119,7 @@ namespace UI
 				}
 			}
 
-			UI::string(color_t(153, 153, 153, data->m_alpha), m_box_start.x + 10.f, m_box_start.y + 3.f, false, draw_text.c_str());
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, draw_text, color_t(153, 153, 153, data->m_alpha));
 
 			//m_draw_time += csgo.m_globals()->frametime;
 

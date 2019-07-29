@@ -113,6 +113,14 @@ protected:
 	std::vector<batch_t>	batches;
 };
 
+enum font_t
+{
+	font_title,
+	font_normal,
+
+	font_num
+};
+
 class c_renderer : std::enable_shared_from_this<c_renderer>
 {
 	int32_t m_last_texture;
@@ -123,11 +131,10 @@ class c_renderer : std::enable_shared_from_this<c_renderer>
 
 	static const std::size_t m_max_vertices = 12288;
 
-	std::vector<std::unique_ptr<c_font>> m_fonts;
+	std::vector<std::unique_ptr<c_font>> fonts;
+	font_handle_t m_fonts[font_num];
 
 public:
-	FONScontext* m_font_context = nullptr;
-	FONScontext* make_font_context() const;
 	render_list_t::ptr	m_render_list{ };
 	render_list_t::ptr make_render_list() const;
 
@@ -136,7 +143,12 @@ public:
 	void game_begin();
 	void game_end();
 
-	font_handle_t create_font(const std::string& family, float size);
+	font_handle_t get_font(font_t font)
+	{
+		return m_fonts[font];
+	}
+
+	font_handle_t create_font(const std::string& family, long size, std::uint8_t flags = 0, int width = 0);
 
 	void add_vertex(const render_list_t::ptr& render_list, vertex_t& vertex, size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, 0.f, 0.f });
 	void add_vertex(vertex_t& vertex, size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, 0.f, 0.f });
