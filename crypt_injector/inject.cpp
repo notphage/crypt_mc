@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <tlhelp32.h>
-#include <ntstatus.h>
 #include <locale>
 
 class c_loader

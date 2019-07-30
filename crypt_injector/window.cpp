@@ -81,7 +81,6 @@ void c_window::render()
 	ctx.m_renderer->begin();
 
 	m_gui.draw();
-	//ctx.m_renderer->draw_filled_rect({ 0, 0, 200, 200 }, color_t(255, 255, 255, 100));
 
 	ctx.m_renderer->render();
 	ctx.m_renderer->end();

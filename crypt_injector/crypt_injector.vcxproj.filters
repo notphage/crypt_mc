@@ -35,6 +35,9 @@
     <Filter Include="SRC\injection\syscall">
       <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\hwid">
+      <UniqueIdentifier>{6e27eeb6-c434-4c5d-bd6f-d1d39e7b6398}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,6 +69,9 @@
     </ClCompile>
     <ClCompile Include="syscall.cpp">
       <Filter>SRC\injection\syscall</Filter>
+    </ClCompile>
+    <ClCompile Include="hwid.cpp">
+      <Filter>SRC\hwid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +134,9 @@
     </ClInclude>
     <ClInclude Include="..\asmlib\asmlibran.h">
       <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="hwid.h">
+      <Filter>SRC\hwid</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

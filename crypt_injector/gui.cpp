@@ -19,7 +19,8 @@ void c_gui::draw_login()
 		password.handle(loader.data(), xors("password"), password_str, true);
 
 		login.handle(loader.data(), xors("login"), []() {
-			client.set_login_info(username_str, fnvr(password_str), 0xFFFFFFFFFFFFFFFF);
+			client.set_login_info(username_str, fnvr(password_str), ctx.m_hwid.get_hwid());
+			RtlSecureZeroMemory(username_str, sizeof username_str);
 			RtlSecureZeroMemory(password_str, sizeof password_str);
 
 			client.set_stage(connection_stage::STAGE_LOGIN);
