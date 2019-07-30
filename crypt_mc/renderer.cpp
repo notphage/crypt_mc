@@ -1,6 +1,6 @@
 #include "context.h"
 #include "renderer.h"
-#include "font.h"
+#include "glfontstash.h"
 
 #include <gl/GL.h>
 #pragma comment (lib, "opengl32.lib")
@@ -30,6 +30,11 @@ bool gl_lite_init()
 		return true;
 }
 
+FONScontext* c_renderer::make_font_context() const
+{
+	return glfonsCreate(2048, 8192, FONS_ZERO_TOPLEFT);
+}
+
 render_list_t::ptr c_renderer::make_render_list() const
 {
 	return std::make_unique<render_list_t>(m_max_vertices);
@@ -37,19 +42,12 @@ render_list_t::ptr c_renderer::make_render_list() const
 
 void c_renderer::draw_scene()
 {
-	anti_rin(
-		m_fonts[font_title] = create_font(xors("Segoe UI"), 32);
-		m_fonts[font_normal] = create_font(xors("Segoe UI"), 9);
-	)
-
 	// Backup GL state
 	glGetIntegerv(GL_TEXTURE_BINDING_2D, &m_last_texture);
 	glGetIntegerv(GL_POLYGON_MODE, m_last_polygon_mode);
 	glGetIntegerv(GL_VIEWPORT, m_last_viewport);
 	glGetIntegerv(GL_SCISSOR_BOX, m_last_scissor_box);
 	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT);
-	//glGetIntegerv(GL_CURRENT_PROGRAM, &m_last_program);
-	//cglUseProgram(0);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -114,7 +112,6 @@ void c_renderer::draw_scene()
 	glPolygonMode(GL_BACK, (GLenum)m_last_polygon_mode[1]);
 	glViewport(m_last_viewport[0], m_last_viewport[1], (GLsizei)m_last_viewport[2], (GLsizei)m_last_viewport[3]);
 	glScissor(m_last_scissor_box[0], m_last_scissor_box[1], (GLsizei)m_last_scissor_box[2], (GLsizei)m_last_scissor_box[3]);
-	//cglUseProgram(m_last_program);
 
 	m_render_list->clear();
 }
@@ -148,9 +145,9 @@ void c_renderer::game_end()
 	glPopMatrix();
 }
 
-font_handle_t c_renderer::create_font(const std::string& family, long size, std::uint8_t flags, int width)
+font_handle_t c_renderer::create_font(const std::string& family, long size)
 {
-	fonts.push_back(std::make_unique<c_font>(this, family, size, flags, width));
+	fonts.push_back(std::make_unique<c_font>(this, family, size));
 	return font_handle_t{ fonts.size() - 1 };
 }
 

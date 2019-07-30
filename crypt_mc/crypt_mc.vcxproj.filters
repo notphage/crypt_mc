@@ -118,9 +118,6 @@
     <ClCompile Include="font.cpp">
       <Filter>SRC\render\text</Filter>
     </ClCompile>
-    <ClCompile Include="renderer.cpp">
-      <Filter>SRC\render</Filter>
-    </ClCompile>
     <ClCompile Include="gettime.cpp">
       <Filter>SRC\hooks</Filter>
     </ClCompile>
@@ -183,6 +180,9 @@
     </ClCompile>
     <ClCompile Include="gui.cpp">
       <Filter>SRC\render\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>SRC\render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -329,6 +329,15 @@
     </ClInclude>
     <ClInclude Include="hash.h">
       <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="fontstash.h">
+      <Filter>SRC\render\text</Filter>
+    </ClInclude>
+    <ClInclude Include="glfontstash.h">
+      <Filter>SRC\render\text</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_truetype.h">
+      <Filter>SRC\render\text</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

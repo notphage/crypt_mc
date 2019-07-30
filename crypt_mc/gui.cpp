@@ -109,9 +109,9 @@ void c_gui::tab_combat()
 
 			velocity_on_sprint.handle(menu.data(), xors("on sprint"), &ctx.m_settings.combat_velocity_on_sprint);
 
-			velocity_horizontal.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_velocity_horizontal, 0, 200, 1, xors("%%%%%%%"));
-			velocity_vertical.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_velocity_vertical, 0, 200, 1, xors("%%%%%%%"));
-			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%%%%%%%"));
+			velocity_horizontal.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_velocity_horizontal, 0, 200, 1, xors("%"));
+			velocity_vertical.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_velocity_vertical, 0, 200, 1, xors("%"));
+			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%"));
 			velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay, 0, 8, 1, xors(" ticks"));
 		}
 		velocity_groupbox.end(menu.data());

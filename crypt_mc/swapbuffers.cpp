@@ -14,6 +14,8 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 
 		ctx.m_renderer = std::make_shared<c_renderer>();
 		ctx.m_renderer->m_render_list = ctx.m_renderer->make_render_list();
+		ctx.m_renderer->m_font_context = ctx.m_renderer->make_font_context();
+		ctx.m_renderer->m_fonts[font_normal] = ctx.m_renderer->create_font(xors("tahoma"), 12);
 		ctx.m_gui = std::make_shared<c_gui>();
 
 		ctx.m_init = true;
@@ -30,9 +32,9 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 	//rendering shit goes here
 	{
 		ctx.m_gui->background();
-
+		
 		ctx.m_gui->draw();
-
+		
 		ctx.m_renderer->draw_scene();
 	}
 

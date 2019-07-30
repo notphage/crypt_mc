@@ -476,7 +476,7 @@ namespace UI
 				float tab_x = m_start.x + 20.f + (tab_width + tab_spacing) * i;
 				float tab_y = m_start.y + 30.f;
 
-				float text_x = tab_x + (tab_width * 0.5f);
+				float text_x = tab_x + (tab_width * 0.5f) - 17.f;
 				float text_y = tab_y - 14.f;
 
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { text_x + 1.f, text_y + 1.f }, tabs.at(i), text_color_shadow);
@@ -556,19 +556,20 @@ namespace UI
 
 			float width = 211.f;
 
-			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text);
+			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
 
 			// top
 			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
-			ctx.m_renderer->draw_line({ m_start.x + 12.f + text_width }, { m_start.y, m_start.x + width, m_start.y }, edge_color);
+			ctx.m_renderer->draw_line({ m_start.x + 12.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+
 			// left
 			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_end.x, m_end.y }, edge_color);
 			// right
 			ctx.m_renderer->draw_line({ m_start.x + width, m_start.y }, { m_end.x + width, m_end.y + 1.f }, edge_color);
 			ctx.m_renderer->draw_line({ m_start.x + width + 1.f, m_start.y }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
 			// bottom
-			ctx.m_renderer->draw_line({ m_end.x, m_end.y }, { m_end.x + width + 1.f, m_end.y }, edge_color);
-			ctx.m_renderer->draw_line({ m_end.x, m_end.y + 1.f }, { m_end.x + width + 2.f, m_end.y + 1.f }, shadow_color);
+			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y }, { m_end.x + width, m_end.y }, edge_color);
+			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y + 1.f }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
 
 			if (strlen(m_text) > 0)
 			{
@@ -839,10 +840,11 @@ namespace UI
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
 
-			std::string text_value(std::string(m_formatting) + std::string(m_suffix));
+			char buf[1024];
+			sprintf(buf, "%.2f %s", *m_value, m_suffix);
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, std::to_string(*m_value), text_shadow);
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, std::to_string(*m_value), text_color);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color);
 		}
 
 		void handle(c_window_data* data, const char* name, float* setting, float min, float max, float step = 1.f, std::string formatting = "%.2f", std::string suffix = "")
@@ -1028,9 +1030,14 @@ namespace UI
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
 
-			std::string text_value(std::string("%d") + std::string(m_suffix));
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, std::to_string(*m_value), text_shadow);
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, std::to_string(*m_value), text_color);
+			char buf[1024];
+			if (strlen(m_suffix) > 0)
+				sprintf(buf, "%i %s", *m_value, m_suffix);
+			else
+				sprintf(buf, "%i", *m_value);
+
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color);
 		}
 
 		void handle(c_window_data* data, const char* name, int* setting, int min, int max, int step = 1, std::string suffix = "")
@@ -1138,9 +1145,10 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ m_start.x, m_start.y, m_bounds.x, m_bounds.y }, color);
 
 			auto text_color = m_is_inside && data->m_left_click ? data->m_color : color_t(153, 153, 153, data->m_alpha);
+			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
 
 			if (m_text)
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + m_bounds.x * 0.5f, m_start.y + (m_bounds.y * 0.5f) - 6.0f }, m_text, text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { (m_start.x + (m_bounds.x * 0.5f) - (text_width * 0.5f)), m_start.y + (m_bounds.y * 0.5f) - 6.0f }, m_text, text_color);
 		}
 
 		void handle(c_window_data* data, const char* text, const std::function<void()>& function)
@@ -1350,7 +1358,7 @@ namespace UI
 				else
 				{
 					auto buffer_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_items[m_key->type]).x;
-					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_bounds.x - (buffer_width + 10.0f), m_box_start.y + 3.f }, m_items[m_key->type], text_color);
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_end.x - (buffer_width + 10.0f), m_box_start.y + 3.f }, m_items[m_key->type], text_color);
 				}
 			}
 		}
@@ -1379,15 +1387,15 @@ namespace UI
 			if (m_dropdown_end <= 0.f)
 				return;
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + 2.f + m_dropdown_end }, color_t(0, 0, 0, data->m_alpha));
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 2.f + 1.f, (m_box_end.x) - m_box_start.x, m_bounds.y + 2.f + m_dropdown_end - 1.f }, color_t(36, 36, 36, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 3.f, (m_box_end.x) - m_box_start.x, m_bounds.y + m_dropdown_end - 23.f }, color_t(36, 36, 36, data->m_alpha));
 
 			for (size_t i = 0; i < m_items.size(); i++)
 			{
 				float x = m_box_start.x + 10.f;
 				float y = m_end.y + 3.f + i * 16;
 
-				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end)
+				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end - 2.f)
 					continue;
 
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y }, m_items[i], m_key->type == i ? data->m_color : color_t(153, 153, 153, data->m_alpha));
@@ -1585,8 +1593,8 @@ namespace UI
 			if (m_dropdown_end <= 0.f)
 				return;
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + 2.f + m_dropdown_end }, color_t(0, 0, 0, data->m_alpha));
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 2.f + 1.f, (m_box_end.x) - m_box_start.x, m_bounds.y + 2.f + m_dropdown_end - 1.f }, color_t(36, 36, 36, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 3.f, (m_box_end.x) - m_box_start.x, m_bounds.y + m_dropdown_end - 23.f }, color_t(36, 36, 36, data->m_alpha));
 
 			size_t start = m_max_items ? m_item_offset : 0;
 			size_t count = m_max_items ? m_max_items : m_items.size();
@@ -1596,7 +1604,7 @@ namespace UI
 				float x = m_box_start.x + 10.f;
 				float y = m_end.y + 3.f + i * m_item_height;
 
-				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end)
+				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end - 2.f)
 					continue;
 
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y }, m_items.at(start + i), *m_setting == start + i ? data->m_color : color_t(153, 153, 153, data->m_alpha));
@@ -1722,7 +1730,7 @@ namespace UI
 
 					const float width_limit = 120.f;
 
-					float new_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), items_text + m_items.at(i).m_text);
+					float new_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), items_text + m_items.at(i).m_text).x;
 
 					if (new_width > width_limit)
 					{
@@ -1792,15 +1800,15 @@ namespace UI
 			if (m_dropdown_end <= 0.f)
 				return;
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + 2.f + m_dropdown_end }, color_t(0, 0, 0));
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 2.f + 1.f,(m_box_end.x) - m_box_start.x, m_bounds.y + 2.f + m_dropdown_end - 1.f }, color_t(36, 36, 36));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 3.f, (m_box_end.x) - m_box_start.x, m_bounds.y + m_dropdown_end - 23.f }, color_t(36, 36, 36, data->m_alpha));
 
 			for (size_t i = 0; i < m_items.size(); i++)
 			{
 				float x = m_box_start.x + 10.f;
 				float y = m_end.y + 3.f + i * m_item_height;
 
-				if (y + (m_item_height * 0.5f) > m_end.y + 2.f + m_dropdown_end)
+				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end - 2.f)
 					continue;
 
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y }, m_items.at(i).m_text, *m_items.at(i).m_setting ? data->m_color : color_t(153, 153, 153));

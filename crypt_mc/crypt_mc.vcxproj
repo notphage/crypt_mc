@@ -148,6 +148,7 @@
       </OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -258,6 +259,8 @@
     <ClInclude Include="fmt\ranges.h" />
     <ClInclude Include="fmt\time.h" />
     <ClInclude Include="font.h" />
+    <ClInclude Include="fontstash.h" />
+    <ClInclude Include="glfontstash.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="hde64.h" />
@@ -276,6 +279,7 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="speed.h" />
     <ClInclude Include="sprint.h" />
+    <ClInclude Include="stb_truetype.h" />
     <ClInclude Include="step.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="table64.h" />

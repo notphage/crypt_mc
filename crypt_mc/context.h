@@ -68,7 +68,6 @@ public:
 
 	std::shared_ptr<c_renderer> m_renderer;
 	std::shared_ptr<c_gui> m_gui;
-	std::shared_ptr<c_font> m_font;
 	c_settings m_settings;
 
 	std::vector<std::string> m_cfg_list;
