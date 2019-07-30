@@ -7,7 +7,7 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 {
 	if (ctx.m_ingame)
 	{
-		std::shared_ptr<c_stack_trace> stack_class = std::make_shared<c_stack_trace>();
+		static std::shared_ptr<c_stack_trace> stack_class = std::make_shared<c_stack_trace>();
 		stack_class->instantiate(jni);
 
 		stack_trace stack;
@@ -15,10 +15,10 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 
 		if (stack.valid)
 		{
-			auto mc = ctx.get_game(jni);
+			static auto mc = ctx.get_game(jni);
 
-			auto self = mc->get_player();
-			auto world = mc->get_world();
+			static auto self = mc->get_player();
+			static auto world = mc->get_world();
 
 			if (self && world)
 			{

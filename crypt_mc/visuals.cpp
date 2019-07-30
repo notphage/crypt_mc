@@ -4,9 +4,8 @@
 
 void c_visuals::draw_box_3d(const std::shared_ptr<c_player>& player, const vec3& pos)
 {
-	glPushMatrix();
-
-	glEnable(GL_LINE_SMOOTH);
+	LI_FN(glPushMatrix).cached()();
+	LI_FN(glEnable).cached()(GL_LINE_SMOOTH);
 
 	float horz_space_frac = 1.6f;
 
@@ -17,9 +16,9 @@ void c_visuals::draw_box_3d(const std::shared_ptr<c_player>& player, const vec3&
 	float minz = pos.z - (player->get_width() / 2.f * horz_space_frac);
 	float maxz = minz + (player->get_width() * horz_space_frac);
 
-	glTranslatef(pos.x, pos.y, pos.z);
-	glRotatef(-player->get_yaw(), 0.f, 1.f, 0.f);
-	glTranslatef(-pos.x, -pos.y, -pos.z);
+	LI_FN(glTranslatef).cached()(pos.x, pos.y, pos.z);
+	LI_FN(glRotatef).cached()(-player->get_yaw(), 0.f, 1.f, 0.f);
+	LI_FN(glTranslatef).cached()(-pos.x, -pos.y, -pos.z);
 
 	// Outline
 	{
@@ -172,16 +171,14 @@ void c_visuals::draw_box_3d(const std::shared_ptr<c_player>& player, const vec3&
 	//	                        });
 	}
 
-	glDisable(GL_LINE_SMOOTH);
-
-	glPopMatrix();
+	LI_FN(glDisable).cached()(GL_LINE_SMOOTH);
+	LI_FN(glPopMatrix).cached()();
 }
 
 void c_visuals::draw_box_2d(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& player, const vec3& pos)
 {
-	glPushMatrix();
-	
-	glEnable(GL_LINE_SMOOTH);
+	LI_FN(glPushMatrix).cached()();
+	LI_FN(glEnable).cached()(GL_LINE_SMOOTH);
 	
 	float horz_space_frac = 1.6f;
 	
@@ -194,9 +191,9 @@ void c_visuals::draw_box_2d(const std::shared_ptr<c_game>& mc, const std::shared
 	
 	float z = (maxz + minz) / 2.f;
 	
-	glTranslatef(pos.x, pos.y, pos.z);
-	glRotatef(-mc->get_player_yview(), 0.f, 1.f, 0.f);
-	glTranslatef(-pos.x, -pos.y, -pos.z);
+	LI_FN(glTranslatef).cached()(pos.x, pos.y, pos.z);
+	LI_FN(glRotatef).cached()(-mc->get_player_yview(), 0.f, 1.f, 0.f);
+	LI_FN(glTranslatef).cached()(-pos.x, -pos.y, -pos.z);
 
 	//ctx.m_renderer.vertex3f(ctx.m_settings.visuals_esp_box_color, GL_LINES,
 	//	{
@@ -226,16 +223,14 @@ void c_visuals::draw_box_2d(const std::shared_ptr<c_game>& mc, const std::shared
 	//		});
 	}
 	
-	glDisable(GL_LINE_SMOOTH);
-	
-	glPopMatrix();
+	LI_FN(glDisable).cached()(GL_LINE_SMOOTH);
+	LI_FN(glPopMatrix).cached()();
 }
 
 void c_visuals::draw_snap_lines(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& player, const vec3& pos)
 {
-	glPushMatrix();
-
-	glEnable(GL_LINE_SMOOTH);
+	LI_FN(glPushMatrix).cached()();
+	LI_FN(glEnable).cached()(GL_LINE_SMOOTH);
 
 	mc->set_view_bobbing(false);
 
@@ -245,9 +240,8 @@ void c_visuals::draw_snap_lines(const std::shared_ptr<c_game>& mc, const std::sh
 	//		{pos.x, pos.y, pos.z}
 	//	});
 
-	glDisable(GL_LINE_SMOOTH);
-
-	glPopMatrix();
+	LI_FN(glDisable).cached()(GL_LINE_SMOOTH);
+	LI_FN(glPopMatrix).cached()();
 }
 
 void c_visuals::draw_name_tags(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& player, const vec3& pos)
@@ -267,32 +261,32 @@ void c_visuals::draw_name_tags(const std::shared_ptr<c_game>& mc, const std::sha
 	auto scale = 0.0300000024f;
 	auto height = player->is_sneaking() ? player->get_height() + 0.2f : player->get_height() + 0.5f;
 
-	glPushMatrix();
-	glTranslatef(pos.x, pos.y + height, pos.z);
-	glNormal3f(0.0f, 1.0f, 0.0f);
-	glRotatef(-mc->get_player_yview(), 0.0f, 1.0f, 0.0f);
-	glRotatef(mc->get_player_xview(), 1.0f, 0.0f, 0.0f);
-	glScalef(-scale, -scale, scale);
-	glDepthMask(false);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glEnable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glBegin(GL_QUADS);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	glVertex3d(static_cast<double>(-width - 2), static_cast<double>(-2), 0.0);
-	glVertex3d(static_cast<double>(-width - 2), static_cast<double>(10), 0.0);
-	glVertex3d(static_cast<double>(width + 2), static_cast<double>(10), 0.0);
-	glVertex3d(static_cast<double>(width + 2), static_cast<double>(-2), 0.0);
-	glEnd();
-	glEnable(GL_TEXTURE_2D);
+	LI_FN(glPushMatrix).cached()();
+	LI_FN(glTranslatef).cached()(pos.x, pos.y + height, pos.z);
+	LI_FN(glNormal3f).cached()(0.0f, 1.0f, 0.0f);
+	LI_FN(glRotatef).cached()(-mc->get_player_yview(), 0.0f, 1.0f, 0.0f);
+	LI_FN(glRotatef).cached()(mc->get_player_xview(), 1.0f, 0.0f, 0.0f);
+	LI_FN(glScalef).cached()(-scale, -scale, scale);
+	LI_FN(glDepthMask).cached()(false);
+	LI_FN(glDisable).cached()(GL_DEPTH_TEST);
+	LI_FN(glDisable).cached()(GL_LIGHTING);
+	LI_FN(glEnable).cached()(GL_BLEND);
+	LI_FN(glDisable).cached()(GL_TEXTURE_2D);
+	LI_FN(glBegin).cached()(GL_QUADS);
+	LI_FN(glColor4f).cached()(0.0f, 0.0f, 0.0f, 1.0f);
+	LI_FN(glVertex3d).cached()(static_cast<double>(-width - 2), static_cast<double>(-2), 0.0);
+	LI_FN(glVertex3d).cached()(static_cast<double>(-width - 2), static_cast<double>(10), 0.0);
+	LI_FN(glVertex3d).cached()(static_cast<double>(width + 2), static_cast<double>(10), 0.0);
+	LI_FN(glVertex3d).cached()(static_cast<double>(width + 2), static_cast<double>(-2), 0.0);
+	LI_FN(glEnd).cached()();
+	LI_FN(glEnable).cached()(GL_TEXTURE_2D);
 	mc->draw_string_with_shadow(name_colored, -width, 0, -1);
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(true);
-	glEnable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glPopMatrix();
+	LI_FN(glEnable).cached()(GL_DEPTH_TEST);
+	LI_FN(glDepthMask).cached()(true);
+	LI_FN(glEnable).cached()(GL_LIGHTING);
+	LI_FN(glDisable).cached()(GL_BLEND);
+	LI_FN(glColor4f).cached()(1.0f, 1.0f, 1.0f, 1.0f);
+	LI_FN(glPopMatrix).cached()();
 }
 
 void c_visuals::on_render(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)

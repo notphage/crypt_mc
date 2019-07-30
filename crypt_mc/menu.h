@@ -841,13 +841,13 @@ namespace UI
 			}
 
 			char buf[1024];
-			sprintf(buf, "%.2f %s", *m_value, m_suffix);
+			sprintf(buf, xors("%.2f%s"), *m_value, m_suffix);
 
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow);
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color);
 		}
 
-		void handle(c_window_data* data, const char* name, float* setting, float min, float max, float step = 1.f, std::string formatting = "%.2f", std::string suffix = "")
+		void handle(c_window_data* data, const char* name, float* setting, float min, float max, float step = 1.f, std::string formatting = xors("%.2f"), std::string suffix = "")
 		{
 			g_input.get_cursor_pos(m_cursor_x, m_cursor_y);
 
@@ -1031,10 +1031,7 @@ namespace UI
 			}
 
 			char buf[1024];
-			if (strlen(m_suffix) > 0)
-				sprintf(buf, "%i %s", *m_value, m_suffix);
-			else
-				sprintf(buf, "%i", *m_value);
+			sprintf(buf, xors("%i%s"), *m_value, m_suffix);
 
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow);
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color);

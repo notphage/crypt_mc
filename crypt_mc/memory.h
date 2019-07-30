@@ -200,7 +200,7 @@ namespace memory
 			constexpr const DWORD protect_flags = PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
 
 			MEMORY_BASIC_INFORMATION out;
-			VirtualQuery((void*)p, &out, sizeof out);
+			LI_FN(VirtualQuery).cached()((void*)p, &out, sizeof out);
 
 			return out.Type
 			       && !(out.Protect & (PAGE_GUARD | PAGE_NOACCESS))

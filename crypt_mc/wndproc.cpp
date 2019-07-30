@@ -5,7 +5,7 @@ decltype(hooked::o_wnd_proc) hooked::o_wnd_proc;
 
 long long __stdcall hooked::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam, int64_t param)
 {
-	if (GetActiveWindow() != hwnd)
+	if (LI_FN(GetActiveWindow).cached()() != hwnd)
 	{
 		if (g_input.is_any_input_active())
 			g_input.clear();
@@ -19,7 +19,7 @@ long long __stdcall hooked::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam, i
 	if (msg == WM_SIZE)
 	{
 		RECT rect;
-		GetClientRect(ctx.m_window, &rect);
+		LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
 
 		ctx.m_screen_w = rect.right - rect.left;
 		ctx.m_screen_h = rect.bottom - rect.top;

@@ -1,6 +1,5 @@
 #pragma once
 #include "context.h"
-#include "erase.h"
 
 struct header_t
 {
@@ -11,8 +10,6 @@ struct header_t
 
 static _declspec(noinline) void parse_header(uintptr_t base)
 {
-	//DELETE_START(0);
-
 #ifdef TESTBUILD
 	strncpy_s(ctx.m_username, 32, "SenatorII", 32);
 #else
@@ -29,6 +26,4 @@ static _declspec(noinline) void parse_header(uintptr_t base)
 	// process data from header
 	memcpy(ctx.m_username, temp_header.username, 32);
 #endif
-
-	//DELETE_END(0);
 }

@@ -88,7 +88,7 @@ void c_context::determine_version()
 	{
         typedef jint(__stdcall *get_created_java_vms_proc)(JavaVM**, jsize, jsize*);
 
-        get_created_java_vms_proc fn_get_created_java_vms = (get_created_java_vms_proc)GetProcAddress(GetModuleHandle("jvm.dll"), "JNI_GetCreatedJavaVMs");
+        get_created_java_vms_proc fn_get_created_java_vms = (get_created_java_vms_proc)LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("jvm.dll")), xors("JNI_GetCreatedJavaVMs"));
         fn_get_created_java_vms(&m_jvm, 1, nullptr);
 
         jint err = m_jvm->AttachCurrentThread(reinterpret_cast<void**>(&m_jni), nullptr);
@@ -96,7 +96,10 @@ void c_context::determine_version()
             m_jni = nullptr;
 
 		EnumWindows(enum_windows_proc, 0);
+
+#ifdef TESTBUILD
 		printf(xors(" $> window base: 0x%p\n"), ctx.m_window);
+#endif
 
 		MH_Initialize();
 
@@ -104,13 +107,13 @@ void c_context::determine_version()
 		MH_CreateHook(SwapBuffers, &hooked::swap_buffers, reinterpret_cast<void**>(&hooked::o_swap_buffers));
 		MH_EnableHook(SwapBuffers);
 
-		auto gl_disable = GetProcAddress(GetModuleHandleA(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
-      
+		auto gl_disable = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
+
 		// glDisable
 		MH_CreateHook(gl_disable, &hooked::gldisable, reinterpret_cast<void**>(&hooked::o_gldisable));
 		MH_EnableHook(gl_disable);
 
-		auto get_time = GetProcAddress(GetModuleHandle(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
+		auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
 
 		// getTime
 		MH_CreateHook(get_time, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));

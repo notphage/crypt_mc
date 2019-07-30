@@ -458,7 +458,7 @@ typedef char stbtt__check_size16[sizeof(stbtt_int16) == 2 ? 1 : -1];
 
 #ifndef STBTT_assert
 #include <assert.h>
-#define STBTT_assert(x)    assert(x)
+#define STBTT_assert(x)
 #endif
 
 #ifndef STBTT_strlen

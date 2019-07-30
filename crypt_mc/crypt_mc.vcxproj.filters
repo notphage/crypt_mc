@@ -77,9 +77,6 @@
     <Filter Include="SRC\features\air_control">
       <UniqueIdentifier>{cd6e3e3d-121c-4e49-a551-ea46a0195f4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\render\fmt">
-      <UniqueIdentifier>{6f7e4eed-8138-4dcb-8209-4aa2e50901c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\render\gui">
       <UniqueIdentifier>{b02a333a-0df3-4241-9482-2c69bf8f1690}</UniqueIdentifier>
     </Filter>
@@ -172,12 +169,6 @@
     <ClCompile Include="step.cpp">
       <Filter>SRC\features\step</Filter>
     </ClCompile>
-    <ClCompile Include="fmt\format.cc">
-      <Filter>SRC\render\fmt</Filter>
-    </ClCompile>
-    <ClCompile Include="fmt\posix.cc">
-      <Filter>SRC\render\fmt</Filter>
-    </ClCompile>
     <ClCompile Include="gui.cpp">
       <Filter>SRC\render\gui</Filter>
     </ClCompile>
@@ -203,9 +194,6 @@
     </ClInclude>
     <ClInclude Include="precompiled.h">
       <Filter>SRC</Filter>
-    </ClInclude>
-    <ClInclude Include="erase.h">
-      <Filter>SRC\utils</Filter>
     </ClInclude>
     <ClInclude Include="math.h">
       <Filter>SRC\utils</Filter>
@@ -288,39 +276,6 @@
     <ClInclude Include="step.h">
       <Filter>SRC\features\step</Filter>
     </ClInclude>
-    <ClInclude Include="fmt\chrono.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\color.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\core.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\format.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\format-inl.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\locale.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\ostream.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\posix.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\printf.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\ranges.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\time.h">
-      <Filter>SRC\render\fmt</Filter>
-    </ClInclude>
     <ClInclude Include="gui.h">
       <Filter>SRC\render\gui</Filter>
     </ClInclude>
@@ -339,5 +294,19 @@
     <ClInclude Include="stb_truetype.h">
       <Filter>SRC\render\text</Filter>
     </ClInclude>
+    <ClInclude Include="..\asmlib\asmlib.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\asmlib\asmlibran.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lazy_import.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="syscall_stub.asm">
+      <Filter>SRC</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

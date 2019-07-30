@@ -28,6 +28,7 @@
 
 #include <windows.h>
 #include "buffer.h"
+#include "context.h"
 
 // Size of each memory block. (= page size of VirtualAlloc)
 #define MEMORY_BLOCK_SIZE 0x1000
@@ -79,7 +80,7 @@ VOID UninitializeBuffer(VOID)
 	while (pBlock)
 	{
 		PMEMORY_BLOCK pNext = pBlock->pNext;
-		VirtualFree(pBlock, 0, MEM_RELEASE);
+		LI_FN(VirtualFree).cached()(pBlock, 0, MEM_RELEASE);
 		pBlock = pNext;
 	}
 }
@@ -99,7 +100,7 @@ static LPVOID FindPrevFreeRegion(LPVOID pAddress, LPVOID pMinAddr, DWORD dwAlloc
 	while (tryAddr >= (ULONG_PTR)pMinAddr)
 	{
 		MEMORY_BASIC_INFORMATION mbi;
-		if (VirtualQuery((LPVOID)tryAddr, &mbi, sizeof(mbi)) == 0)
+		if (LI_FN(VirtualQuery).cached()((LPVOID)tryAddr, &mbi, sizeof(mbi)) == 0)
 			break;
 
 		if (mbi.State == MEM_FREE)
@@ -130,7 +131,7 @@ static LPVOID FindNextFreeRegion(LPVOID pAddress, LPVOID pMaxAddr, DWORD dwAlloc
 	while (tryAddr <= (ULONG_PTR)pMaxAddr)
 	{
 		MEMORY_BASIC_INFORMATION mbi;
-		if (VirtualQuery((LPVOID)tryAddr, &mbi, sizeof(mbi)) == 0)
+		if (LI_FN(VirtualQuery).cached()((LPVOID)tryAddr, &mbi, sizeof(mbi)) == 0)
 			break;
 
 		if (mbi.State == MEM_FREE)
@@ -150,13 +151,13 @@ static LPVOID FindNextFreeRegion(LPVOID pAddress, LPVOID pMaxAddr, DWORD dwAlloc
 //-------------------------------------------------------------------------
 static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
 {
-	PMEMORY_BLOCK pBlock;
+	PMEMORY_BLOCK pBlock = nullptr;
 #if defined(_M_X64) || defined(__x86_64__)
 	ULONG_PTR minAddr;
 	ULONG_PTR maxAddr;
 
 	SYSTEM_INFO si;
-	GetSystemInfo(&si);
+	LI_FN(GetSystemInfo).cached()(&si);
 	minAddr = (ULONG_PTR)si.lpMinimumApplicationAddress;
 	maxAddr = (ULONG_PTR)si.lpMaximumApplicationAddress;
 
@@ -194,8 +195,8 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
 			if (pAlloc == NULL)
 				break;
 
-			pBlock = (PMEMORY_BLOCK)VirtualAlloc(
-			                                     pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+			pBlock = (PMEMORY_BLOCK)LI_FN(VirtualAlloc).cached()(pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+
 			if (pBlock != NULL)
 				break;
 		}
@@ -211,8 +212,8 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
 			if (pAlloc == NULL)
 				break;
 
-			pBlock = (PMEMORY_BLOCK)VirtualAlloc(
-			                                     pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+			pBlock = (PMEMORY_BLOCK)LI_FN(VirtualAlloc).cached()(pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+
 			if (pBlock != NULL)
 				break;
 		}
@@ -292,7 +293,7 @@ VOID FreeBuffer(LPVOID pBuffer)
 				else
 					g_pMemoryBlocks = pBlock->pNext;
 
-				VirtualFree(pBlock, 0, MEM_RELEASE);
+				LI_FN(VirtualFree).cached()(pBlock, 0, MEM_RELEASE);
 			}
 
 			break;
@@ -307,7 +308,7 @@ VOID FreeBuffer(LPVOID pBuffer)
 BOOL IsExecutableAddress(LPVOID pAddress)
 {
 	MEMORY_BASIC_INFORMATION mi;
-	VirtualQuery(pAddress, &mi, sizeof(mi));
+	LI_FN(VirtualQuery).cached()(pAddress, &mi, sizeof(mi));
 
 	return (mi.State == MEM_COMMIT && (mi.Protect & PAGE_EXECUTE_FLAGS));
 }

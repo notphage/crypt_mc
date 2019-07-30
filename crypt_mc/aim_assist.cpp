@@ -45,7 +45,7 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	m_last_scale = ctx.m_settings.combat_aim_assist_scale;
 
-	bool mouse_down = GetAsyncKeyState(VK_LBUTTON) < 0;
+	bool mouse_down = LI_FN(GetAsyncKeyState).cached()(VK_LBUTTON) < 0;
 
 	if (!mc->in_game_has_focus() || ctx.m_menu_open)
 		return;

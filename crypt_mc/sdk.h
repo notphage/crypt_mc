@@ -1347,8 +1347,6 @@ struct stack_trace
 class c_stack_trace
 {
 	JNIEnv* jni;
-
-	jclass cls_exception;
 public:
 	void instantiate(JNIEnv*);
 	void get_stack_trace(int, stack_trace&);

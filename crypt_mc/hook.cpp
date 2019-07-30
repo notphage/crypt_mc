@@ -300,7 +300,7 @@ static VOID EnumerateThreads(PFROZEN_THREADS pThreads)
 			}
 			while (Thread32Next(hSnapshot, &te));
 		}
-		CloseHandle(hSnapshot);
+		LI_FN(CloseHandle).cached()(hSnapshot);
 	}
 }
 
@@ -317,12 +317,12 @@ static VOID Freeze(PFROZEN_THREADS pThreads, UINT pos, UINT action)
 		UINT i;
 		for (i = 0; i < pThreads->size; ++i)
 		{
-			HANDLE hThread = OpenThread(THREAD_ACCESS, FALSE, pThreads->pItems[i]);
+			HANDLE hThread = LI_FN(OpenThread).cached()(THREAD_ACCESS, FALSE, pThreads->pItems[i]);
 			if (hThread != NULL)
 			{
-				SuspendThread(hThread);
+				LI_FN(SuspendThread).cached()(hThread);
 				ProcessThreadIPs(hThread, pos, action);
-				CloseHandle(hThread);
+				LI_FN(CloseHandle).cached()(hThread);
 			}
 		}
 	}
@@ -336,11 +336,11 @@ static VOID Unfreeze(PFROZEN_THREADS pThreads)
 		UINT i;
 		for (i = 0; i < pThreads->size; ++i)
 		{
-			HANDLE hThread = OpenThread(THREAD_ACCESS, FALSE, pThreads->pItems[i]);
+			HANDLE hThread = LI_FN(OpenThread).cached()(THREAD_ACCESS, FALSE, pThreads->pItems[i]);
 			if (hThread != NULL)
 			{
-				ResumeThread(hThread);
-				CloseHandle(hThread);
+				LI_FN(ResumeThread).cached()(hThread);
+				LI_FN(CloseHandle).cached()(hThread);
 			}
 		}
 
@@ -362,7 +362,7 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
 		patchSize += sizeof(JMP_REL_SHORT);
 	}
 
-	if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
+	if (!LI_FN(VirtualProtect).cached()(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return MH_ERROR_MEMORY_PROTECT;
 
 	if (enable)
@@ -386,7 +386,7 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
 			memcpy(pPatchTarget, pHook->backup, sizeof(JMP_REL));
 	}
 
-	VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect);
+	LI_FN(VirtualProtect).cached()(pPatchTarget, patchSize, oldProtect, &oldProtect);
 
 	// Just-in-case measure.
 	FlushInstructionCache(GetCurrentProcess(), pPatchTarget, patchSize);
@@ -839,11 +839,11 @@ MH_STATUS WINAPI MH_CreateHookApiEx(
 	HMODULE hModule;
 	LPVOID pTarget;
 
-	hModule = GetModuleHandleW(pszModule);
+	hModule = LI_FN(GetModuleHandleW).cached()(pszModule);
 	if (hModule == NULL)
 		return MH_ERROR_MODULE_NOT_FOUND;
 
-	pTarget = (LPVOID)GetProcAddress(hModule, pszProcName);
+	pTarget = (LPVOID)LI_FN(GetProcAddress).cached()(hModule, pszProcName);
 	if (pTarget == NULL)
 		return MH_ERROR_FUNCTION_NOT_FOUND;
 
@@ -887,5 +887,5 @@ const char* WINAPI MH_StatusToString(MH_STATUS status)
 
 #undef MH_ST2STR
 
-	return "(unknown)";
+	return xors("(unknown)");
 }

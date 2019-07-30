@@ -28,18 +28,6 @@ typedef char GLchar;
 typedef ptrdiff_t GLintptr;
 typedef ptrdiff_t GLsizeiptr;
 
-#define LOADER_GL_LIST \
-    /* ret, name, params */ \
-    GLE(void,      UseProgram,              uint32_t program) \
-	GLE(void,	   GenerateMipmap,			uint32_t texture) \
-    /* end */
-
-#define GLE(ret, name, ...) typedef ret __stdcall name##proc(__VA_ARGS__); extern name##proc * cgl##name;
-LOADER_GL_LIST
-#undef GLE
-
-bool gl_lite_init();
-
 class c_font;
 #include "font.h"
 

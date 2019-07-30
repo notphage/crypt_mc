@@ -1,6 +1,4 @@
 #include "context.h"
-#include <VersionHelpers.h>
-#include "erase.h"
 #include "header.h"
 #include "MinHook.h"
 
@@ -11,8 +9,8 @@ static void __cdecl std::_Xlength_error(const char* error) {}
 
 void unload()
 {
-	auto gl_disable = GetProcAddress(GetModuleHandleA(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
-    auto get_time = GetProcAddress(GetModuleHandle(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime")); 
+	auto gl_disable = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
+    auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
 
 	MH_RemoveHook(SwapBuffers);
 	MH_RemoveHook(gl_disable);
@@ -25,8 +23,6 @@ void unload()
 
 void hack(HINSTANCE bin)
 {
-	//DELETE_START(0);
-
 	// store module base
 	ctx.m_instance = bin;
 
@@ -64,10 +60,10 @@ void hack(HINSTANCE bin)
 	{
 		using namespace std::chrono_literals;
 
-		auto mc = ctx.get_game();
+		static auto mc = ctx.get_game();
 
-		auto self = mc->get_player();
-		auto world = mc->get_world();
+		static auto self = mc->get_player();
+		static auto world = mc->get_world();
 
 		if (self && world)
 		{
@@ -94,11 +90,9 @@ void hack(HINSTANCE bin)
 		}
 	}
 
-	//DELETE_END(0);
-
 	unload();
 
-//#ifdef TESTBUILD
+#ifdef TESTBUILD
 	DWORD unload_time = GetTickCount() + 2000;
 	while (true)
 	{
@@ -114,10 +108,10 @@ void hack(HINSTANCE bin)
 
 		Sleep(100);
 	}
-//#else
-//	// im pro choice so its okay
-//	abort();
-//#endif
+#else
+	// im pro choice so its okay
+	abort();
+#endif
 }
 
 void fuck_skids()
@@ -189,30 +183,11 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 			freopen(xors("CONOUT$"), xors("w"), stdout);
 		}
 #else
-        if (AllocConsole())
-        {
-            hwnd_t con_hwndw{ GetConsoleWindow() };
-            RECT con_bound{ 904 + 219, 420 + 420 + 69 };
-            RECT wndw_rect{};
-
-            SetConsoleTitle(xors("mc"));
-
-            GetWindowRect(con_hwndw, &wndw_rect);
-            MoveWindow(con_hwndw, wndw_rect.left, wndw_rect.top, con_bound.left, con_bound.top, true);
-
-            SetWindowLong(con_hwndw, GWL_STYLE, GetWindowLong(con_hwndw, GWL_STYLE) | WS_BORDER);
-            SetWindowLong(con_hwndw, GWL_EXSTYLE, GetWindowLong(con_hwndw, GWL_EXSTYLE) | WS_EX_LAYERED);
-
-            SetLayeredWindowAttributes(con_hwndw, 0, 230, 2);
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-
-            freopen(xors("CONOUT$"), xors("w"), stdout);
-        }
 		//fuck_skids();
 		// take username and sub days left out of custom header
 #endif
 
-		CreateThread(0, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, 0);
+		LI_FN(CreateThread).cached()(0, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, 0);
 
 		return true;
 	}

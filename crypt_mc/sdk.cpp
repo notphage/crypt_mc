@@ -4,6 +4,7 @@
 struct stack_trace_fields
 {
 	jclass stack_trace_element = nullptr;
+	jclass throwable = nullptr;
 
 	jfieldID fid_method_name = nullptr;
 	jfieldID fid_line_number = nullptr;
@@ -19,17 +20,16 @@ void c_stack_trace::instantiate(JNIEnv* _jni)
 {
 	jni = (_jni) ? _jni : ctx.m_jni;
 
-	cls_exception = jni->FindClass(xors("java/lang/Throwable"));
-
 	static bool init_fields = false;
 
 	if (!init_fields)
 	{
 		stacktracefields.stack_trace_element = (jclass)jni->NewGlobalRef(jni->FindClass(xors("java/lang/StackTraceElement")));
+		stacktracefields.throwable = (jclass)jni->NewGlobalRef(jni->FindClass(xors("java/lang/Throwable")));
 
-		stacktracefields.mid_exception_init = jni->GetMethodID(cls_exception, xors("<init>"), xors("()V"));
-		stacktracefields.mid_get_stack_trace_element = jni->GetMethodID(cls_exception, xors("getStackTraceElement"), xors("(I)Ljava/lang/StackTraceElement;"));
-		stacktracefields.mid_get_stack_trace_depth = jni->GetMethodID(cls_exception, xors("getStackTraceDepth"), xors("()I"));
+		stacktracefields.mid_exception_init = jni->GetMethodID(stacktracefields.throwable, xors("<init>"), xors("()V"));
+		stacktracefields.mid_get_stack_trace_element = jni->GetMethodID(stacktracefields.throwable, xors("getStackTraceElement"), xors("(I)Ljava/lang/StackTraceElement;"));
+		stacktracefields.mid_get_stack_trace_depth = jni->GetMethodID(stacktracefields.throwable, xors("getStackTraceDepth"), xors("()I"));
 
 		stacktracefields.fid_method_name = jni->GetFieldID(stacktracefields.stack_trace_element, xors("methodName"), xors("Ljava/lang/String;"));
 		stacktracefields.fid_line_number = jni->GetFieldID(stacktracefields.stack_trace_element, xors("lineNumber"), xors("I"));
@@ -38,7 +38,7 @@ void c_stack_trace::instantiate(JNIEnv* _jni)
 
 void c_stack_trace::get_stack_trace(int index, stack_trace& stack)
 {
-	jobject obj_exception = jni->NewObject(cls_exception, stacktracefields.mid_exception_init);
+	jobject obj_exception = jni->NewObject(stacktracefields.throwable, stacktracefields.mid_exception_init);
 	jint stack_trace_depth = jni->CallIntMethod(obj_exception, stacktracefields.mid_get_stack_trace_depth);
 
 	if (stack_trace_depth <= index)

@@ -8,6 +8,9 @@
 // fuck exceptions
 #define _HAS_EXCEPTIONS 0
 #define NOMINMAX
+#define STATUS_SUCCESS ((long)0x00000000L)
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
 
 #include <jni.h>
 #include <jvmti.h>
@@ -19,3 +22,4 @@
 #include "gui.h"
 #include "math.h"
 #include "feature.h"
+#include "lazy_import.h"

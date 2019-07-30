@@ -7,7 +7,7 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 {
 	anti_rin(
 		RECT rect;
-		GetClientRect(ctx.m_window, &rect);
+		LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
 
 		ctx.m_screen_w = rect.right - rect.left;
 		ctx.m_screen_h = rect.bottom - rect.top;

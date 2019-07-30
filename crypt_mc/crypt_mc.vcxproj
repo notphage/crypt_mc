@@ -55,9 +55,11 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -83,13 +85,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>c:\hack\</OutDir>
     <IncludePath>$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
-    <LibraryPath>$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\asmlib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>c:\hack\</OutDir>
     <TargetExt>.dll</TargetExt>
     <IncludePath>$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
-    <LibraryPath>$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\asmlib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -143,7 +145,7 @@
       <ForcedIncludeFiles>precompiled.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;jvm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libacof64o.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;jvm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>
       </OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
@@ -171,11 +173,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>
-      </SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <OmitFramePointers>false</OmitFramePointers>
+      <OmitFramePointers>true</OmitFramePointers>
       <PreprocessorDefinitions>PUBLICBUILD;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS; NOMINMAX; _WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
@@ -190,13 +191,15 @@
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>precompiled.h</ForcedIncludeFiles>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AssemblyDebug>false</AssemblyDebug>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;jvm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libacof64o.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;jvm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -207,8 +210,6 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fast_place.cpp" />
     <ClCompile Include="flight.cpp" />
-    <ClCompile Include="fmt\format.cc" />
-    <ClCompile Include="fmt\posix.cc" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="gettime.cpp" />
     <ClCompile Include="gldisable.cpp" />
@@ -238,26 +239,16 @@
     <ClCompile Include="wndproc.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\asmlib\asmlib.h" />
+    <ClInclude Include="..\asmlib\asmlibran.h" />
     <ClInclude Include="aim_assist.h" />
     <ClInclude Include="air_control.h" />
     <ClInclude Include="auto_clicker.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="context.h" />
-    <ClInclude Include="erase.h" />
     <ClInclude Include="fast_place.h" />
     <ClInclude Include="feature.h" />
     <ClInclude Include="flight.h" />
-    <ClInclude Include="fmt\chrono.h" />
-    <ClInclude Include="fmt\color.h" />
-    <ClInclude Include="fmt\core.h" />
-    <ClInclude Include="fmt\format-inl.h" />
-    <ClInclude Include="fmt\format.h" />
-    <ClInclude Include="fmt\locale.h" />
-    <ClInclude Include="fmt\ostream.h" />
-    <ClInclude Include="fmt\posix.h" />
-    <ClInclude Include="fmt\printf.h" />
-    <ClInclude Include="fmt\ranges.h" />
-    <ClInclude Include="fmt\time.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="fontstash.h" />
     <ClInclude Include="glfontstash.h" />
@@ -266,6 +257,7 @@
     <ClInclude Include="hde64.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="lazy_import.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="menu.h" />
@@ -292,5 +284,6 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>
