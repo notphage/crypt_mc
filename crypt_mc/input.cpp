@@ -431,18 +431,18 @@ char c_input_manager::get_pressed_char(VirtualKeys_t* out)
 	return 0;
 }
 
-void c_input_manager::press_mouse1()
+void c_input_manager::press_mouse(bool left)
 {
 	int x, y;
 	get_cursor_pos(x, y);
 
-	LI_FN(PostMessageA).cached()(ctx.m_window, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(x, y));
+	LI_FN(PostMessageA).cached()(ctx.m_window, WM_LBUTTONDOWN, left ? MK_LBUTTON : MK_RBUTTON, MAKELPARAM(x, y));
 }
 
-void c_input_manager::release_mouse1()
+void c_input_manager::release_mouse(bool left)
 {
 	int x, y;
 	get_cursor_pos(x, y);
 
-	LI_FN(PostMessageA).cached()(ctx.m_window, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(x, y));
+	LI_FN(PostMessageA).cached()(ctx.m_window, WM_LBUTTONUP, left ? MK_LBUTTON : MK_RBUTTON, MAKELPARAM(x, y));
 }

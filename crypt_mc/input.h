@@ -186,9 +186,8 @@ public:
 	//returns the first found currently pressed key
 	char get_pressed_char(VirtualKeys_t* pressed_key = nullptr);
 
-	void press_mouse1();
-
-	void release_mouse1();
+	void press_mouse(bool left);
+	void release_mouse(bool left);
 
 	//check if a key is valid
 	__forceinline static bool is_valid_key(VirtualKeys_t key)

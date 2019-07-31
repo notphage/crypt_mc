@@ -3,63 +3,68 @@
 
 void c_speed::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	if (!ctx.m_settings.movement_speed || !valid_keystate(ctx.m_settings.movement_speed_key))
-		return;
+	if (valid_keystate(ctx.m_settings.movement_longjump_key))
+		longjump(self);
+	else if (ctx.m_settings.movement_speed && valid_keystate(ctx.m_settings.movement_speed_key))
+	{
+		if (self->get_strafing() != 0 || self->get_forward() != 0)
+		{
+			switch (ctx.m_settings.movement_speed_mode)
+			{
+			case 0:
+			{
+				bhop(self);
+				break;
+			}
 
-    if (self->get_strafing() != 0 || self->get_forward() != 0)
-    {
-        switch (ctx.m_settings.movement_speed_mode)
-        {
-        case 0:
-        {
-            bhop(self);
-            break;
-        }
+			case 1:
+			{
+				slowhop(self);
+				break;
+			}
 
-        case 1:
-        {
-            slowhop(self);
-            break;
-        }
+			case 2:
+			{
+				minihop(self);
+				break;
+			}
 
-        case 2:
-        {
-            minihop(self);
-            break;
-        }
+			case 3:
+			{
+				yport(self);
+				break;
+			}
 
-        case 3:
-        {
-            yport(self);
-            break;
-        }
+			case 4:
+			{
+				vanilla(self);
+				break;
+			}
 
-        case 4:
-        {
-            vanilla(self);
-            break;
-        }
+			case 5:
+			{
+				glidehop(self);
+				break;
+			}
 
-        case 5:
-        {
-            glidehop(self);
-            break;
-        }
-         
-        case 6:
-        {
-            custom(self);
-            break;
-        }
-        default:
-            break;
-        }
-    }
-    else
-    {
-        self->set_motion_x(0);
-        self->set_motion_z(0);
-    }
+			case 6:
+			{
+				custom(self);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+		else
+		{
+			self->set_motion_x(0);
+			self->set_motion_z(0);
+		}
+	}
+	else if (ctx.m_settings.movement_air_control && valid_keystate(ctx.m_settings.movement_air_control_key))
+		if (!self->is_collided_vertically())
+			set_speed(self, get_base_speed(self));
 }
 
 void c_speed::bhop(std::shared_ptr<c_player> self) const
@@ -71,9 +76,7 @@ void c_speed::bhop(std::shared_ptr<c_player> self) const
         jump(self, 0.42);
     }
     else 
-    {
         set_speed(self, get_base_speed(self) + 0.14);
-    }
 }
 
 void c_speed::slowhop(std::shared_ptr<c_player> self) const
@@ -85,9 +88,7 @@ void c_speed::slowhop(std::shared_ptr<c_player> self) const
         jump(self, 0.42);
     }
     else
-    {
         set_speed(self, get_base_speed(self) + 0.03);
-    }
 }
 
 void c_speed::custom(std::shared_ptr<c_player> self) const
@@ -110,9 +111,7 @@ void c_speed::custom(std::shared_ptr<c_player> self) const
         jump(self, 0.42);
     }
     else
-    {
         set_speed(self, get_base_speed(self) + 0.03);
-    }
 }
 
 
@@ -125,9 +124,7 @@ void c_speed::minihop(std::shared_ptr<c_player> self) const
         jump(self, 0.248);
     }
     else 
-    {
         set_speed(self, get_base_speed(self) + 0.1);
-    }
 }
 
 void c_speed::glidehop(std::shared_ptr<c_player> self) const
@@ -165,26 +162,26 @@ void c_speed::yport(std::shared_ptr<c_player> self) const
 void c_speed::vanilla(std::shared_ptr<c_player> self) const
 {
     if (self->is_collided_vertically())
-    {
         set_speed(self, get_base_speed(self) + 0.15);
-    }
+}
+
+void c_speed::longjump(std::shared_ptr<c_player> self) const
+{
+	if (self->is_collided_vertically())
+	{
+		set_speed(self, get_base_speed(self) + ctx.m_settings.movement_longjump_boost);
+		jump(self, 0.42);
+	}
 }
 
 void c_speed::jump(std::shared_ptr<c_player> self, double height) const
 {
-    if (height == 0.42) 
-    {
-        self->set_motion_y(0.41999998688697815);
-    }
-    else 
-    {
-        self->set_motion_y(height);
-    }
+	(height == 0.42) ? self->set_motion_y(0.41999998688697815) : self->set_motion_y(height);
 }
 
 double c_speed::get_base_speed(std::shared_ptr<c_player> self)
 {
-    double base_speed = 0.2873;
+    double base_speed = 0.283;
 
     //Handle speed potion
     if (self->is_potion_active(1))

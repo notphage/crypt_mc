@@ -60,10 +60,10 @@ void hack(HINSTANCE bin)
 	{
 		using namespace std::chrono_literals;
 
-		static auto mc = ctx.get_game();
+		auto mc = ctx.get_game();
 
-		static auto self = mc->get_player();
-		static auto world = mc->get_world();
+		auto self = mc->get_player();
+		auto world = mc->get_world();
 
 		if (self && world)
 		{

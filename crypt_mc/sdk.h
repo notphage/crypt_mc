@@ -1246,12 +1246,14 @@ public:
     virtual jboolean is_collided_vertically() = 0;
     virtual jboolean is_collided_horizontally() = 0;
     virtual jboolean is_sprinting() = 0;
+	virtual jboolean in_water() = 0;
 
 	virtual jfloat get_width() = 0;
 	virtual jfloat get_height() = 0;
     virtual jfloat get_eye_height() = 0;
     
     virtual jfloat get_health() = 0;
+	virtual jboolean has_armor() = 0;
 
 	virtual jstring get_name() = 0;
 

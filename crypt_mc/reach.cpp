@@ -8,6 +8,9 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	
 	if (ctx.m_settings.combat_reach_on_sprint && !self->is_sprinting())
 		return;
+
+	if (ctx.m_settings.combat_reach_disable_in_water && self->in_water())
+		return;
 	
 	std::shared_ptr<c_player> target_entity = nullptr;
 	
@@ -50,8 +53,11 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 
 	    if (abs(yaw_change) < scaled)
 	    {
-	        target_entity = player;
-	        target_distance = distance;
+			if (ctx.m_settings.combat_reach_y_check && fabs(player->origin_y() - self->origin_y()) > .33f)
+				continue;
+
+			target_entity = player;
+			target_distance = distance;
 	    }
 	}
 

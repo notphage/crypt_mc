@@ -10,6 +10,8 @@ class c_speed : public c_feature
     void yport(std::shared_ptr<c_player> self) const;
     void vanilla(std::shared_ptr<c_player> self) const;
 
+	void longjump(std::shared_ptr<c_player> self) const;
+
     void jump(std::shared_ptr<c_player> self, double height) const;
 
 	void set_speed(std::shared_ptr<c_player> self, float speed) const;

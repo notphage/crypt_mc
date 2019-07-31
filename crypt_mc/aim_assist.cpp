@@ -70,10 +70,13 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	auto determine_target = [&](const std::shared_ptr<c_player>& player) -> bool
 	{
-		if (!player || !player->player_instance /*|| player->is_dead()*/ || self->is_same(player))
+		if (!player || !player->player_instance || player->is_dead() || self->is_same(player))
 			return false;
 
 		if (!ctx.m_settings.combat_aim_assist_invisibles && player->is_invisible())
+			return false;
+
+		if (!ctx.m_settings.combat_aim_assist_nakeds && !player->has_armor())
 			return false;
 
 		pitch = self->get_pitch();

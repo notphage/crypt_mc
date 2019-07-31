@@ -204,7 +204,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aim_assist.cpp" />
-    <ClCompile Include="air_control.cpp" />
+    <ClCompile Include="anti_afk.cpp" />
     <ClCompile Include="auto_clicker.cpp" />
     <ClCompile Include="buffer.cpp" />
     <ClCompile Include="dllmain.cpp" />
@@ -242,7 +242,7 @@
     <ClInclude Include="..\asmlib\asmlib.h" />
     <ClInclude Include="..\asmlib\asmlibran.h" />
     <ClInclude Include="aim_assist.h" />
-    <ClInclude Include="air_control.h" />
+    <ClInclude Include="anti_afk.h" />
     <ClInclude Include="auto_clicker.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="context.h" />

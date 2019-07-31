@@ -24,6 +24,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 
 	if (!ctx.m_settings.combat_auto_clicker_inventory && in_inventory)
 		return;
+
 	
 	if (!in_inventory && ctx.m_settings.combat_auto_clicker_weapons_only && !has_weapon)
 		return;
@@ -53,12 +54,12 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 
 		if (left_click && ((clock() - last_click) > util::random(current_delay / 2, current_delay / 2 + current_delay / 18)))
 		{
-			g_input.press_mouse1();
+			g_input.press_mouse(true);
 			left_click = false;
 		}
 		else if (!left_click && clock() - last_click > current_delay)
 		{
-			g_input.release_mouse1();
+			g_input.release_mouse(true);
 
 			left_click = true;
 			current_delay = util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1);

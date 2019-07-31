@@ -25,15 +25,13 @@ void c_gui::background()
 
 void c_gui::tab_combat()
 {
-	static UI::c_groupbox auto_clicker_groupbox;
-	static UI::c_checkbox auto_clicker;
+	static UI::c_enable_groupbox auto_clicker_groupbox;
 	static UI::c_key_bind auto_clicker_key;
 	static UI::c_slider auto_clicker_min_cps;
 	static UI::c_slider auto_clicker_max_cps;
 	static UI::c_multi_dropdown auto_clicker_conditions;
 
-	static UI::c_groupbox aim_assist_groupbox;
-	static UI::c_checkbox aim_assist;
+	static UI::c_enable_groupbox aim_assist_groupbox;
 	static UI::c_key_bind aim_assist_key;
 	static UI::c_slider aim_assist_fov;
 	static UI::c_float_slider aim_assist_v_speed;
@@ -42,36 +40,24 @@ void c_gui::tab_combat()
 	static UI::c_float_slider aim_assist_distance;
 	static UI::c_multi_dropdown aim_assist_conditions;
 
-	static UI::c_groupbox velocity_groupbox;
-	static UI::c_checkbox velocity;
-	static UI::c_key_bind velocity_key;
-	static UI::c_checkbox velocity_on_sprint;
+	static UI::c_enable_groupbox velocity_groupbox;
+	static UI::c_key_bind velocity_key;;
 	static UI::c_slider velocity_horizontal;
 	static UI::c_slider velocity_vertical;
 	static UI::c_slider velocity_chance;
 	static UI::c_slider velocity_delay;
+	static UI::c_multi_dropdown velocity_conditions;
 
-	static UI::c_groupbox throwpot_groupbox;
-	static UI::c_checkbox throwpot;
-	static UI::c_key_bind throwpot_key;
-	static UI::c_slider throwpot_delay;
-	static UI::c_slider throwpot_health;
-	static UI::c_multi_dropdown throwpot_conditions;
-
-	static UI::c_groupbox reach_groupbox;
-	static UI::c_checkbox reach;
+	static UI::c_enable_groupbox reach_groupbox;
 	static UI::c_key_bind reach_key;
-	static UI::c_checkbox reach_on_sprint;
 	static UI::c_float_slider reach_distance_min;
 	static UI::c_float_slider reach_distance_max;
-
+	static UI::c_multi_dropdown reach_conditions;
 
 	menu.column_left();
 	{
 		auto_clicker_groupbox.start(menu.data(), xors("auto clicker"));
 		{
-			auto_clicker.handle(menu.data(), xors("auto clicker"), &ctx.m_settings.combat_auto_clicker);
-
 			if (ctx.m_settings.combat_auto_clicker)
 				auto_clicker_key.handle(menu.data(), "", &ctx.m_settings.combat_auto_clicker_key, keytype_t::kt_all);
 
@@ -84,50 +70,34 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")}
 				});
 		}
-		auto_clicker_groupbox.end(menu.data());
+		auto_clicker_groupbox.end(menu.data(), &ctx.m_settings.combat_auto_clicker);
 
 		reach_groupbox.start(menu.data(), xors("reach"));
 		{
-			reach.handle(menu.data(), xors("reach"), &ctx.m_settings.combat_reach);
-
 			if (ctx.m_settings.combat_reach)
 				reach_key.handle(menu.data(), "", &ctx.m_settings.combat_reach_key, keytype_t::kt_all);
 
-			reach_on_sprint.handle(menu.data(), xors("on sprint"), &ctx.m_settings.combat_reach_on_sprint);
-
 			reach_distance_min.handle(menu.data(), xors("min"), &ctx.m_settings.combat_reach_distance_min, 3.f, 5.99f, 0.1f, xors("%.2f"));
 			reach_distance_max.handle(menu.data(), xors("max"), &ctx.m_settings.combat_reach_distance_max, ctx.m_settings.combat_reach_distance_min, 6.f, 0.1f, xors("%.2f"));
+			reach_conditions.handle(menu.data(), xors("conditions"),
+				{
+					{&ctx.m_settings.combat_reach_on_sprint, xors("on sprint")},
+					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
+					{&ctx.m_settings.combat_reach_y_check, xors("y check")}
+				});
 		}
-		reach_groupbox.end(menu.data());
-
-		velocity_groupbox.start(menu.data(), xors("velocity"));
-		{
-			velocity.handle(menu.data(), xors("velocity"), &ctx.m_settings.combat_velocity);
-
-			if (ctx.m_settings.combat_velocity)
-				velocity_key.handle(menu.data(), "", &ctx.m_settings.combat_velocity_key, keytype_t::kt_all);
-
-			velocity_on_sprint.handle(menu.data(), xors("on sprint"), &ctx.m_settings.combat_velocity_on_sprint);
-
-			velocity_horizontal.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_velocity_horizontal, 0, 200, 1, xors("%"));
-			velocity_vertical.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_velocity_vertical, 0, 200, 1, xors("%"));
-			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%"));
-			velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay, 0, 8, 1, xors(" ticks"));
-		}
-		velocity_groupbox.end(menu.data());
+		reach_groupbox.end(menu.data(), &ctx.m_settings.combat_reach);
 
 		auto_clicker_key.dropdown(menu.data());
 		auto_clicker_conditions.dropdown(menu.data());
-		velocity_key.dropdown(menu.data());
 		reach_key.dropdown(menu.data());
+		reach_conditions.dropdown(menu.data());
 	}
 
 	menu.column_right();
 	{
 		aim_assist_groupbox.start(menu.data(), xors("aim assist"));
 		{
-			aim_assist.handle(menu.data(), xors("aim assist"), &ctx.m_settings.combat_aim_assist);
-
 			if (ctx.m_settings.combat_aim_assist)
 				aim_assist_key.handle(menu.data(), "", &ctx.m_settings.combat_aim_assist_key, keytype_t::kt_all);
 
@@ -145,15 +115,57 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_aim_assist_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_aim_assist_vertical, xors("vertical")},
 					{&ctx.m_settings.combat_aim_assist_sticky, xors("sticky")},
-					{&ctx.m_settings.combat_aim_assist_invisibles, xors("invisibles")}
+					{&ctx.m_settings.combat_aim_assist_invisibles, xors("invisibles")},
+					{&ctx.m_settings.combat_aim_assist_nakeds, xors("nakeds")}
 				});
 		}
-		aim_assist_groupbox.end(menu.data());
+		aim_assist_groupbox.end(menu.data(), &ctx.m_settings.combat_aim_assist);
 
+		velocity_groupbox.start(menu.data(), xors("velocity"));
+		{
+			if (ctx.m_settings.combat_velocity)
+				velocity_key.handle(menu.data(), "", &ctx.m_settings.combat_velocity_key, keytype_t::kt_all);
+
+			velocity_horizontal.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_velocity_horizontal, 0, 200, 1, xors("%"));
+			velocity_vertical.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_velocity_vertical, 0, 200, 1, xors("%"));
+			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%"));
+
+			if (ctx.m_settings.combat_velocity_delay)
+				velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay_ticks, 0, 8, 1, xors(" ticks"));
+
+			velocity_conditions.handle(menu.data(), xors("conditions"),
+				{
+					{&ctx.m_settings.combat_velocity_on_sprint, xors("on sprint")},
+					{&ctx.m_settings.combat_velocity_delay, xors("delay")}
+				});
+		}
+		velocity_groupbox.end(menu.data(), &ctx.m_settings.combat_velocity);
+
+		aim_assist_key.dropdown(menu.data());
+		aim_assist_conditions.dropdown(menu.data());
+		velocity_key.dropdown(menu.data());
+		velocity_conditions.dropdown(menu.data());
+	}
+}
+
+void c_gui::tab_player()
+{
+	static UI::c_enable_groupbox throwpot_groupbox;
+	static UI::c_key_bind throwpot_key;
+	static UI::c_slider throwpot_delay;
+	static UI::c_slider throwpot_health;
+	static UI::c_multi_dropdown throwpot_conditions;
+
+	static UI::c_enable_groupbox fast_place_groupbox;
+	static UI::c_key_bind fast_place_key;
+
+	static UI::c_groupbox afk_groupbox;
+	static UI::c_checkbox afk;
+
+	menu.column_left();
+	{
 		throwpot_groupbox.start(menu.data(), xors("throwpot"));
 		{
-			throwpot.handle(menu.data(), xors("throwpot"), &ctx.m_settings.combat_throwpot);
-
 			throwpot_key.handle(menu.data(), "", &ctx.m_settings.combat_throwpot_key, keytype_t::kt_hold);
 			throwpot_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_throwpot_delay, 1, 200, 1, xors("ms"));
 			throwpot_health.handle(menu.data(), xors("health"), &ctx.m_settings.combat_throwpot_health, 1, 20, 1, xors("hearts"));
@@ -164,40 +176,27 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_throwpot_soup, xors("soup")}
 				});
 		}
-		throwpot_groupbox.end(menu.data());
+		throwpot_groupbox.end(menu.data(), &ctx.m_settings.combat_throwpot);
 
-		aim_assist_key.dropdown(menu.data());
-		aim_assist_conditions.dropdown(menu.data());
 		throwpot_key.dropdown(menu.data());
 		throwpot_conditions.dropdown(menu.data());
-	}
-}
-
-void c_gui::tab_player()
-{
-	static UI::c_groupbox fast_place_groupbox;
-	static UI::c_checkbox fast_place;
-	static UI::c_key_bind fast_place_key;
-	static UI::c_slider fast_place_delay;
-
-	menu.column_left();
-	{
-		fast_place_groupbox.start(menu.data(), xors("fast place"));
-		{
-			fast_place.handle(menu.data(), xors("fast place"), &ctx.m_settings.player_fast_place);
-
-			if (ctx.m_settings.player_fast_place)
-				fast_place_key.handle(menu.data(), "", &ctx.m_settings.player_fast_place_key, keytype_t::kt_all);
-
-			fast_place_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_fast_place_delay, 0, 7);
-		}
-		fast_place_groupbox.end(menu.data());
-
-		fast_place_key.dropdown(menu.data());
 	}
 
 	menu.column_right();
 	{
+		fast_place_groupbox.start(menu.data(), xors("fast place"));
+		{
+			fast_place_key.handle(menu.data(), "", &ctx.m_settings.player_fast_place_key, keytype_t::kt_all);
+		}
+		fast_place_groupbox.end(menu.data(), &ctx.m_settings.player_fast_place);
+
+		afk_groupbox.start(menu.data(), xors("anti afk"));
+		{
+			afk.handle(menu.data(), xors("enable"), &ctx.m_settings.player_anti_afk);
+		}
+		afk_groupbox.end(menu.data());
+
+		fast_place_key.dropdown(menu.data());
 	}
 }
 
@@ -254,31 +253,28 @@ void c_gui::tab_visuals()
 
 void c_gui::tab_movement()
 {
-	static UI::c_groupbox timer_groupbox;
-	static UI::c_checkbox timer;
+	static UI::c_enable_groupbox timer_groupbox;
 	static UI::c_key_bind timer_key;
 	static UI::c_float_slider timer_speed;
 
-	static UI::c_groupbox speed_groupbox;
-	static UI::c_checkbox speed;
+	static UI::c_enable_groupbox speed_groupbox;
 	static UI::c_key_bind speed_key;
 	static UI::c_dropdown speed_mode;
 
-	static UI::c_groupbox step_groupbox;
-	static UI::c_checkbox step;
+	static UI::c_key_bind longjump_key;
+	static UI::c_float_slider longjump_boost;
+
+	static UI::c_enable_groupbox step_groupbox;
 	static UI::c_key_bind step_key;
 	static UI::c_float_slider step_height;
 
-	static UI::c_groupbox air_control_groupbox;
-	static UI::c_checkbox air_control;
+	static UI::c_enable_groupbox air_control_groupbox;
 	static UI::c_key_bind air_control_key;
 
-	static UI::c_groupbox sprint_groupbox;
-	static UI::c_checkbox sprint;
+	static UI::c_enable_groupbox sprint_groupbox;
 	static UI::c_key_bind sprint_key;
 
-	static UI::c_groupbox flight_groupbox;
-	static UI::c_checkbox flight;
+	static UI::c_enable_groupbox flight_groupbox;
 	static UI::c_key_bind flight_key;
 	static UI::c_float_slider flight_hspeed;
 	static UI::c_float_slider flight_vspeed;
@@ -289,44 +285,38 @@ void c_gui::tab_movement()
 	{
 		timer_groupbox.start(menu.data(), xors("timer"));
 		{
-			timer.handle(menu.data(), xors("timer"), &ctx.m_settings.movement_timer);
-
 			if (ctx.m_settings.movement_timer)
 				timer_key.handle(menu.data(), "", &ctx.m_settings.movement_timer_key, keytype_t::kt_all);
 
 			timer_speed.handle(menu.data(), xors("speed"), &ctx.m_settings.movement_timer_speed, .01f, 3.f, 0.01f);
 		}
-		timer_groupbox.end(menu.data());
+		timer_groupbox.end(menu.data(), &ctx.m_settings.movement_timer);
 
 		flight_groupbox.start(menu.data(), xors("flight"));
 		{
-			flight.handle(menu.data(), xors("flight"), &ctx.m_settings.movement_flight);
-
 			if (ctx.m_settings.movement_flight)
 				flight_key.handle(menu.data(), "", &ctx.m_settings.movement_flight_key, keytype_t::kt_all);
+
+			flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
+			flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
+			flight_glide_speed.handle(menu.data(), xors("glide speed"), &ctx.m_settings.movement_flight_glide_speed, 0.f, 1.f, 0.01f);
 
 			flight_options.handle(menu.data(), xors("options"),
 				{
 					{&ctx.m_settings.movement_flight_glide, xors("glide")},
 					{&ctx.m_settings.movement_flight_tight, xors("tight")}
 				});
-
-			flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
-			flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
-			flight_glide_speed.handle(menu.data(), xors("glide speed"), &ctx.m_settings.movement_flight_glide_speed, 0.f, 1.f, 0.01f);
 		}
-		flight_groupbox.end(menu.data());
+		flight_groupbox.end(menu.data(), &ctx.m_settings.movement_flight);
 
 		step_groupbox.start(menu.data(), xors("step"));
 		{
-			step.handle(menu.data(), xors("step"), &ctx.m_settings.movement_step);
-
 			if (ctx.m_settings.movement_step)
 				step_key.handle(menu.data(), "", &ctx.m_settings.movement_step_key, keytype_t::kt_all);
 
 			step_height.handle(menu.data(), xors("step height"), &ctx.m_settings.movement_step_height, 0.5f, 5.f, 0.01f);
 		}
-		step_groupbox.end(menu.data());
+		step_groupbox.end(menu.data(), &ctx.m_settings.movement_step);
 
 		timer_key.dropdown(menu.data());
 		flight_key.dropdown(menu.data());
@@ -340,34 +330,28 @@ void c_gui::tab_movement()
 	{
 		speed_groupbox.start(menu.data(), xors("speed"));
 		{
-			speed.handle(menu.data(), xors("speed"), &ctx.m_settings.movement_speed);
-
 			if (ctx.m_settings.movement_speed)
 				speed_key.handle(menu.data(), "", &ctx.m_settings.movement_speed_key, keytype_t::kt_all);
 
 			speed_mode.handle(menu.data(), xors("mode"),
 				{ xors("bhop"), xors("slowhop"), xors("minihop"), xors("yport"), xors("vanilla"), xors("glidehop") }, &ctx.m_settings.movement_speed_mode);
+
+			longjump_key.handle(menu.data(), xors("longjump"), &ctx.m_settings.movement_longjump_key, keytype_t::kt_hold);
+			longjump_boost.handle(menu.data(), xors("boost"), &ctx.m_settings.movement_longjump_boost, 0.f, 3.f, 0.01f);
 		}
-		speed_groupbox.end(menu.data());
+		speed_groupbox.end(menu.data(), &ctx.m_settings.movement_speed);
 
 		sprint_groupbox.start(menu.data(), xors("sprint"));
 		{
-			sprint.handle(menu.data(), xors("sprint"), &ctx.m_settings.movement_sprint);
-
-			if (ctx.m_settings.movement_sprint)
-				sprint_key.handle(menu.data(), "", &ctx.m_settings.movement_sprint_key, keytype_t::kt_all);
-
+			sprint_key.handle(menu.data(), "", &ctx.m_settings.movement_sprint_key, keytype_t::kt_all);
 		}
-		sprint_groupbox.end(menu.data());
+		sprint_groupbox.end(menu.data(), &ctx.m_settings.movement_sprint);
 
 		air_control_groupbox.start(menu.data(), xors("air control"));
 		{
-			air_control.handle(menu.data(), xors("air control"), &ctx.m_settings.movement_air_control);
-
-			if (ctx.m_settings.movement_air_control)
-				air_control_key.handle(menu.data(), "", &ctx.m_settings.movement_air_control_key, keytype_t::kt_all);
+			air_control_key.handle(menu.data(), "", &ctx.m_settings.movement_air_control_key, keytype_t::kt_all);
 		}
-		air_control_groupbox.end(menu.data());
+		air_control_groupbox.end(menu.data(), &ctx.m_settings.movement_air_control);
 
 		speed_key.dropdown(menu.data());
 		sprint_key.dropdown(menu.data());

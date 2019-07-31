@@ -15,10 +15,10 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 
 		if (stack.valid)
 		{
-			static auto mc = ctx.get_game(jni);
+			auto mc = ctx.get_game(jni);
 
-			static auto self = mc->get_player();
-			static auto world = mc->get_world();
+			auto self = mc->get_player();
+			auto world = mc->get_world();
 
 			if (self && world)
 			{

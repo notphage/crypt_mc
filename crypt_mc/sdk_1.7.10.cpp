@@ -62,6 +62,7 @@ struct player_fields
 	jfieldID fid_inventory = nullptr;
 	jfieldID fid_inventory_player = nullptr;
 	jfieldID fid_obj_capabilities = nullptr;
+	jfieldID fid_armor_inventory = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -69,6 +70,7 @@ struct player_fields
 	jmethodID mid_is_invisible = nullptr;
 	jmethodID mid_is_sneaking = nullptr;
 	jmethodID mid_is_sprinting = nullptr;
+	jmethodID mid_in_water = nullptr;
 	jmethodID mid_set_sprinting = nullptr;
 	jmethodID mid_swing_item = nullptr;
 	jmethodID mid_set_sneaking = nullptr;
@@ -341,6 +343,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.fid_inventory = jni->GetFieldID(playerfields.entity_player_class, xors("field_71069_bz"), xors("Lnet/minecraft/inventory/Container;"));
 		playerfields.fid_inventory_player = jni->GetFieldID(playerfields.entity_player_class, xors("field_71071_by"), xors("Lnet/minecraft/entity/player/InventoryPlayer;"));
 		playerfields.fid_obj_capabilities = jni->GetFieldID(playerfields.entity_player_class, xors("field_71075_bZ"), xors("Lnet/minecraft/entity/player/PlayerCapabilities;"));
+		playerfields.fid_armor_inventory = jni->GetFieldID(playerfields.cls_inventory, xors("field_70460_b"), xors("[Lnet/minecraft/item/ItemStack;"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70660_b"), xors("(Lnet/minecraft/potion/Potion;)Lnet/minecraft/potion/PotionEffect;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76458_c"), xors("()I"));
@@ -348,7 +351,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.mid_is_invisible = jni->GetMethodID(playerfields.entity_class, xors("func_82150_aj"), xors("()Z"));
 		playerfields.mid_is_sneaking = jni->GetMethodID(playerfields.entity_class, xors("func_70093_af"), xors("()Z"));
 		playerfields.mid_is_sprinting = jni->GetMethodID(playerfields.entity_class, xors("func_70051_ag"), xors("()Z"));
-		playerfields.mid_is_sprinting = jni->GetMethodID(playerfields.entity_class, xors("func_70051_ag"), xors("()Z"));
+		playerfields.mid_in_water = jni->GetMethodID(playerfields.entity_class, xors("func_70090_H"), xors("()Z"));
 		playerfields.mid_set_sprinting = jni->GetMethodID(playerfields.entity_player_sp_class, xors("func_70031_b"), xors("(Z)V"));
 		playerfields.mid_swing_item = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_71038_i"), xors("()V"));
 		playerfields.mid_set_sneaking = jni->GetMethodID(playerfields.entity_class, xors("func_70095_a"), xors("(Z)V"));
@@ -361,7 +364,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.mid_get_stack = jni->GetMethodID(playerfields.cls_slot, xors("func_75211_c"), xors("()Lnet/minecraft/item/ItemStack;"));
 		playerfields.mid_potion_id = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76456_a"), xors("()I"));
 		playerfields.mid_get_effects = jni->GetMethodID(playerfields.cls_item_potion, xors("func_77832_l"), xors("(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"));
-		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("func_78769_a"), xors("(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z"));
+		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("func_78769_a"), "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z");
 		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("func_70047_e"), xors("()F"));
 
 		init_fields = true;
@@ -411,6 +414,11 @@ jboolean c_player_1710::is_potion_active(jint potion)
 jboolean c_player_1710::is_sprinting()
 {
     return jni->CallBooleanMethod(player_instance, playerfields.mid_is_sprinting);
+}
+
+jboolean c_player_1710::in_water()
+{
+	return jni->CallBooleanMethod(player_instance, playerfields.mid_in_water);
 }
 
 void c_player_1710::set_sprinting(jboolean sprint)
@@ -531,6 +539,19 @@ jfloat c_player_1710::get_health()
     return jni->CallFloatMethod(player_instance, playerfields.mid_get_health);
 }
 
+jboolean c_player_1710::has_armor()
+{
+	jobjectArray arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
+	if (!arr_item_stack)
+		return false;
+
+	for (jint i = 0; i < jni->GetArrayLength(arr_item_stack); i++)
+		if (auto obj = jni->GetObjectArrayElement(arr_item_stack, i))
+			return true;
+
+	return false;
+}
+
 jfloat c_player_1710::get_height()
 {
 	return jni->GetFloatField(player_instance, playerfields.fid_height);
@@ -577,7 +598,7 @@ jboolean c_player_1710::send_use_item(jobject item_stack)
 	jobject obj_game = jni->GetStaticObjectField(minecraft_class, fid_minecraft);
 	jobject obj_world = jni->GetObjectField(obj_game, fid_the_world);
 
-	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, obj_game, obj_world, item_stack);
+	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, obj_world, item_stack);
 }
 
 void c_player_1710::set_current_slot(jint slot)

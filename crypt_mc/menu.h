@@ -378,20 +378,40 @@ namespace UI
 			else
 				m_was_open = false;
 
-			if (ctx.m_settings.gui_fade_speed > 0)
-				m_data.m_alpha = math::clamp<int>(m_should_open ? (m_data.m_alpha + ctx.m_settings.gui_fade_speed) : (m_data.m_alpha - ctx.m_settings.gui_fade_speed), 0, 255);
-			else
-				m_data.m_alpha = math::clamp<int>(m_should_open ? (m_data.m_alpha + 255) : (m_data.m_alpha - 255), 0, 255); // sorry
+			// proper frametime
+			static auto old = std::chrono::high_resolution_clock::now();
+			auto now = std::chrono::high_resolution_clock::now();
+			float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - old).count();
 
-			ctx.m_menu_closing = m_data.m_alpha < 255 && m_data.m_alpha > 1;
-			ctx.m_menu_opening = m_should_open && m_data.m_alpha < 255;
+			if (delta >= 31.f)
+			{
+				old = now;
 
-			if (ctx.m_settings.gui_rainbow)
-				ctx.m_settings.gui_accent_color() = ctx.m_settings.gui_accent_color();/* (m_data.m_color = UI::color_t::get_rainbow()); */
-			else
-				m_data.m_color = color;
+				if (ctx.m_settings.gui_fade_speed > 0)
+					m_data.m_alpha = math::clamp<int>(m_should_open ? (m_data.m_alpha + ctx.m_settings.gui_fade_speed) : (m_data.m_alpha - ctx.m_settings.gui_fade_speed), 0, 255);
+				else
+					m_data.m_alpha = math::clamp<int>(m_should_open ? (m_data.m_alpha + 255) : (m_data.m_alpha - 255), 0, 255); // sorry
 
-			*m_data.m_color.a_ptr() = m_data.m_alpha;
+				ctx.m_menu_closing = m_data.m_alpha < 255 && m_data.m_alpha > 1;
+				ctx.m_menu_opening = m_should_open && m_data.m_alpha < 255;
+
+				static float sinebow_t = 0.f;
+				sinebow_t += 0.01f;
+				if (sinebow_t > 1.f)
+					sinebow_t = 0.f;
+
+				static color_t sinebow;
+				sinebow = color_t{ (int)(255.f * (powf(sin(M_PI * (sinebow_t + 0.f / 3.f)), 2.f))),
+								   (int)(255.f * (powf(sin(M_PI * (sinebow_t + 1.f / 3.f)), 2.f))),
+								   (int)(255.f * (powf(sin(M_PI * (sinebow_t + 2.f / 3.f)), 2.f))) };
+
+				if (ctx.m_settings.gui_rainbow)
+					ctx.m_settings.gui_accent_color() = (m_data.m_color = sinebow);
+				else
+					m_data.m_color = color;
+
+				*m_data.m_color.a_ptr() = m_data.m_alpha;
+			}
 
 			m_is_open = m_data.m_alpha > 0;
 			if (!m_is_open)
@@ -575,6 +595,112 @@ namespace UI
 			{
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 11.f, m_start.y - 5.f }, m_text, shadow_color);
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 10.f, m_start.y - 6.f }, m_text, text_color);
+
+				// dont leave it around in memory unencrypted
+				memset(m_text, 0, m_text_length);
+			}
+		}
+	};
+
+	class c_enable_groupbox : public c_control
+	{
+		static constexpr size_t m_text_length = 32;
+
+		char m_text[m_text_length]{};
+		bool* m_value{};
+
+	public:
+		void start(c_window_data* data, const char* text)
+		{
+			strncpy_s(m_text, m_text_length, text, m_text_length);
+			m_start = vec2(data->m_x - 10.f, data->m_y + 5.f);
+
+			// setup coord for next item
+			data->m_y += 15.f;
+		}
+
+		void end(c_window_data* data, bool* setting)
+		{
+			g_input.get_cursor_pos(m_cursor_x, m_cursor_y);
+
+			m_end = vec2(data->m_x - 10.f, data->m_y + 5.f);
+
+			m_value = setting;
+			// setup coord for next item
+			data->m_y += 15.f;
+
+			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
+
+
+			m_is_inside = m_cursor_x > m_start.x + 11.f && m_cursor_x < m_start.x + text_width + 18.f && m_cursor_y > m_start.y - 3.f && m_cursor_y < m_end.y + 3.f;
+			if (m_value && data->m_left_click && !data->m_ignore && m_is_inside)
+			{
+				*m_value = !*m_value;
+				data->m_ignore = true;
+			}
+
+			draw(data);
+		}
+
+		void draw(c_window_data* data)
+		{
+			color_t text_color(206, 206, 206, data->m_alpha);
+			color_t shadow_color(0, 0, 0, data->m_alpha);
+			color_t edge_color(44, 44, 44, data->m_alpha);
+
+			float width = 211.f;
+
+			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
+
+			// top
+			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
+			ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+
+			// left
+			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_end.x, m_end.y }, edge_color);
+			// right
+			ctx.m_renderer->draw_line({ m_start.x + width, m_start.y }, { m_end.x + width, m_end.y + 1.f }, edge_color);
+			ctx.m_renderer->draw_line({ m_start.x + width + 1.f, m_start.y }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			// bottom
+			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y }, { m_end.x + width, m_end.y }, edge_color);
+			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y + 1.f }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+
+			// checkbox
+			ctx.m_renderer->draw_filled_rect({ m_start.x + 10.f, m_start.y - 3.f, 8.f, 8.f }, color_t(0, 0, 0, data->m_alpha));
+
+			// inner box empty
+			color_t empty_color_top = color_t(69, 69, 69, data->m_alpha);
+			color_t empty_color_bottom
+			(
+				empty_color_top.r() > 25 ? empty_color_top.r() - 25 : 0,
+				empty_color_top.g() > 25 ? empty_color_top.g() - 25 : 0,
+				empty_color_top.b() > 25 ? empty_color_top.b() - 25 : 0,
+				data->m_alpha
+			);
+			
+			ctx.m_renderer->draw_gradient_rect({ m_start.x + 11.f, m_start.y - 2.f, 6.f, 6.f }, empty_color_top, empty_color_top, empty_color_bottom, empty_color_bottom);
+
+			// inner box
+			if (*m_value)
+			{
+				int anim_alpha = (float(data->m_alpha) * data->m_animation_progress);
+
+				color_t checkbox_color_top = data->m_color;
+				color_t checkbox_color_bottom
+				(
+					checkbox_color_top.r() > 25 ? checkbox_color_top.r() - 25 : 0,
+					checkbox_color_top.g() > 25 ? checkbox_color_top.g() - 25 : 0,
+					checkbox_color_top.b() > 25 ? checkbox_color_top.b() - 25 : 0,
+					anim_alpha
+				);
+
+				ctx.m_renderer->draw_gradient_rect({ m_start.x + 11.f, m_start.y - 2.f, 6.f, 6.f }, checkbox_color_top, checkbox_color_top, checkbox_color_bottom, checkbox_color_bottom);
+			}
+
+			if (strlen(m_text) > 0)
+			{
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 25.f, m_start.y - 5.f }, m_text, shadow_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 24.f, m_start.y - 6.f }, m_text, text_color);
 
 				// dont leave it around in memory unencrypted
 				memset(m_text, 0, m_text_length);
@@ -1618,7 +1744,6 @@ namespace UI
 
 				float scroll_start = scroll_step * m_item_offset;
 
-				ctx.m_renderer->draw_filled_rect({ m_box_end.x - 4.f, m_bounds.y + 4.f + scroll_start, m_box_end.x - 1.f, m_bounds.y + 2.f + scroll_start + scroll_size }, color_t(0, 0, 0, data->m_alpha));
 				ctx.m_renderer->draw_line({ m_box_end.x - 3.f, m_end.y + 4.f + scroll_start + 1.f }, { m_box_end.x - 3.f, m_end.y + 2.f + scroll_start + scroll_size - 1.f }, data->m_color);
 			}
 		}

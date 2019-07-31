@@ -223,12 +223,14 @@ public:
 	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), false };
 	setting_t<bool> combat_aim_assist_require_click{&m_holder, fnvc("combat_aim_assist_require_click"), true};
 	setting_t<bool> combat_aim_assist_weapons_only{&m_holder, fnvc("combat_aim_assist_weapons_only"), true};
-	setting_t<bool> combat_aim_assist_invisibles{&m_holder, fnvc("combat_aim_assist_invisibles"), false};
+	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), false };
+	setting_t<bool> combat_aim_assist_nakeds{&m_holder, fnvc("combat_aim_assist_nakeds"), false};
 
 	setting_t<bool> combat_velocity{&m_holder, fnvc("combat_velocity"), false};
 	setting_t<keysetting_t> combat_velocity_key{&m_holder, fnvc("combat_velocity_key"), {}};
 	setting_t<bool> combat_velocity_on_sprint{ &m_holder, fnvc("combat_velocity_on_sprint"), false };
-	setting_t<int> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), 0 };
+	setting_t<bool> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), false };
+	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 80 };
 	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 80 };
 	setting_t<int> combat_velocity_vertical{&m_holder, fnvc("combat_velocity_vertical"), 100};
 	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 85};
@@ -243,13 +245,16 @@ public:
 	setting_t<bool> combat_reach{&m_holder, fnvc("combat_reach"), false};
 	setting_t<keysetting_t> combat_reach_key{&m_holder, fnvc("combat_reach_key"), {}};
 	setting_t<bool> combat_reach_on_sprint{ &m_holder, fnvc("combat_reach_on_sprint"), false };
+	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), false };
+	setting_t<bool> combat_reach_y_check{ &m_holder, fnvc("combat_reach_y_check"), false };
 	setting_t<float> combat_reach_distance_min{ &m_holder, fnvc("combat_reach_distance_min"), 3.f };
 	setting_t<float> combat_reach_distance_max{ &m_holder, fnvc("combat_reach_distance_max"), 3.2f };
 
 	//Player features
 	setting_t<bool> player_fast_place{&m_holder, fnvc("player_fast_place"), false};
 	setting_t<keysetting_t> player_fast_place_key{&m_holder, fnvc("player_fast_place_key"), {}};
-	setting_t<int> player_fast_place_delay{&m_holder, fnvc("player_fast_place_delay"), 0};
+
+	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
 
 	//Movement features
 	setting_t<bool> movement_timer{&m_holder, fnvc("movement_timer"), false};
@@ -277,6 +282,9 @@ public:
 	setting_t<bool> movement_speed{&m_holder, fnvc("movement_speed"), false};
 	setting_t<keysetting_t> movement_speed_key{&m_holder, fnvc("movement_speed_key"), {}};
     setting_t<int> movement_speed_mode{ &m_holder, fnvc("movement_speed_mode"), 0 };
+
+	setting_t<keysetting_t> movement_longjump_key{ &m_holder, fnvc("movement_longjump_key"), {} };
+	setting_t<float> movement_longjump_boost{ &m_holder, fnvc("movement_longjump_boost"), 0.5f };
 
 	setting_t<int> visuals_esp_box{&m_holder, fnvc("visuals_esp_box"), 0};
 	setting_t<color_t> visuals_esp_box_color{&m_holder, fnvc("visuals_esp_box_color"), {255, 200, 69, 255}};

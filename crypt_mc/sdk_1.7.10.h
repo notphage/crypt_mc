@@ -49,11 +49,13 @@ public:
     jboolean is_collided_vertically() override;
     jboolean is_collided_horizontally() override;
     jboolean is_sprinting() override;
+	jboolean in_water() override;
 
 	jfloat get_width() override;
 	jfloat get_height() override;
     jfloat get_eye_height() override;
     jfloat get_health() override;
+	jboolean has_armor() override;
 
 	jstring get_name() override;
 

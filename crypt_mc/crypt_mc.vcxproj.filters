@@ -74,19 +74,16 @@
     <Filter Include="SRC\features\step">
       <UniqueIdentifier>{9bd4cd41-a35e-4302-a2db-f1d5cc07d86b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\features\air_control">
-      <UniqueIdentifier>{cd6e3e3d-121c-4e49-a551-ea46a0195f4e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\render\gui">
       <UniqueIdentifier>{b02a333a-0df3-4241-9482-2c69bf8f1690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\anti_afk">
+      <UniqueIdentifier>{f19caee8-8421-40c9-a928-e822248092ac}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aim_assist.cpp">
       <Filter>SRC\features\aim_assist</Filter>
-    </ClCompile>
-    <ClCompile Include="air_control.cpp">
-      <Filter>SRC\features\air_control</Filter>
     </ClCompile>
     <ClCompile Include="auto_clicker.cpp">
       <Filter>SRC\features\auto_clicker</Filter>
@@ -175,13 +172,13 @@
     <ClCompile Include="renderer.cpp">
       <Filter>SRC\render</Filter>
     </ClCompile>
+    <ClCompile Include="anti_afk.cpp">
+      <Filter>SRC\features\anti_afk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aim_assist.h">
       <Filter>SRC\features\aim_assist</Filter>
-    </ClInclude>
-    <ClInclude Include="air_control.h">
-      <Filter>SRC\features\air_control</Filter>
     </ClInclude>
     <ClInclude Include="auto_clicker.h">
       <Filter>SRC\features\auto_clicker</Filter>
@@ -303,10 +300,8 @@
     <ClInclude Include="lazy_import.h">
       <Filter>SRC\utils</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="syscall_stub.asm">
-      <Filter>SRC</Filter>
-    </MASM>
+    <ClInclude Include="anti_afk.h">
+      <Filter>SRC\features\anti_afk</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
