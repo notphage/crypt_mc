@@ -76,6 +76,7 @@ struct player_fields
 	jmethodID mid_set_sneaking = nullptr;
 	jmethodID mid_set_velocity = nullptr;
 	jmethodID mid_get_health = nullptr;
+	jmethodID mid_get_max_health = nullptr;
 	jmethodID mid_get_name = nullptr;
 	jmethodID mid_get_held_item = nullptr;
 	jmethodID mid_get_item = nullptr;
@@ -357,6 +358,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.mid_set_sneaking = jni->GetMethodID(playerfields.entity_class, xors("func_70095_a"), xors("(Z)V"));
 		playerfields.mid_set_velocity = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70016_h"), xors("(DDD)V"));
 		playerfields.mid_get_health = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_110143_aJ"), xors("()F"));
+		playerfields.mid_get_max_health = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_110138_aP"), xors("()F"));
 		playerfields.mid_get_name = jni->GetMethodID(playerfields.entity_player_class, xors("func_70005_c_"), xors("()Ljava/lang/String;"));
 		playerfields.mid_get_held_item = jni->GetMethodID(playerfields.entity_player_class, xors("func_70694_bm"), xors("()Lnet/minecraft/item/ItemStack;"));
 		playerfields.mid_get_item = jni->GetMethodID(playerfields.item_stack_class, xors("func_77973_b"), xors("()Lnet/minecraft/item/Item;"));
@@ -519,11 +521,6 @@ jdouble c_player_1710::old_origin_z()
 	return jni->GetDoubleField(player_instance, playerfields.fid_old_zorigin);
 }
 
-jfloat c_player_1710::health()
-{
-	return jni->CallFloatMethod(player_instance, playerfields.mid_get_health);
-}
-
 jboolean c_player_1710::is_dead()
 {
 	return jni->GetBooleanField(player_instance, playerfields.fid_is_dead);
@@ -537,6 +534,11 @@ jfloat c_player_1710::get_width()
 jfloat c_player_1710::get_health()
 {
     return jni->CallFloatMethod(player_instance, playerfields.mid_get_health);
+}
+
+jfloat c_player_1710::get_max_health()
+{
+	return jni->CallFloatMethod(player_instance, playerfields.mid_get_max_health);
 }
 
 jboolean c_player_1710::has_armor()

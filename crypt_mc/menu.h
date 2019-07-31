@@ -1493,14 +1493,14 @@ namespace UI
 
 			if (m_type_dropdown)
 			{
-				m_dropdown_end += 2.f;
+				m_dropdown_end += 3.f;
 
 				if (m_dropdown_end + m_end.y > m_box_end.y)
 					m_dropdown_end = m_box_end.y - m_end.y;
 			}
 			else
 			{
-				m_dropdown_end -= 2.f;
+				m_dropdown_end -= 3.f;
 
 				if (m_dropdown_end <= 0.f)
 					m_dropdown_end = 0.f;
@@ -1699,14 +1699,14 @@ namespace UI
 			// maybe this is reason supremacy also doesnt have close animation :>
 			if (m_is_open)
 			{
-				m_dropdown_end += 2.f;
+				m_dropdown_end += 3.f;
 
 				if (m_dropdown_end + m_end.y > m_box_end.y)
 					m_dropdown_end = m_box_end.y - m_end.y;
 			}
 			else
 			{
-				m_dropdown_end -= 2.f;
+				m_dropdown_end -= 3.f;
 
 				if (m_dropdown_end <= 0.f)
 					m_dropdown_end = 0.f;
@@ -1905,14 +1905,14 @@ namespace UI
 			// maybe this is reason supremacy also doesnt have close animation :>
 			if (m_is_open)
 			{
-				m_dropdown_end += 2.f;
+				m_dropdown_end += 3.f;
 
 				if (m_dropdown_end + m_end.y > m_box_end.y)
 					m_dropdown_end = m_box_end.y - m_end.y;
 			}
 			else
 			{
-				m_dropdown_end -= 2.f;
+				m_dropdown_end -= 3.f;
 
 				if (m_dropdown_end <= 0.f)
 					m_dropdown_end = 0.f;

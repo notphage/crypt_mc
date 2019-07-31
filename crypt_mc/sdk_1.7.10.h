@@ -44,7 +44,6 @@ public:
 	jdouble old_origin_y() override;
 	jdouble old_origin_z() override;
 
-	jfloat health() override;
 	jboolean is_dead() override;
     jboolean is_collided_vertically() override;
     jboolean is_collided_horizontally() override;
@@ -55,6 +54,7 @@ public:
 	jfloat get_height() override;
     jfloat get_eye_height() override;
     jfloat get_health() override;
+	jfloat get_max_health() override;
 	jboolean has_armor() override;
 
 	jstring get_name() override;

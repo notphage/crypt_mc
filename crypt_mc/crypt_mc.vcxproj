@@ -230,7 +230,7 @@
     <ClCompile Include="sprint.cpp" />
     <ClCompile Include="step.cpp" />
     <ClCompile Include="swapbuffers.cpp" />
-    <ClCompile Include="throwpot.cpp" />
+    <ClCompile Include="throw.cpp" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="trampoline.cpp" />
     <ClCompile Include="velocity.cpp" />
@@ -275,7 +275,7 @@
     <ClInclude Include="step.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="table64.h" />
-    <ClInclude Include="throwpot.h" />
+    <ClInclude Include="throw.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="trampoline.h" />
     <ClInclude Include="util.h" />

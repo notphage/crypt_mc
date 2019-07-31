@@ -1241,7 +1241,6 @@ public:
 	virtual jdouble old_origin_y() = 0;
 	virtual jdouble old_origin_z() = 0;
 
-	virtual jfloat health() = 0;
 	virtual jboolean is_dead() = 0;
     virtual jboolean is_collided_vertically() = 0;
     virtual jboolean is_collided_horizontally() = 0;
@@ -1253,6 +1252,7 @@ public:
     virtual jfloat get_eye_height() = 0;
     
     virtual jfloat get_health() = 0;
+	virtual jfloat get_max_health() = 0;
 	virtual jboolean has_armor() = 0;
 
 	virtual jstring get_name() = 0;

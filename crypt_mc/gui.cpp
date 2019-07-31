@@ -148,11 +148,17 @@ void c_gui::tab_combat()
 
 void c_gui::tab_player()
 {
-	static UI::c_enable_groupbox throwpot_groupbox;
-	static UI::c_key_bind throwpot_key;
-	static UI::c_slider throwpot_delay;
-	static UI::c_slider throwpot_health;
-	static UI::c_multi_dropdown throwpot_conditions;
+	static UI::c_enable_groupbox throw_groupbox;
+
+	static UI::c_key_bind throwhealing_key;
+	static UI::c_multi_dropdown throwhealing_items;
+
+	static UI::c_key_bind throwpearl_key;
+
+	static UI::c_key_bind throwdebuff_key;
+	static UI::c_multi_dropdown throwdebuff_items;
+
+	static UI::c_slider throw_delay;
 
 	static UI::c_enable_groupbox fast_place_groupbox;
 	static UI::c_key_bind fast_place_key;
@@ -162,22 +168,37 @@ void c_gui::tab_player()
 
 	menu.column_left();
 	{
-		throwpot_groupbox.start(menu.data(), xors("throwpot"));
+		throw_groupbox.start(menu.data(), xors("throw"));
 		{
-			throwpot_key.handle(menu.data(), "", &ctx.m_settings.combat_throwpot_key, keytype_t::kt_hold);
-			throwpot_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_throwpot_delay, 1, 200, 1, xors("ms"));
-			throwpot_health.handle(menu.data(), xors("health"), &ctx.m_settings.combat_throwpot_health, 1, 20, 1, xors("hearts"));
-
-			throwpot_conditions.handle(menu.data(), xors("items"),
+			throwhealing_key.handle(menu.data(), xors("healing"), &ctx.m_settings.player_throwhealing_key, keytype_t::kt_hold);
+			throwhealing_items.handle(menu.data(), xors("items"),
 				{
-					{&ctx.m_settings.combat_throwpot_potions, xors("potions")},
-					{&ctx.m_settings.combat_throwpot_soup, xors("soup")}
+					{&ctx.m_settings.player_throwhealing_potions, xors("potions")},
+					{&ctx.m_settings.player_throwhealing_soup, xors("soup")}
 				});
-		}
-		throwpot_groupbox.end(menu.data(), &ctx.m_settings.combat_throwpot);
 
-		throwpot_key.dropdown(menu.data());
-		throwpot_conditions.dropdown(menu.data());
+			throwpearl_key.handle(menu.data(), xors("pearl"), &ctx.m_settings.player_throwpearl_key, keytype_t::kt_hold);
+
+			throwdebuff_key.handle(menu.data(), xors("debuff"), &ctx.m_settings.player_throwdebuff_key, keytype_t::kt_hold);
+			throwdebuff_items.handle(menu.data(), xors("items"),
+				{
+					{&ctx.m_settings.player_throwdebuff_damage, xors("damage")},
+					{&ctx.m_settings.player_throwdebuff_poison, xors("poison")},
+					{&ctx.m_settings.player_throwdebuff_slow, xors("slow")},
+					{&ctx.m_settings.player_throwdebuff_blind, xors("blind")},
+					{&ctx.m_settings.player_throwdebuff_weakness, xors("weakness")},
+					{&ctx.m_settings.player_throwdebuff_wither, xors("wither")},
+				});
+
+			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 50, 200, 1, xors("ms"));
+		}
+		throw_groupbox.end(menu.data(), &ctx.m_settings.player_throw);
+
+		throwhealing_key.dropdown(menu.data());
+		throwhealing_items.dropdown(menu.data());
+		throwpearl_key.dropdown(menu.data());
+		throwdebuff_key.dropdown(menu.data());
+		throwdebuff_items.dropdown(menu.data());
 	}
 
 	menu.column_right();

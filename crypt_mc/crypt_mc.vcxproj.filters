@@ -53,9 +53,6 @@
     <Filter Include="SRC\features\speed">
       <UniqueIdentifier>{b4f19ae5-7bcd-4f8e-b635-212a0d13819e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\features\throwpot">
-      <UniqueIdentifier>{b4b676e7-5308-44e3-bf9b-6bb43d6714f0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\SDK\1.8.X">
       <UniqueIdentifier>{93229119-9e49-4cae-97d2-99ba429ddaad}</UniqueIdentifier>
     </Filter>
@@ -79,6 +76,9 @@
     </Filter>
     <Filter Include="SRC\features\anti_afk">
       <UniqueIdentifier>{f19caee8-8421-40c9-a928-e822248092ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\throw">
+      <UniqueIdentifier>{b4b676e7-5308-44e3-bf9b-6bb43d6714f0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -160,9 +160,6 @@
     <ClCompile Include="timer.cpp">
       <Filter>SRC\features\timer</Filter>
     </ClCompile>
-    <ClCompile Include="throwpot.cpp">
-      <Filter>SRC\features\throwpot</Filter>
-    </ClCompile>
     <ClCompile Include="step.cpp">
       <Filter>SRC\features\step</Filter>
     </ClCompile>
@@ -174,6 +171,9 @@
     </ClCompile>
     <ClCompile Include="anti_afk.cpp">
       <Filter>SRC\features\anti_afk</Filter>
+    </ClCompile>
+    <ClCompile Include="throw.cpp">
+      <Filter>SRC\features\throw</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -267,9 +267,6 @@
     <ClInclude Include="timer.h">
       <Filter>SRC\features\timer</Filter>
     </ClInclude>
-    <ClInclude Include="throwpot.h">
-      <Filter>SRC\features\throwpot</Filter>
-    </ClInclude>
     <ClInclude Include="step.h">
       <Filter>SRC\features\step</Filter>
     </ClInclude>
@@ -302,6 +299,9 @@
     </ClInclude>
     <ClInclude Include="anti_afk.h">
       <Filter>SRC\features\anti_afk</Filter>
+    </ClInclude>
+    <ClInclude Include="throw.h">
+      <Filter>SRC\features\throw</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

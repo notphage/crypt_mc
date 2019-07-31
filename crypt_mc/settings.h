@@ -234,13 +234,6 @@ public:
 	setting_t<int> combat_velocity_vertical{&m_holder, fnvc("combat_velocity_vertical"), 100};
 	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 85};
 
-	setting_t<bool> combat_throwpot{&m_holder, fnvc("combat_throwpot"), false};
-    setting_t<keysetting_t> combat_throwpot_key{ &m_holder, fnvc("combat_throwpot_key"), {} };
-	setting_t<int> combat_throwpot_delay{ &m_holder, fnvc("combat_throwpot_delay"), 50 };
-	setting_t<int> combat_throwpot_health{ &m_holder, fnvc("combat_throwpot_health"), 12 };
-    setting_t<bool> combat_throwpot_potions{ &m_holder, fnvc("combat_throwpot_potions"), true };
-    setting_t<bool> combat_throwpot_soup{ &m_holder, fnvc("combat_throwpot_soup"), true };
-
 	setting_t<bool> combat_reach{&m_holder, fnvc("combat_reach"), false};
 	setting_t<keysetting_t> combat_reach_key{&m_holder, fnvc("combat_reach_key"), {}};
 	setting_t<bool> combat_reach_on_sprint{ &m_holder, fnvc("combat_reach_on_sprint"), false };
@@ -250,6 +243,23 @@ public:
 	setting_t<float> combat_reach_distance_max{ &m_holder, fnvc("combat_reach_distance_max"), 3.2f };
 
 	//Player features
+	setting_t<bool> player_throw{ &m_holder, fnvc("player_throw"), false };
+	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 50 };
+
+	setting_t<keysetting_t> player_throwhealing_key{ &m_holder, fnvc("player_throwhealing_key"), {} };
+	setting_t<bool> player_throwhealing_potions{ &m_holder, fnvc("player_throwhealing_potions"), true };
+	setting_t<bool> player_throwhealing_soup{ &m_holder, fnvc("player_throwhealing_soup"), true };
+
+	setting_t<keysetting_t> player_throwpearl_key{ &m_holder, fnvc("player_throwpearl_key"), {} };
+
+	setting_t<keysetting_t> player_throwdebuff_key{ &m_holder, fnvc("player_throwdebuff_key"), {} };
+	setting_t<bool> player_throwdebuff_damage{ &m_holder, fnvc("player_throwdebuff_damage") };
+	setting_t<bool> player_throwdebuff_poison{ &m_holder, fnvc("player_throwdebuff_poison") };
+	setting_t<bool> player_throwdebuff_slow{ &m_holder, fnvc("player_throwdebuff_slow") };
+	setting_t<bool> player_throwdebuff_blind{ &m_holder, fnvc("player_throwdebuff_blind") };
+	setting_t<bool> player_throwdebuff_weakness{ &m_holder, fnvc("player_throwdebuff_weakness") };
+	setting_t<bool> player_throwdebuff_wither{ &m_holder, fnvc("player_throwdebuff_wither") };
+
 	setting_t<bool> player_fast_place{&m_holder, fnvc("player_fast_place"), false};
 	setting_t<keysetting_t> player_fast_place_key{&m_holder, fnvc("player_fast_place_key"), {}};
 
