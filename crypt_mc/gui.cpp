@@ -36,7 +36,6 @@ void c_gui::tab_combat()
 	static UI::c_slider aim_assist_fov;
 	static UI::c_float_slider aim_assist_v_speed;
 	static UI::c_float_slider aim_assist_h_speed;
-	static UI::c_float_slider aim_assist_scale;
 	static UI::c_float_slider aim_assist_distance;
 	static UI::c_multi_dropdown aim_assist_conditions;
 
@@ -102,7 +101,6 @@ void c_gui::tab_combat()
 				aim_assist_key.handle(menu.data(), "", &ctx.m_settings.combat_aim_assist_key, keytype_t::kt_all);
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
-			aim_assist_scale.handle(menu.data(), xors("scale"), &ctx.m_settings.combat_aim_assist_scale, 0.f, 1.f, 0.01f);
 			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 1.f, 10.f, 0.01f);
 
 			if (ctx.m_settings.combat_aim_assist_vertical)

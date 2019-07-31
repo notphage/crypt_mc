@@ -216,7 +216,6 @@ public:
 	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 2.f};
 	setting_t<float> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 1.f};
 
-	setting_t<float> combat_aim_assist_scale{&m_holder, fnvc("combat_aim_assist_scale"), 0.4f};
 	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.0f};
 
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
