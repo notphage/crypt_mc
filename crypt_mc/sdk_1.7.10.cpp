@@ -114,7 +114,9 @@ struct game_fields
 	jclass cls_inventory = nullptr;
 	jclass cls_chat = nullptr;
 	jclass cls_moving_object_position = nullptr;
-	jclass cls_sys_impl = nullptr;
+	jclass cls_lwjgl_sys_impl = nullptr;
+	jclass cls_lwjgl_display = nullptr;
+	jclass cls_lwjgl_mouse = nullptr;
 
 	jfieldID fid_minecraft;
 	jfieldID fid_entity_renderer_obj;
@@ -151,6 +153,9 @@ struct game_fields
 	jmethodID mid_set_in_focus = nullptr;
 	jmethodID mid_set_not_in_focus = nullptr;
 	jmethodID mid_get_hwnd = nullptr;
+	jmethodID mid_set_cursor_pos = nullptr;
+	jmethodID mid_get_width = nullptr;
+	jmethodID mid_get_height = nullptr;
 
 	jobject obj_game = nullptr;
 	jobject obj_render_manager = nullptr;
@@ -673,7 +678,9 @@ void c_game_1710::instantiate(JNIEnv* _jni = nullptr)
 		gamefields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.client.gui.inventory.GuiContainer")));
 		gamefields.cls_chat = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.client.gui.GuiChat")));
 		gamefields.cls_moving_object_position = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.util.MovingObjectPosition")));
-		gamefields.cls_sys_impl = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.WindowsSysImplementation")));
+		gamefields.cls_lwjgl_sys_impl = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.WindowsSysImplementation")));
+		gamefields.cls_lwjgl_mouse = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.input.Mouse")));
+		gamefields.cls_lwjgl_display = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.opengl.Display")));
 
 		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("field_71432_P"), xors("Lnet/minecraft/client/Minecraft;"));
 		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("field_71460_t"), xors("Lnet/minecraft/client/renderer/EntityRenderer;"));
@@ -709,7 +716,10 @@ void c_game_1710::instantiate(JNIEnv* _jni = nullptr)
 		gamefields.mid_get_net_handler = jni->GetMethodID(gamefields.minecraft, xors("func_147114_u"), xors("()Lnet/minecraft/client/network/NetHandlerPlayClient;"));
 		gamefields.mid_set_in_focus = jni->GetMethodID(gamefields.minecraft, xors("func_71381_h"), xors("()V"));
 		gamefields.mid_set_not_in_focus = jni->GetMethodID(gamefields.minecraft, xors("func_71364_i"), xors("()V"));
-		gamefields.mid_get_hwnd = jni->GetStaticMethodID(gamefields.cls_sys_impl, xors("getHwnd"), xors("()J"));
+		gamefields.mid_get_hwnd = jni->GetStaticMethodID(gamefields.cls_lwjgl_sys_impl, xors("getHwnd"), xors("()J"));
+		gamefields.mid_set_cursor_pos = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setCursorPosition"), xors("(II)V"));
+		gamefields.mid_get_width = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getWidth"), xors("()I"));
+		gamefields.mid_get_height = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getHeight"), xors("()I"));
 
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
 		gamefields.obj_render_manager = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_render_manager_obj));
@@ -901,5 +911,20 @@ void c_game_1710::setup_camera_transform(jfloat par1, int par2)
 
 jlong c_game_1710::get_window_handle()
 {
-	return jni->CallStaticLongMethod(gamefields.cls_sys_impl, gamefields.mid_get_hwnd);
+	return jni->CallStaticLongMethod(gamefields.cls_lwjgl_sys_impl, gamefields.mid_get_hwnd);
+}
+
+jint c_game_1710::get_screen_w()
+{
+	return jni->CallStaticIntMethod(gamefields.cls_lwjgl_display, gamefields.mid_get_width);
+}
+
+jint c_game_1710::get_screen_h()
+{
+	return jni->CallStaticIntMethod(gamefields.cls_lwjgl_display, gamefields.mid_get_height);
+}
+
+void c_game_1710::set_cursor_pos(jint x, jint y)
+{
+	jni->CallStaticVoidMethod(gamefields.cls_lwjgl_mouse, gamefields.mid_set_cursor_pos, x, y);
 }

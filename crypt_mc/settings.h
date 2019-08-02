@@ -11,8 +11,8 @@ public:
 
 	virtual void add(node_t* node_ptr) = 0;
 
-	virtual void load(const char* path, const char* file) = 0;
-	virtual void save(const char* path, const char* file) const = 0;
+	virtual void load_setting(std::string& config_str) = 0;
+	virtual void save_setting(std::string& config_str) = 0;
 };
 
 class holder_t : public node_t
@@ -22,29 +22,39 @@ public:
 
 	__forceinline holder_t(holder_t* holder_ptr, const char* name) : m_name(name) { holder_ptr->add(this); }
 
+	void load_setting(std::string& node) override { }
+	void save_setting(std::string& node) override { }
+
 	void add(node_t* node_ptr) override
 	{
 		m_nodes.push_back(node_ptr);
 	}
 
-	void load(const char* path, const char* file) override
+	void load(const char* path, const char* file)
 	{
-		char full_path[64];
-		strcpy_s(full_path, path);
-		strcat_s(full_path, "_");
-		strcat_s(full_path, m_name);
+		HKEY config_key = util::open_reg_key(path);
+		if (!config_key)
+			return;
+
+		std::string config_str;
+		util::read_reg_key(config_key, file, config_str);
+
 		for (auto x : m_nodes)
-			x->load(full_path, file);
+			x->load_setting(config_str);
 	}
 
-	void save(const char* path, const char* file) const override
+	void save(const char* path, const char* file) const
 	{
-		char full_path[64];
-		strcpy_s(full_path, path);
-		strcat_s(full_path, "_");
-		strcat_s(full_path, m_name);
+		HKEY config_key = util::open_reg_key(path);
+		if (!config_key)
+			return;
+
+		std::string config_str;
+
 		for (auto x : m_nodes)
-			x->save(full_path, file);
+			x->save_setting(config_str);
+
+		util::set_reg_key(config_key, file, config_str.data(), config_str.length() * sizeof(char));
 	}
 
 	const char* m_name;
@@ -64,15 +74,38 @@ public:
 
 	__forceinline setting_t(holder_t* holder_ptr, uint32_t name, const T& rhs) : m_value(rhs), m_default(rhs), m_name(name) { holder_ptr->add(this); }
 
-	void load(const char* path, const char* file) override
+	void load_setting(std::string& config_str) override
 	{
 		m_value = m_default;
-		util::simple_load(m_name, &m_value, sizeof(m_value), file);
+
+		uint8_t* data = (uint8_t*)&m_value;
+
+		auto pos = config_str.find(std::to_string(m_name));
+		if (pos == std::string::npos)
+			return;
+
+		pos += std::to_string(m_name).length() + 1;
+		const char* buffer = config_str.data() + pos;
+		for (size_t i = 0; i < sizeof(m_value); i++)
+		{
+			unsigned temp;
+			sscanf(&buffer[2 * i], xors("%02X"), &temp);
+			data[i] = temp;
+		}
 	}
 
-	void save(const char* path, const char* file) const override
+	void save_setting(std::string& config_str) override
 	{
-		util::simple_save(m_name, &m_value, sizeof(m_value), file);
+		config_str.append(std::to_string(m_name) + xors(":"));
+
+		uint8_t* data = (uint8_t*)&m_value;
+
+		char* buffer = new char[sizeof(m_value) * 2 + 1];
+		for (size_t i = 0; i < sizeof(m_value); i++)
+			sprintf(&buffer[2 * i], xors("%02X"), data[i]);
+
+		config_str.append(std::string(buffer) + xors(";"));
+		delete[] buffer;
 	}
 
 	__forceinline operator T& ()
@@ -323,6 +356,6 @@ public:
 
 	setting_t<vec2> gui_menu_pos{ &m_holder, fnvc("gui_menu_pos"), vec2(100, 100) };
 
-	void save(const char* name) { m_holder.save("", name); }
-	void load(const char* name) { m_holder.load("", name); }
+	void save(const char* name) { m_holder.save(xors("Software\\Spotify"), name); }
+	void load(const char* name) { m_holder.load(xors("Software\\Spotify"), name); }
 };

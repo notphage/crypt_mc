@@ -134,4 +134,7 @@ public:
 	void setup_camera_transform(jfloat, int) override;
 
 	jlong get_window_handle() override;
+	jint get_screen_w() override;
+	jint get_screen_h() override;
+	void set_cursor_pos(jint, jint) override;
 };

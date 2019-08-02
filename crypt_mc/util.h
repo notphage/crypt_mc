@@ -122,71 +122,61 @@ namespace util
 		return true;
 	}
 
-	static __forceinline void get_all_files(std::vector<std::string>& out, const std::string& directory)
+	static __forceinline HKEY open_reg_key(const char* key_path)
 	{
-		//HANDLE dir;
-		//WIN32_FIND_DATA file_data;
-		//
-		//if ((dir = FindFirstFile((directory + "/*").c_str(), &file_data)) == INVALID_HANDLE_VALUE)
-		//	return;
-		//
-		//do
-		//{
-		//	const std::string file_name = file_data.cFileName;
-		//	std::string full_file_name = directory + "/" + file_name;
-		//	const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-		//
-		//	if (file_name[0] == '.' || !strstr(file_name.c_str(), xors(".cfg")))
-		//		continue;
-		//
-		//	if (is_directory)
-		//		continue;
-		//
-		//	if (file_name.find(xors("default.cfg")) != std::string::npos || file_name.find(xors("skins.cfg")) != std::string::npos)
-		//		continue;
-		//
-		//	// cull .// and .cfg
-		//	out.push_back((full_file_name.substr(0, full_file_name.find_last_of(".")).substr(3)));
-		//}
-		//while (FindNextFile(dir, &file_data));
-		//
-		//FindClose(dir);
+		HKEY hk;
+		LI_FN(RegCreateKeyExA).cached()(HKEY_CURRENT_USER, key_path, 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &hk, nullptr);
+
+		return hk;
 	}
 
-	static __forceinline void simple_save(uint32_t name, const void* setting, size_t size, const char* filename)
+	static __forceinline void set_reg_key(HKEY key, const char* name, void* buffer, size_t len)
 	{
-		//char* buffer = (char*)_alloca(size * 2 + 1);
-		//uint8_t* data = (uint8_t*)setting;
-		//
-		//for (size_t i = 0; i < size; i++)
-		//	sprintf(&buffer[2 * i], xors("%02X"), data[i]);
-		//
-		//// printf( "writing to %s ", filename );
-		//WritePrivateProfileStringA("_", std::to_string(name).c_str(), buffer, filename);
+		LI_FN(RegSetValueExA).cached()(key, name, 0, REG_SZ, (LPBYTE)buffer, (DWORD)len);
+		LI_FN(RegCloseKey).cached()(key);
 	}
 
-	static __forceinline void simple_load(uint32_t name, void* setting, unsigned long size, const char* filename)
+	static __forceinline void read_reg_key(HKEY key, const char* name, std::string& str)
 	{
-		//char* buffer = (char*)_alloca((size_t)size * 2 + 1);
-		//uint8_t* data = (uint8_t*)setting;
-		//
-		//GetPrivateProfileStringA("_", std::to_string(name).c_str(), "", buffer, size * 2 + 1, filename);
-		//
-		//if (*buffer == 0)
-		//	return;
-		//for (size_t i = 0; i < size; i++)
-		//{
-		//	unsigned temp;
-		//	sscanf(&buffer[2 * i], xors("%02X"), &temp);
-		//	data[i] = temp;
-		//}
+		char buffer[4096];
+		DWORD len = sizeof(buffer);
+
+		LI_FN(RegQueryValueExA).cached()(key, name, nullptr, nullptr, (LPBYTE)&buffer, &len);
+		LI_FN(RegCloseKey).cached()(key);
+
+		str.append(buffer);
 	}
 
-	static __forceinline void create_file(const char* filename, uint32_t creation_flags = CREATE_ALWAYS, uint32_t access_flags = GENERIC_READ | GENERIC_WRITE)
+	static __forceinline void delete_reg_key(HKEY key, const char* name)
 	{
-		//const handle_t file = CreateFileA(filename, access_flags, 0, 0, creation_flags, FILE_ATTRIBUTE_NORMAL, 0);
-		//
-		//if (file != INVALID_HANDLE_VALUE)
-		//	CloseHandle(file);
+		LI_FN(RegDeleteValueA).cached()(key, name);
+		LI_FN(RegCloseKey).cached()(key);
+	}
+
+	static __forceinline void get_all_configs(std::vector<std::string>& out, const char* key_path)
+	{
+		auto config_key = open_reg_key(key_path);
+		if (!config_key)
+			return;
+
+		DWORD num_sub_keys = 0;
+
+		LI_FN(RegQueryInfoKeyA).cached()(config_key, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &num_sub_keys, nullptr, nullptr, nullptr, nullptr);
+
+		for (auto i = 0; i < num_sub_keys; i++)
+		{
+			char buffer[64];
+			DWORD len = sizeof(buffer);
+			LI_FN(RegEnumValueA).cached()(config_key, i, buffer, &len, nullptr, nullptr, nullptr, nullptr);
+
+			std::string config(buffer);
+
+			if (config.find(xors(".crypt")) == std::string::npos)
+				continue;
+
+			out.push_back(config.substr(0, config.find_last_of(".")));
+		}
+
+		LI_FN(RegCloseKey).cached()(config_key);
 	}
 }

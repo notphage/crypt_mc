@@ -1338,6 +1338,9 @@ public:
 	virtual void setup_camera_transform(jfloat, int) = 0;
 
 	virtual jlong get_window_handle() = 0;
+	virtual jint get_screen_w() = 0;
+	virtual jint get_screen_h() = 0;
+	virtual void set_cursor_pos(jint, jint) = 0;
 };
 
 struct stack_trace

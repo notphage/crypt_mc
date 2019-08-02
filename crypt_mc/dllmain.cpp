@@ -49,12 +49,9 @@ void hack(HINSTANCE bin)
 
 	ctx.determine_version();
 
-	// anti segfault
-	// nothing but trouble
-	util::create_file(xors("./default.cfg"), OPEN_EXISTING);
-	ctx.m_cfg_list.push_back(xors("default"));
-	util::get_all_files(ctx.m_cfg_list, xors("./"));
-	//ctx.m_settings.load(xors("./default.cfg"));
+	ctx.m_settings.save(xors("default.crypt"));
+	util::get_all_configs(ctx.m_cfg_list, xors("Software\\Spotify"));
+	ctx.m_settings.load(xors("default.crypt"));
 
 	while (!ctx.m_panic)
 	{
@@ -66,6 +63,12 @@ void hack(HINSTANCE bin)
 		{
 			ctx.m_window = cur_hwnd;
 			hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, (long long)hooked::wnd_proc));
+
+			RECT rect;
+			LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
+
+			ctx.m_screen_w = rect.right - rect.left;
+			ctx.m_screen_h = rect.bottom - rect.top;
 		}
 
 		auto self = mc->get_player();
@@ -81,6 +84,7 @@ void hack(HINSTANCE bin)
 			}
 			else if (ctx.m_menu_closing)
 			{
+				mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
 				mc->set_in_focus();
 			}
 

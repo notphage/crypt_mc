@@ -7,7 +7,7 @@
 #include <string>
 
 // compile time, string hiding
-#define fnvc( str )[&]( ){ constexpr uint32_t out = util::hash::hash( str ); return out; }( )
+#define fnvc( str )[&]( ){ constexpr uint64_t out = util::hash::hash( str ); return out; }( )
 
 // compiletime or const runtime, not string hiding
 #define fnvr( str ) util::hash::hash( str )

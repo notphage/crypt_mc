@@ -12,7 +12,6 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 		ctx.m_screen_w = rect.right - rect.left;
 		ctx.m_screen_h = rect.bottom - rect.top;
 
-
 		ctx.m_renderer = std::make_shared<c_renderer>();
 		ctx.m_renderer->m_render_list = ctx.m_renderer->make_render_list();
 		ctx.m_renderer->m_font_context = ctx.m_renderer->make_font_context();

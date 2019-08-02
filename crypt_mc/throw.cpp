@@ -67,19 +67,36 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	static bool healing_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwhealing_key) || healing_running))
 		if (self->get_max_health() - self->get_health() >= 8.f || healing_running)
+		{
 			if (auto slot = find_healing(self); slot >= 0)
 				stage_switch(slot, healing_running, ctx.m_settings.player_throwhealing_key);
+			else
+				g_input.toggle_key(ctx.m_settings.player_throwhealing_key);
+		}
+		else
+			g_input.toggle_key(ctx.m_settings.player_throwhealing_key);
 
 	static bool pearl_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwpearl_key) || pearl_running) && !healing_running)
+	{
 		if (auto slot = find_pearl(self); slot >= 0)
 			stage_switch(slot, pearl_running, ctx.m_settings.player_throwpearl_key);
-
+		else
+			g_input.toggle_key(ctx.m_settings.player_throwpearl_key);
+	}
+	else
+		g_input.toggle_key(ctx.m_settings.player_throwpearl_key);
 
 	static bool debuff_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwdebuff_key) || debuff_running) && !healing_running && !pearl_running)
+	{
 		if (auto slot = find_debuff(self); slot >= 0)
 			stage_switch(slot, debuff_running, ctx.m_settings.player_throwpearl_key);
+		else
+			g_input.toggle_key(ctx.m_settings.player_throwdebuff_key);
+	}
+	else
+		g_input.toggle_key(ctx.m_settings.player_throwdebuff_key);
 }
 
 std::vector<int> c_throw::find_item(const std::shared_ptr<c_player>& self, int min, int max, jclass clazz) const

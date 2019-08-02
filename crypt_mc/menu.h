@@ -632,7 +632,7 @@ namespace UI
 			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
 
 
-			m_is_inside = m_cursor_x > m_start.x + 11.f && m_cursor_x < m_start.x + text_width + 18.f && m_cursor_y > m_start.y - 3.f && m_cursor_y < m_end.y + 3.f;
+			m_is_inside = m_cursor_x > m_start.x + 11.f && m_cursor_x < m_start.x + text_width + 18.f && m_cursor_y > m_start.y - 3.f && m_cursor_y < m_start.y + 11.f;
 			if (m_value && data->m_left_click && !data->m_ignore && m_is_inside)
 			{
 				*m_value = !*m_value;

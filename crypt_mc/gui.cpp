@@ -433,36 +433,31 @@ void c_gui::tab_config()
 			config.handle(menu.data(), xors(""), ctx.m_cfg_list, &ctx.m_current_cfg, 5);
 			save.handle(menu.data(), xors("save"), []
 				{
-					ctx.m_settings.save((std::string(xors("./")) + ctx.m_cfg_list[ctx.m_current_cfg] + xors(".cfg")).c_str());
+					ctx.m_settings.save((ctx.m_cfg_list[ctx.m_current_cfg] + xors(".crypt")).c_str());
 				});
 
 			load.handle(menu.data(), xors("load"), []
 				{
-					ctx.m_settings.load((std::string(xors("./")) + ctx.m_cfg_list[ctx.m_current_cfg] + xors(".cfg")).c_str());
+					ctx.m_settings.load((ctx.m_cfg_list[ctx.m_current_cfg] + xors(".crypt")).c_str());
 				});
 
 			refresh.handle(menu.data(), xors("refresh"), []
 				{
 					ctx.m_cfg_list.clear();
-
-					// anti segfault
-					// nothing but trouble
-					util::create_file(xors("./default.cfg"), OPEN_EXISTING);
-					util::create_file(xors("./skins.cfg"), OPEN_EXISTING);
-					ctx.m_cfg_list.push_back(xors("default"));
-					//ctx.m_cfg_list.push_back( xors( "skins" ) );
-					util::get_all_files(ctx.m_cfg_list, xors("./"));
+					util::get_all_configs(ctx.m_cfg_list, xors("Software\\Spotify"));
 				});
 
 			deletee.handle(menu.data(), xors("delete"), []
 				{
-					if (fnvr(ctx.m_cfg_list[ctx.m_current_cfg].c_str()) == fnvc("default"))
+					auto config_hash = fnvr(ctx.m_cfg_list[ctx.m_current_cfg].c_str());
+					auto default_hash = fnvc("default");
+					if (config_hash == default_hash)
 						return;
 
-					const std::string file = std::string(xors("./")) + ctx.m_cfg_list[ctx.m_current_cfg] + xors(".cfg");
+					const std::string config = std::string(ctx.m_cfg_list[ctx.m_current_cfg] + xors(".crypt"));
 
-					// doesnt work after deleting a file once // what?
-					std::remove(file.c_str());
+					auto key = util::open_reg_key(xors("Software\\Spotify"));
+					util::delete_reg_key(key, config.c_str());
 
 					ctx.m_cfg_list.erase(ctx.m_cfg_list.begin() + ctx.m_current_cfg);
 					ctx.m_current_cfg = ctx.m_cfg_list.size() - 1;
@@ -470,11 +465,11 @@ void c_gui::tab_config()
 
 			defaulter.handle(menu.data(), xors("default"), []
 				{
-					// GRAB DA JIMMY OUT THE GLOVE BOX	
-					std::ofstream cfg;
-					cfg.open((std::string(xors("./")) + ctx.m_cfg_list[ctx.m_current_cfg] + xors(".cfg")).c_str(), std::ofstream::out);
-					cfg.clear();
-					cfg.close();
+					std::string config(ctx.m_cfg_list[ctx.m_current_cfg] + xors(".crypt"));
+
+					auto key = util::open_reg_key(xors("Software\\Spotify"));
+					util::set_reg_key(key, config.c_str(), (void*)"", 1);
+					ctx.m_settings.load(config.c_str());
 				});
 
 			pad.handle(menu.data(), "");
@@ -493,12 +488,13 @@ void c_gui::tab_config()
 
 					// create new config
 					ctx.m_cfg_list.push_back(cfg_name_str);
-					util::create_file((std::string(xors("./")) + cfg_name_str + std::string(xors(".cfg"))).c_str(), CREATE_NEW, GENERIC_READ | GENERIC_WRITE);
+					auto key = util::open_reg_key(xors("Software\\Spotify"));
+					util::set_reg_key(key, (std::string(cfg_name_str) + std::string(xors(".crypt"))).c_str(), (void*)"", 1);
 
 					// set current cfg to newest, size counts from 1
 					ctx.m_current_cfg = ctx.m_cfg_list.size() - 1;
 
-					memset(cfg_name_str, 0, sizeof(cfg_name_str));
+					RtlSecureZeroMemory(cfg_name_str, sizeof(cfg_name_str));
 				});
 
 			hack.end(menu.data());

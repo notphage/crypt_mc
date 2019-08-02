@@ -63,8 +63,8 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	jdouble target_distance = ctx.m_settings.combat_aim_assist_distance;
 
-	auto target_yaw_change = 90.f, target_pitch_change = 90.f;
-	jfloat yaw = 0.f, pitch = 0.f;
+	auto target_yaw_change =  0.f, target_pitch_change = 0.f;
+	jfloat yaw = self->get_yaw(), pitch = self->get_pitch();
 
 	const vec3 self_origin(self->origin_x(), self->origin_y(), self->origin_z());
 
@@ -78,9 +78,6 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 		if (!ctx.m_settings.combat_aim_assist_nakeds && !player->has_armor())
 			return false;
-
-		pitch = self->get_pitch();
-		yaw = self->get_yaw();
 
 		const vec3 head(player->origin_x(), player->origin_y() + 1.2f, player->origin_z());
 		vec3 diff = head - self_origin;
@@ -111,9 +108,7 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 	bool found_target = false;
 
 	if (ctx.m_settings.combat_aim_assist_sticky && target_entity)
-	{
 		found_target = determine_target(target_entity);
-	}
 
 	if (!found_target)
 	{
