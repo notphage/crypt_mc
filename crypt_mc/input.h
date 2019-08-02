@@ -162,6 +162,9 @@ class c_input_manager
 	int m_scroll_wheel_state{};
 	char m_keyboard_char{};
 
+	bool m_toggled[ARRAYSIZE(m_pressed_keys)];
+	bool m_pressed_once[ARRAYSIZE(m_toggled)];
+
 public:
 	void capture_mouse_move(long lparam);
 	void clear();
@@ -172,6 +175,9 @@ public:
 	//checks if the key is pressed
 	bool is_key_pressed(int key);
 	bool is_key_pressed(keysetting_t key);
+
+	//allows code to toggle on/off keybinds
+	void toggle_key(keysetting_t key);
 
 	//returns the first found key pressed, or KEY_NONE if none are
 	VirtualKeys_t is_any_key_pressed();

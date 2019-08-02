@@ -5,7 +5,7 @@
 
 void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	auto stage_switch = [&](int slot, bool& is_running)
+	auto stage_switch = [&](int slot, bool& is_running, keysetting_t& key)
 	{
 		static int stage = 0;
 		static int old_slot = -1;
@@ -28,11 +28,19 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 
 			case 1:
 			{
-				if (clock() - delay > ctx.m_settings.player_throw_delay && self->get_held_item())
+				if (clock() - delay > 150 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && self->get_held_item())
 				{
 					self->send_use_item(self->get_held_item());
 
 					stage++;
+				}
+				else if (!self->get_held_item())
+				{
+					self->set_current_slot(old_slot);
+					old_slot = -1;
+
+					stage = 0;
+					is_running = false;
 				}
 				break;
 			}
@@ -41,11 +49,11 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 			{
 				self->set_current_slot(old_slot);
 
-				delay = clock();
 				old_slot = -1;
 
 				stage = 0;
 				is_running = false;
+				g_input.toggle_key(key);
 
 				//Set disabled
 				break;
@@ -60,18 +68,18 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	if ((valid_keystate(ctx.m_settings.player_throwhealing_key) || healing_running))
 		if (self->get_max_health() - self->get_health() >= 8.f || healing_running)
 			if (auto slot = find_healing(self); slot >= 0)
-				stage_switch(slot, healing_running);
+				stage_switch(slot, healing_running, ctx.m_settings.player_throwhealing_key);
 
 	static bool pearl_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwpearl_key) || pearl_running) && !healing_running)
 		if (auto slot = find_pearl(self); slot >= 0)
-			stage_switch(slot, pearl_running);
+			stage_switch(slot, pearl_running, ctx.m_settings.player_throwpearl_key);
 
 
 	static bool debuff_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwdebuff_key) || debuff_running) && !healing_running && !pearl_running)
 		if (auto slot = find_debuff(self); slot >= 0)
-			stage_switch(slot, debuff_running);
+			stage_switch(slot, debuff_running, ctx.m_settings.player_throwpearl_key);
 }
 
 std::vector<int> c_throw::find_item(const std::shared_ptr<c_player>& self, int min, int max, jclass clazz) const

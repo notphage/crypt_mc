@@ -1336,6 +1336,8 @@ public:
 	virtual void enable_light_map() = 0;
 	virtual void disable_light_map() = 0;
 	virtual void setup_camera_transform(jfloat, int) = 0;
+
+	virtual jlong get_window_handle() = 0;
 };
 
 struct stack_trace

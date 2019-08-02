@@ -62,6 +62,12 @@ void hack(HINSTANCE bin)
 
 		auto mc = ctx.get_game();
 
+		if (auto cur_hwnd = (HWND)mc->get_window_handle(); cur_hwnd != ctx.m_window)
+		{
+			ctx.m_window = cur_hwnd;
+			hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, (long long)hooked::wnd_proc));
+		}
+
 		auto self = mc->get_player();
 		auto world = mc->get_world();
 

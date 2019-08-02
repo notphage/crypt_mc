@@ -6,6 +6,8 @@ struct stack_trace_fields
 	jclass stack_trace_element = nullptr;
 	jclass throwable = nullptr;
 
+	jobject obj_exception = nullptr;
+
 	jfieldID fid_method_name = nullptr;
 	jfieldID fid_line_number = nullptr;
 
@@ -31,25 +33,27 @@ void c_stack_trace::instantiate(JNIEnv* _jni)
 		stacktracefields.mid_get_stack_trace_element = jni->GetMethodID(stacktracefields.throwable, xors("getStackTraceElement"), xors("(I)Ljava/lang/StackTraceElement;"));
 		stacktracefields.mid_get_stack_trace_depth = jni->GetMethodID(stacktracefields.throwable, xors("getStackTraceDepth"), xors("()I"));
 
+		stacktracefields.obj_exception = jni->NewGlobalRef(jni->NewObject(stacktracefields.throwable, stacktracefields.mid_exception_init));
+
 		stacktracefields.fid_method_name = jni->GetFieldID(stacktracefields.stack_trace_element, xors("methodName"), xors("Ljava/lang/String;"));
 		stacktracefields.fid_line_number = jni->GetFieldID(stacktracefields.stack_trace_element, xors("lineNumber"), xors("I"));
+
+		init_fields = true;
 	}
 }
 
 void c_stack_trace::get_stack_trace(int index, stack_trace& stack)
 {
-	jobject obj_exception = jni->NewObject(stacktracefields.throwable, stacktracefields.mid_exception_init);
-	jint stack_trace_depth = jni->CallIntMethod(obj_exception, stacktracefields.mid_get_stack_trace_depth);
+	jint stack_trace_depth = jni->CallIntMethod(stacktracefields.obj_exception, stacktracefields.mid_get_stack_trace_depth);
 
 	if (stack_trace_depth <= index)
 		return;
 
-	jobject stack_trace_element = jni->CallObjectMethod(obj_exception, stacktracefields.mid_get_stack_trace_element, index);
+	jobject stack_trace_element = jni->CallObjectMethod(stacktracefields.obj_exception, stacktracefields.mid_get_stack_trace_element, index);
 	jstring str_method_name = reinterpret_cast<jstring>(jni->GetObjectField(stack_trace_element, stacktracefields.fid_method_name));
 
 	jint line_number = jni->GetIntField(stack_trace_element, stacktracefields.fid_line_number);
 
-	jni->DeleteLocalRef(obj_exception);
 	jni->DeleteLocalRef(stack_trace_element);
 
 	stack.valid = true;

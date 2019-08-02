@@ -132,4 +132,6 @@ public:
 	void set_object_mouse_over(jobject player) override;
 	void disable_light_map() override;
 	void setup_camera_transform(jfloat, int) override;
+
+	jlong get_window_handle() override;
 };

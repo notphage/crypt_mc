@@ -13,6 +13,9 @@ long long __stdcall hooked::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam, i
 		return CallWindowProcA(hooked::o_wnd_proc, hwnd, msg, uparam, param);
 	}
 
+	if (hwnd != ctx.m_window)
+		ctx.m_window = hwnd;
+
 	if (msg == WM_MOUSEMOVE)
 		g_input.capture_mouse_move(param);
 

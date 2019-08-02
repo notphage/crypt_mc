@@ -36,6 +36,7 @@ void c_gui::tab_combat()
 	static UI::c_slider aim_assist_fov;
 	static UI::c_float_slider aim_assist_v_speed;
 	static UI::c_float_slider aim_assist_h_speed;
+	static UI::c_float_slider aim_assist_scale;
 	static UI::c_float_slider aim_assist_distance;
 	static UI::c_multi_dropdown aim_assist_conditions;
 
@@ -101,6 +102,7 @@ void c_gui::tab_combat()
 				aim_assist_key.handle(menu.data(), "", &ctx.m_settings.combat_aim_assist_key, keytype_t::kt_all);
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
+			aim_assist_scale.handle(menu.data(), xors("scale"), &ctx.m_settings.combat_aim_assist_scale, 0.f, 1.f, 0.01f);
 			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 1.f, 10.f, 0.01f);
 
 			if (ctx.m_settings.combat_aim_assist_vertical)
@@ -170,16 +172,16 @@ void c_gui::tab_player()
 	{
 		throw_groupbox.start(menu.data(), xors("throw"));
 		{
-			throwhealing_key.handle(menu.data(), xors("healing"), &ctx.m_settings.player_throwhealing_key, keytype_t::kt_hold);
+			throwhealing_key.handle(menu.data(), xors("healing"), &ctx.m_settings.player_throwhealing_key, keytype_t::kt_toggle);
 			throwhealing_items.handle(menu.data(), xors("items"),
 				{
 					{&ctx.m_settings.player_throwhealing_potions, xors("potions")},
 					{&ctx.m_settings.player_throwhealing_soup, xors("soup")}
 				});
 
-			throwpearl_key.handle(menu.data(), xors("pearl"), &ctx.m_settings.player_throwpearl_key, keytype_t::kt_hold);
+			throwpearl_key.handle(menu.data(), xors("pearl"), &ctx.m_settings.player_throwpearl_key, keytype_t::kt_toggle);
 
-			throwdebuff_key.handle(menu.data(), xors("debuff"), &ctx.m_settings.player_throwdebuff_key, keytype_t::kt_hold);
+			throwdebuff_key.handle(menu.data(), xors("debuff"), &ctx.m_settings.player_throwdebuff_key, keytype_t::kt_toggle);
 			throwdebuff_items.handle(menu.data(), xors("items"),
 				{
 					{&ctx.m_settings.player_throwdebuff_damage, xors("damage")},
@@ -190,7 +192,7 @@ void c_gui::tab_player()
 					{&ctx.m_settings.player_throwdebuff_wither, xors("wither")},
 				});
 
-			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 50, 200, 1, xors("ms"));
+			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 0, 200, 1, xors("ms"));
 		}
 		throw_groupbox.end(menu.data(), &ctx.m_settings.player_throw);
 

@@ -216,6 +216,7 @@ public:
 	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 2.f};
 	setting_t<float> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 1.f};
 
+	setting_t<float> combat_aim_assist_scale{ &m_holder, fnvc("combat_aim_assist_scale"), 0.4f };
 	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.0f};
 
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
@@ -244,7 +245,7 @@ public:
 
 	//Player features
 	setting_t<bool> player_throw{ &m_holder, fnvc("player_throw"), false };
-	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 50 };
+	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 0 };
 
 	setting_t<keysetting_t> player_throwhealing_key{ &m_holder, fnvc("player_throwhealing_key"), {} };
 	setting_t<bool> player_throwhealing_potions{ &m_holder, fnvc("player_throwhealing_potions"), true };

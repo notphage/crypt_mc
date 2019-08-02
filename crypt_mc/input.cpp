@@ -104,8 +104,6 @@ bool c_input_manager::is_key_pressed(keysetting_t key)
 	VirtualKeys_t pressed = (VirtualKeys_t)key.key;
 	keytype_t keytype = (keytype_t)key.type;
 	bool valid{};
-	static bool toggled[ARRAYSIZE(m_pressed_keys)];
-	static bool pressed_once[ARRAYSIZE(toggled)];
 
 	if (keytype == kt_always)
 		return true;
@@ -116,18 +114,27 @@ bool c_input_manager::is_key_pressed(keysetting_t key)
 	if (keytype == kt_toggle)
 	{
 		if (is_key_pressed(pressed))
-			pressed_once[pressed] = true;
+			m_pressed_once[pressed] = true;
 
-		if (!is_key_pressed(pressed) && pressed_once[pressed])
+		if (!is_key_pressed(pressed) && m_pressed_once[pressed])
 		{
-			toggled[pressed] = !toggled[pressed];
-			pressed_once[pressed] = false;
+			m_toggled[pressed] = !m_toggled[pressed];
+			m_pressed_once[pressed] = false;
 		}
 
-		return toggled[pressed];
+		return m_toggled[pressed];
 	}
 
 	return false;
+}
+
+void c_input_manager::toggle_key(keysetting_t key)
+{
+	VirtualKeys_t pressed = (VirtualKeys_t)key.key;
+	keytype_t keytype = (keytype_t)key.type;
+
+	if (keytype == kt_toggle)
+		m_toggled[pressed] = !m_toggled[pressed];
 }
 
 std::string c_input_manager::get_key_name(VirtualKeys_t key)

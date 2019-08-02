@@ -2,8 +2,10 @@
 
 class c_aim_assist : public c_feature
 {
+	std::vector<float> m_vec;
+	float m_last_scale = -1.f;
 
-	float clamp(float rotation);
+	void scan();
 	float get_x_speed() const;
 	float get_y_speed() const;
 public:
