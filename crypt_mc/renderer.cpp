@@ -17,6 +17,9 @@ render_list_t::ptr c_renderer::make_render_list() const
 
 void c_renderer::draw_scene()
 {
+	if (m_render_list->batches.empty())
+		return;
+
 	// Backup GL state
 	LI_FN(glGetIntegerv).cached()(GL_TEXTURE_BINDING_2D, &m_last_texture);
 	LI_FN(glGetIntegerv).cached()(GL_POLYGON_MODE, m_last_polygon_mode);
@@ -24,6 +27,7 @@ void c_renderer::draw_scene()
 	LI_FN(glGetIntegerv).cached()(GL_SCISSOR_BOX, m_last_scissor_box);
 	LI_FN(glPushAttrib).cached()(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT);
 
+	LI_FN(glShadeModel).cached()(GL_SMOOTH);
 	LI_FN(glEnable).cached()(GL_BLEND);
 	LI_FN(glBlendFunc).cached()(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	LI_FN(glDisable).cached()(GL_CULL_FACE);

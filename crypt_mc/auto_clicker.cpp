@@ -25,10 +25,10 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 	if (!ctx.m_settings.combat_auto_clicker_inventory && in_inventory)
 		return;
 
-	
+
 	if (!in_inventory && ctx.m_settings.combat_auto_clicker_weapons_only && !has_weapon)
 		return;
-	
+
 	if (in_inventory && ctx.m_settings.combat_auto_clicker_inventory && !g_input.is_key_pressed(KEYS_SHIFT))
 		return;
 
@@ -44,15 +44,15 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 			if (clock() - last_click > 80)
 			{
 				left_click = true;
-				current_delay = util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1);
+				current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-10, 10), 10, 2000);
 				last_click = clock();
 				clicks = 0;
-				clicks_until_skip = util::random(45, 62);
+				clicks_until_skip = util::random(43, 62);
 			}
 			return;
 		}
 
-		if (left_click && ((clock() - last_click) > util::random(current_delay / 2, current_delay / 2 + current_delay / 18)))
+		if (left_click && ((clock() - last_click) > util::random(current_delay / 2, (current_delay / 2) + current_delay / util::random(9, 21))))
 		{
 			g_input.press_mouse(true);
 			left_click = false;
@@ -62,7 +62,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 			g_input.release_mouse(true);
 
 			left_click = true;
-			current_delay = util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1);
+			current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-10, 10), 10, 2000);
 			last_click = clock();
 			clicks += 1;
 		}

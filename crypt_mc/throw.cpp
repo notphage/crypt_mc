@@ -28,10 +28,11 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 
 			case 1:
 			{
-				if (clock() - delay > 150 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && self->get_held_item())
+				if (clock() - delay > 75 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && self->get_held_item())
 				{
 					self->send_use_item(self->get_held_item());
 
+					delay = clock();
 					stage++;
 				}
 				else if (!self->get_held_item())
@@ -47,15 +48,18 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 
 			case 2:
 			{
-				self->set_current_slot(old_slot);
+				if (clock() - delay > 75 + util::random(-30, 30))
+				{
+					self->set_current_slot(old_slot);
 
-				old_slot = -1;
+					old_slot = -1;
 
-				stage = 0;
-				is_running = false;
-				g_input.toggle_key(key);
+					stage = 0;
+					is_running = false;
+					g_input.toggle_key(key);
 
-				//Set disabled
+					//Set disabled
+				}
 				break;
 			}
 		}
@@ -66,7 +70,7 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 
 	static bool healing_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwhealing_key) || healing_running))
-		if (self->get_max_health() - self->get_health() >= 8.f || healing_running)
+		if (self->get_max_health() - self->get_health() >= 7.f || healing_running)
 		{
 			if (auto slot = find_healing(self); slot >= 0)
 				stage_switch(slot, healing_running, ctx.m_settings.player_throwhealing_key);
@@ -173,7 +177,6 @@ int c_throw::find_debuff(const std::shared_ptr<c_player>& self) const
 		debuffs.emplace_back(2, &ctx.m_settings.player_throwdebuff_slow);
 		debuffs.emplace_back(15, &ctx.m_settings.player_throwdebuff_blind);
 		debuffs.emplace_back(18, &ctx.m_settings.player_throwdebuff_weakness);
-		debuffs.emplace_back(20, &ctx.m_settings.player_throwdebuff_wither);
 	)
 
 

@@ -27,7 +27,7 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 		const vec3 origin(player->origin_x(), player->origin_y(), player->origin_z());
 		const vec3 diff = origin - player_origin;
 
-		auto distance = diff.length();
+		auto distance = sqrt(diff.x * diff.x + diff.z * diff.z);
 
 		if (distance > target_distance)
 			continue;
@@ -49,7 +49,7 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	    auto p_yaw = atan2(diff.z, diff.x) * 180.0f / math::pi - 90.0F;
 	    auto yaw_change = math::normalize(p_yaw - self->get_yaw());
 
-        float scaled = distance > 3.0f ? 7.0f - ((distance - 3.0f) / 1.2f) : 7.0f;
+        float scaled = (distance > 3.0f ? 7.0f - ((distance - 3.0f) / 1.2f) : 7.0f) * (ctx.m_settings.combat_reach_hitboxes ? ctx.m_settings.combat_reach_hitboxes_scale : 1.f);
 
 	    if (abs(yaw_change) < scaled)
 	    {

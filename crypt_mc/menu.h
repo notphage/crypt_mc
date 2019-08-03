@@ -6,71 +6,6 @@
 
 namespace UI
 {
-	//void string(color_t, float, float, bool, const char*, ...)
-	//{
-	//
-	//}
-	//
-	//uint32_t text_width(const char*, ...)
-	//{
-	//	return 0;
-	//}
-	
-	class c_cursor
-	{
-		int cursor_x{}, cursor_y{};
-		float hue_cycle{};
-	public:
-		void handle()
-		{
-			g_input.get_cursor_pos(cursor_x, cursor_y);
-
-			hue_cycle = math::clamp<float>(hue_cycle + 0.002f, 0.f, 1.f);
-
-			draw();
-		}
-
-		void draw()
-		{
-			const color_t outer_color(3, 6, 26, 215);
-			const color_t inner_color(255, 255, 255, 255); //color_t::FromHSB( hue_cycle, 1.0f, 1.0f )
-
-#pragma warning( push )
-#pragma warning( disable : 4244 )
-
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 1, cursor_y, 1, 17 }, outer_color);
-			
-			for (int i = 0; i < 11; i++)
-				ctx.m_renderer->draw_filled_rect({ cursor_x + 2 + i, cursor_y + 1 + i, 1, 1 }, outer_color);
-			
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 8, cursor_y + 12, 5, 1 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 8, cursor_y + 13, 1, 1 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 9, cursor_y + 14, 1, 2 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 10, cursor_y + 16, 1, 2 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 8, cursor_y + 18, 2, 1 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 7, cursor_y + 16, 1, 2 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 6, cursor_y + 14, 1, 2 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 5, cursor_y + 13, 1, 1 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 4, cursor_y + 14, 1, 1 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 3, cursor_y + 15, 1, 1 }, outer_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 2, cursor_y + 16, 1, 1 }, outer_color);
-			
-			for (int i = 0; i < 4; i++)
-				ctx.m_renderer->draw_filled_rect({ cursor_x + 2 + i, cursor_y + 2 + i, 1, 14 - (i * 2) }, inner_color);
-			
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 6, cursor_y + 6, 1, 8 }, inner_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 7, cursor_y + 7, 1, 9 }, inner_color);
-			
-			for (int i = 0; i < 4; i++)
-				ctx.m_renderer->draw_filled_rect({ cursor_x + 8 + i, cursor_y + 8 + i, 1, 4 - i }, inner_color);
-			
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 8, cursor_y + 14, 1, 4 }, inner_color);
-			ctx.m_renderer->draw_filled_rect({ cursor_x + 9, cursor_y + 16, 1, 2 }, inner_color);
-
-#pragma warning( pop )
-		}
-	};
-
 	class c_control
 	{
 	public:
@@ -1940,25 +1875,42 @@ namespace UI
 
 	class c_color_picker : public c_control
 	{
-		uint8_t temp_r{};
-		uint8_t temp_g{};
-		uint8_t temp_b{};
-
 		const char* m_text{};
+		color_t m_temp_col{};
+		color_t m_picker_col{};
+		int m_elem_tracker = -1;
 
 		bool m_is_open{};
+		bool m_inside_picker_window{};
+		bool m_inside_picker{};
+		bool m_inside_hue_picker{};
+		bool m_inside_alpha_picker{};
 		int m_draw_tick{};
+
+		float m_picker_hue_val = 0.f;
+		float m_picker_val_x = 0.f;
+		float m_picker_val_y = 0.f;
+		float m_picker_alpha_val = 1.f;
 
 		vec2 m_box_start{};
 		vec2 m_box_end{};
 		vec2 m_box_bounds{ 20, 8 };
 
+		vec2 m_picker_window_start{};
+		vec2 m_picker_window_end{};
+		vec2 m_picker_window_bounds{ 150, 150 };
+
 		vec2 m_picker_start{};
 		vec2 m_picker_end{};
-		vec2 m_picker_bounds{ 256, 256 };
+		vec2 m_picker_bounds{};
 
-		int m_alpha_value{};
-		c_slider m_alpha_slider{};
+		vec2 m_hue_picker_start{};
+		vec2 m_hue_picker_end{};
+		vec2 m_hue_picker_bounds{};
+
+		vec2 m_alpha_picker_start{};
+		vec2 m_alpha_picker_end{};
+		vec2 m_alpha_picker_bounds{};
 	public:
 		void draw(c_window_data* data)
 		{
@@ -1975,7 +1927,7 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_box_bounds.x + 1.f, m_box_bounds.y + 1.f }, color_t(44, 44, 44, data->m_alpha));
 
 			// inner box
-			color_t box_color_top(temp_r, temp_g, temp_b, data->m_alpha);
+			color_t box_color_top(m_temp_col.r(), m_temp_col.g(), m_temp_col.b(), data->m_alpha);
 			color_t box_color_bottom
 			(
 				box_color_top.r() > 25 ? box_color_top.r() - 25 : 0,
@@ -1987,7 +1939,7 @@ namespace UI
 			ctx.m_renderer->draw_gradient_rect({ m_box_start.x, m_box_start.y, m_box_bounds.x, m_box_bounds.y }, box_color_top, box_color_top, box_color_bottom, box_color_bottom);
 		}
 
-		void handle(c_window_data* data, const char* text, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a = nullptr)
+		void handle(c_window_data* data, const char* text, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a)
 		{
 			g_input.get_cursor_pos(m_cursor_x, m_cursor_y);
 
@@ -1998,27 +1950,31 @@ namespace UI
 			m_box_start = vec2(data->m_x + 150.f, data->m_y);
 			m_box_end = m_box_start + m_box_bounds;
 
-			m_picker_start = vec2(m_box_start.x, m_box_start.y + 10);
+			m_picker_window_start = vec2(m_box_start.x, m_box_start.y + 10);
+			m_picker_window_end = m_picker_window_start + m_picker_window_bounds;
+
+			m_picker_start = vec2(m_picker_window_start.x + 3.f, m_picker_window_start.y + 3.f);
+			m_picker_bounds = vec2(m_picker_window_bounds.x - 25.f, m_picker_window_bounds.y - 25.f);
 			m_picker_end = m_picker_start + m_picker_bounds;
 
-			temp_r = *r;
-			temp_g = *g;
-			temp_b = *b;
+			m_hue_picker_start = vec2(m_picker_end.x + 6.f, m_picker_start.y);
+			m_hue_picker_bounds = vec2(10.f, m_picker_bounds.y);
+			m_hue_picker_end = m_hue_picker_start + m_hue_picker_bounds;
+
+			m_alpha_picker_start = vec2(m_picker_start.x, m_picker_end.y + 6.f);
+			m_alpha_picker_bounds = vec2(m_picker_bounds.x, 10.f);
+			m_alpha_picker_end = m_alpha_picker_start + m_alpha_picker_bounds;
+
+			m_temp_col = { *r, *g, *b, *a };
+
 			// setup coord for next item
 			data->m_y += 15.f;
 
-			if (a)
-			{
-				m_alpha_value = *a;
-
-				m_alpha_slider.handle(data, "", &m_alpha_value, 0, 255);
-
-				m_alpha_value = math::clamp<int>(m_alpha_value, 0, 255);
-
-				*a = m_alpha_value;
-			}
-
 			m_is_inside = m_cursor_x > m_box_start.x && m_cursor_x < m_box_end.x && m_cursor_y > m_box_start.y && m_cursor_y < m_box_end.y;
+			m_inside_picker_window = m_cursor_x > m_picker_window_start.x && m_cursor_x < m_picker_window_end.x && m_cursor_y > m_picker_window_start.y && m_cursor_y < m_picker_window_end.y;
+			m_inside_picker = m_cursor_x > m_picker_start.x && m_cursor_x < m_picker_end.x && m_cursor_y > m_picker_start.y && m_cursor_y < m_picker_end.y;
+			m_inside_hue_picker = m_cursor_x > m_hue_picker_start.x && m_cursor_x < m_hue_picker_end.x && m_cursor_y > m_hue_picker_start.y && m_cursor_y < m_hue_picker_end.y;
+			m_inside_alpha_picker = m_cursor_x > m_alpha_picker_start.x && m_cursor_x < m_alpha_picker_end.x && m_cursor_y > m_alpha_picker_start.y && m_cursor_y < m_alpha_picker_end.y;
 
 			if (m_is_inside && data->m_first_click && !data->m_ignore)
 			{
@@ -2026,44 +1982,55 @@ namespace UI
 				data->m_ignore = true;
 			}
 
-			if (m_is_open)
+			if (!m_is_inside && !m_inside_picker_window && data->m_first_click)
 			{
-				if (m_cursor_x > m_picker_start.x && m_cursor_x < m_picker_end.x && m_cursor_y > m_picker_start.y && m_cursor_y < m_picker_end.y)
+				m_is_open = false;
+				data->m_ignore = false;
+			}
+
+			if (m_is_open && m_inside_picker_window)
+				data->m_ignore = true;
+
+			if (m_is_open && data->m_left_click && m_inside_picker_window)
+			{
+				if (m_inside_picker && (m_elem_tracker == -1 || m_elem_tracker == 0))
 				{
-					//set temp color
-					float height = m_picker_bounds.y - 2;
-					float half_height = height * 0.5f;
+					if (data->m_first_click)
+						m_elem_tracker = 0;
 
-					float x_offset = m_cursor_x - (m_picker_start.x + 1);
-					float y_offset = m_cursor_y - (m_picker_start.y + 1);
-
-					float hue = x_offset / height;
-
-					color_t color;
-
-					if (y_offset > half_height)
-					{
-						float brightness = 1.f - math::clamp<float>((y_offset - half_height) / half_height, 0.f, 1.f);
-						color = color_t::from_hsb(hue, 1.f, brightness);
-					}
-					else
-					{
-						float saturation = math::clamp<float>(y_offset / half_height, 0.f, 1.f);
-						color = color_t::from_hsb(hue, saturation, 1.f);
-					}
-
-					temp_r = color.r();
-					temp_g = color.g();
-					temp_b = color.b();
+					m_picker_val_x = std::clamp((m_cursor_x - m_picker_start.x) / (m_picker_bounds.x - 1.f), 0.f, 1.f);
+					m_picker_val_y = 1.f - std::clamp((m_cursor_y - m_picker_start.y) / (m_picker_bounds.y - 1.f), 0.f, 1.f);
 				}
 
-				if (!data->m_left_click)
+				if (m_inside_hue_picker && (m_elem_tracker == -1 || m_elem_tracker == 1))
 				{
-					*r = temp_r;
-					*g = temp_g;
-					*b = temp_b;
-					m_is_open = false;
+					if (data->m_first_click)
+						m_elem_tracker = 1;
+
+					m_picker_hue_val = std::clamp((m_cursor_y - m_hue_picker_start.y) / (m_hue_picker_bounds.y - 1.f), 0.f, 1.f);
+					m_picker_col.from_hsv(m_picker_hue_val, 1.f, 1.f);
 				}
+
+				if (m_inside_alpha_picker && (m_elem_tracker == -1 || m_elem_tracker == 2))
+				{
+					if (data->m_first_click)
+						m_elem_tracker = 2;
+
+					m_picker_alpha_val = std::clamp(((m_cursor_x - m_alpha_picker_start.x) / (m_alpha_picker_bounds.x)) * 255.f, 0.f, 255.f);
+				}
+
+				m_temp_col.from_hsv(m_picker_hue_val, m_picker_val_x, m_picker_val_y);
+				m_temp_col.a((int)m_picker_alpha_val);
+
+				*r = m_temp_col.r();
+				*g = m_temp_col.g();
+				*b = m_temp_col.b();
+				*a = m_temp_col.a();
+			}
+			else
+			{
+				m_elem_tracker = -1;
+				m_picker_col.from_hsv(m_picker_hue_val, 1.f, 1.f);
 			}
 
 			draw(data);
@@ -2077,28 +2044,34 @@ namespace UI
 			if (m_draw_tick != data->m_draw_counter)
 				return;
 
-			// outer edge
-			ctx.m_renderer->draw_filled_rect({ m_picker_start.x, m_picker_start.y, m_bounds.x, m_bounds.y }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_rect({ m_picker_window_start.x - 1.f, m_picker_window_start.y - 1.f, m_picker_window_bounds.x + 2.f, m_picker_window_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_picker_window_start.x, m_picker_window_start.y, m_picker_window_bounds.x, m_picker_window_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			// picker
-			float height = m_picker_bounds.y - 2.f;
-			float half_height = height / 2.f;
+			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b()), color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b()));
+			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(0, 0, 0, 0), color_t(0, 0, 0, 0), color_t::black(), color_t::black());
 
-			for (float i = 0.f; i < height; i += 1.f)
+			ctx.m_renderer->draw_rect({ m_picker_start.x + (m_picker_bounds.x * (roundf(100.f * m_picker_val_x) / 100.f)) - 2.5f, m_picker_start.y + (m_picker_bounds.y * (roundf(100.f * (1.f - m_picker_val_y)) / 100.f)) - 2.5f, 5.f, 5.f }, color_t(0, 0, 0, data->m_alpha));
+
+			static color_t hue_col[7] =
 			{
-				float hue = i / height;
+				{ 255, 0, 0   },
+				{ 255, 255, 0 },
+				{ 0, 255, 0   },
+				{ 0, 255, 255 },
+				{ 0, 0, 255   },
+				{ 255, 0, 255 },
+				{ 255, 0, 0   }
+			};
 
-				color_t top = color_t::from_hsb(hue, 0.f, 1.f);
-				color_t middle = color_t::from_hsb(hue, 1.f, 1.f);
-				color_t bottom = color_t::from_hsb(hue, 1.f, 0.f);
-
-				*top.a_ptr() = data->m_alpha;
-				*middle.a_ptr() = data->m_alpha;
-				*bottom.a_ptr() = data->m_alpha;
-
-				ctx.m_renderer->draw_gradient_rect({ m_picker_start.x + 1.f + i, m_picker_start.y + 1.f, 1.f, half_height }, top, top, middle, middle);
-				ctx.m_renderer->draw_gradient_rect({ m_picker_start.x + 1.f + i, m_picker_start.y + 1.f + half_height, 1.f, half_height }, middle, middle, bottom, bottom);
+			for (auto i = 0; i < 6; ++i)
+			{
+				const vec4 v(m_hue_picker_start.x, m_hue_picker_start.y + ((i * m_hue_picker_bounds.y) / 6.f), m_hue_picker_bounds.x, (m_hue_picker_bounds.y / 6.f));
+				ctx.m_renderer->draw_gradient_rect(v, hue_col[i], hue_col[i], hue_col[i + 1], hue_col[i + 1]);
 			}
+			ctx.m_renderer->draw_line({ m_hue_picker_start.x - 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (roundf(100.f * m_picker_hue_val) / 100.f)) }, { m_hue_picker_end.x + 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (roundf(100.f * m_picker_hue_val) / 100.f)) }, color_t(0, 0, 0, data->m_alpha));
+
+			ctx.m_renderer->draw_gradient_rect({ m_alpha_picker_start.x, m_alpha_picker_start.y, m_alpha_picker_bounds.x, m_alpha_picker_bounds.y }, color_t::black(), color_t::white(), color_t::black(), color_t::white());
+			ctx.m_renderer->draw_line({ m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (roundf(m_picker_alpha_val) / 255.f)), m_alpha_picker_start.y - 2.f }, { m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (roundf(m_picker_alpha_val) / 255.f)), m_alpha_picker_end.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 		}
 	};
 

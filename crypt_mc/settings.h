@@ -263,7 +263,7 @@ public:
 	setting_t<keysetting_t> combat_velocity_key{&m_holder, fnvc("combat_velocity_key"), {}};
 	setting_t<bool> combat_velocity_on_sprint{ &m_holder, fnvc("combat_velocity_on_sprint"), false };
 	setting_t<bool> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), false };
-	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 80 };
+	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 9 };
 	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 80 };
 	setting_t<int> combat_velocity_vertical{&m_holder, fnvc("combat_velocity_vertical"), 100};
 	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 85};
@@ -273,8 +273,10 @@ public:
 	setting_t<bool> combat_reach_on_sprint{ &m_holder, fnvc("combat_reach_on_sprint"), false };
 	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), false };
 	setting_t<bool> combat_reach_y_check{ &m_holder, fnvc("combat_reach_y_check"), false };
+	setting_t<bool> combat_reach_hitboxes{ &m_holder, fnvc("combat_reach_hitboxes"), false };
 	setting_t<float> combat_reach_distance_min{ &m_holder, fnvc("combat_reach_distance_min"), 3.f };
 	setting_t<float> combat_reach_distance_max{ &m_holder, fnvc("combat_reach_distance_max"), 3.2f };
+	setting_t<float> combat_reach_hitboxes_scale{ &m_holder, fnvc("combat_reach_hitboxes_scale"), 1.f };
 
 	//Player features
 	setting_t<bool> player_throw{ &m_holder, fnvc("player_throw"), false };
@@ -292,7 +294,6 @@ public:
 	setting_t<bool> player_throwdebuff_slow{ &m_holder, fnvc("player_throwdebuff_slow") };
 	setting_t<bool> player_throwdebuff_blind{ &m_holder, fnvc("player_throwdebuff_blind") };
 	setting_t<bool> player_throwdebuff_weakness{ &m_holder, fnvc("player_throwdebuff_weakness") };
-	setting_t<bool> player_throwdebuff_wither{ &m_holder, fnvc("player_throwdebuff_wither") };
 
 	setting_t<bool> player_fast_place{&m_holder, fnvc("player_fast_place"), false};
 	setting_t<keysetting_t> player_fast_place_key{&m_holder, fnvc("player_fast_place_key"), {}};

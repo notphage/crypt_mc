@@ -22,6 +22,7 @@
 #include "flight.h"
 #include "sprint.h"
 #include "step.h"
+#include "anti_afk.h"
 
 int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 {
@@ -133,6 +134,7 @@ void c_context::determine_version()
     ctx.m_features.push_back(std::make_unique<c_flight>());
     ctx.m_features.push_back(std::make_unique<c_sprint>());
     ctx.m_features.push_back(std::make_unique<c_step>());
+	ctx.m_features.push_back(std::make_unique<c_anti_afk>());
 }
 
 jvmtiEnv* c_context::get_jvmti_env()

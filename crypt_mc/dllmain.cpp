@@ -2,6 +2,8 @@
 #include "header.h"
 #include "MinHook.h"
 
+#include <winternl.h>
+
 c_context ctx;
 
 // to get rid of a string in microsoft crt
@@ -119,8 +121,6 @@ void hack(HINSTANCE bin)
 		Sleep(100);
 	}
 #else
-	// im pro choice so its okay
-	abort();
 #endif
 }
 
@@ -195,6 +195,7 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 #else
 		//fuck_skids();
 		// take username and sub days left out of custom header
+		// delete PE header
 #endif
 
 		LI_FN(CreateThread).cached()(0, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, 0);

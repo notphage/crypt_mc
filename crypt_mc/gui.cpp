@@ -15,12 +15,12 @@ c_gui gui;
 
 // wont work cuz menu handles loading/ saving, meaning pos gets set before we can update it
 UI::c_window menu(&ctx.m_settings.gui_menu_pos);
-UI::c_cursor cursor;
 
 void c_gui::background()
 {
 	// transparent background
-	ctx.m_renderer->draw_filled_rect({ 0.f, 0.f, (float)ctx.m_screen_w, (float)ctx.m_screen_h }, color_t(1, 1, 1, 0.5f * menu.data()->m_alpha));
+	if (menu.data()->m_alpha > 0)
+		ctx.m_renderer->draw_filled_rect({ 0.f, 0.f, (float)ctx.m_screen_w, (float)ctx.m_screen_h }, color_t(1, 1, 1, 0.5f * menu.data()->m_alpha));
 }
 
 void c_gui::tab_combat()
@@ -52,6 +52,7 @@ void c_gui::tab_combat()
 	static UI::c_key_bind reach_key;
 	static UI::c_float_slider reach_distance_min;
 	static UI::c_float_slider reach_distance_max;
+	static UI::c_float_slider reach_hitboxes_scale;
 	static UI::c_multi_dropdown reach_conditions;
 
 	menu.column_left();
@@ -77,13 +78,17 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_reach)
 				reach_key.handle(menu.data(), "", &ctx.m_settings.combat_reach_key, keytype_t::kt_all);
 
-			reach_distance_min.handle(menu.data(), xors("min"), &ctx.m_settings.combat_reach_distance_min, 3.f, 5.99f, 0.1f, xors("%.2f"));
-			reach_distance_max.handle(menu.data(), xors("max"), &ctx.m_settings.combat_reach_distance_max, ctx.m_settings.combat_reach_distance_min, 6.f, 0.1f, xors("%.2f"));
+			reach_distance_min.handle(menu.data(), xors("min"), &ctx.m_settings.combat_reach_distance_min, 3.f, 5.99f, 0.01f, xors("%.2f"));
+			reach_distance_max.handle(menu.data(), xors("max"), &ctx.m_settings.combat_reach_distance_max, ctx.m_settings.combat_reach_distance_min, 6.f, 0.01f, xors("%.2f"));
+			if (ctx.m_settings.combat_reach_hitboxes)
+				reach_hitboxes_scale.handle(menu.data(), xors("hitbox scale"), &ctx.m_settings.combat_reach_hitboxes_scale, 1.f, 2.f, 0.01f, xors("%.2f"));
+
 			reach_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_reach_on_sprint, xors("on sprint")},
 					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
-					{&ctx.m_settings.combat_reach_y_check, xors("y check")}
+					{&ctx.m_settings.combat_reach_y_check, xors("y check")},
+					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes") }
 				});
 		}
 		reach_groupbox.end(menu.data(), &ctx.m_settings.combat_reach);
@@ -131,7 +136,7 @@ void c_gui::tab_combat()
 			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%"));
 
 			if (ctx.m_settings.combat_velocity_delay)
-				velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay_ticks, 0, 8, 1, xors(" ticks"));
+				velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay_ticks, 0, 9, 1, xors(" ticks"));
 
 			velocity_conditions.handle(menu.data(), xors("conditions"),
 				{
@@ -189,7 +194,6 @@ void c_gui::tab_player()
 					{&ctx.m_settings.player_throwdebuff_slow, xors("slow")},
 					{&ctx.m_settings.player_throwdebuff_blind, xors("blind")},
 					{&ctx.m_settings.player_throwdebuff_weakness, xors("weakness")},
-					{&ctx.m_settings.player_throwdebuff_wither, xors("wither")},
 				});
 
 			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 0, 200, 1, xors("ms"));
@@ -223,53 +227,53 @@ void c_gui::tab_player()
 
 void c_gui::tab_visuals()
 {
-	static UI::c_groupbox box_groupbox;
-	static UI::c_dropdown box;
-	static UI::c_color_picker box_color;
-	static UI::c_slider box_color_alpha;
-	static UI::c_checkbox box_filled;
-	static UI::c_color_picker box_outline_color;
-	static UI::c_slider box_outline_color_alpha;
-	static UI::c_checkbox snap_lines;
-	static UI::c_color_picker snap_lines_color;
-	static UI::c_slider snap_lines_color_alpha;
-
-	static UI::c_checkbox name_tags;
-
-	menu.column_left();
-	{
-		box_groupbox.start(menu.data(), xors("box"));
-		{
-			box.handle(menu.data(), xors("mode"), { xors("none"), xors("2d"), xors("3d") }, &ctx.m_settings.visuals_esp_box);
-			box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr());
-			box_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_box_color().a_ptr()), 0, 255, 1);
-			box_filled.handle(menu.data(), xors("filled"), &ctx.m_settings.visuals_esp_box_filled);
-			snap_lines.handle(menu.data(), xors("snap lines"), &ctx.m_settings.visuals_esp_snap_lines);
-
-			if (ctx.m_settings.visuals_esp_box_filled)
-			{
-				box_outline_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_outline_color().r_ptr(), ctx.m_settings.visuals_esp_box_outline_color().g_ptr(), ctx.m_settings.visuals_esp_box_outline_color().b_ptr());
-				box_outline_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_box_outline_color().a_ptr()), 0, 255, 1);
-			}
-
-			if (ctx.m_settings.visuals_esp_snap_lines)
-			{
-				snap_lines_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr());
-				snap_lines_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_snap_lines_color().a_ptr()), 0, 255, 1);
-			}
-		}
-		box_groupbox.end(menu.data());
-
-		box.dropdown(menu.data());
-	}
-
-	menu.column_right();
-	{
-		name_tags.handle(menu.data(), xors("nametags"), &ctx.m_settings.visuals_esp_nametags);
-	}
-
-	box_color.picker(menu.data());
-	box_outline_color.picker(menu.data());
+	//static UI::c_groupbox box_groupbox;
+	//static UI::c_dropdown box;
+	//static UI::c_color_picker box_color;
+	//static UI::c_slider box_color_alpha;
+	//static UI::c_checkbox box_filled;
+	//static UI::c_color_picker box_outline_color;
+	//static UI::c_slider box_outline_color_alpha;
+	//static UI::c_checkbox snap_lines;
+	//static UI::c_color_picker snap_lines_color;
+	//static UI::c_slider snap_lines_color_alpha;
+	//
+	//static UI::c_checkbox name_tags;
+	//
+	//menu.column_left();
+	//{
+	//	box_groupbox.start(menu.data(), xors("box"));
+	//	{
+	//		box.handle(menu.data(), xors("mode"), { xors("none"), xors("2d"), xors("3d") }, &ctx.m_settings.visuals_esp_box);
+	//		box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr());
+	//		box_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_box_color().a_ptr()), 0, 255, 1);
+	//		box_filled.handle(menu.data(), xors("filled"), &ctx.m_settings.visuals_esp_box_filled);
+	//		snap_lines.handle(menu.data(), xors("snap lines"), &ctx.m_settings.visuals_esp_snap_lines);
+	//
+	//		if (ctx.m_settings.visuals_esp_box_filled)
+	//		{
+	//			box_outline_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_outline_color().r_ptr(), ctx.m_settings.visuals_esp_box_outline_color().g_ptr(), ctx.m_settings.visuals_esp_box_outline_color().b_ptr());
+	//			box_outline_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_box_outline_color().a_ptr()), 0, 255, 1);
+	//		}
+	//
+	//		if (ctx.m_settings.visuals_esp_snap_lines)
+	//		{
+	//			snap_lines_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr());
+	//			snap_lines_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_snap_lines_color().a_ptr()), 0, 255, 1);
+	//		}
+	//	}
+	//	box_groupbox.end(menu.data());
+	//
+	//	box.dropdown(menu.data());
+	//}
+	//
+	//menu.column_right();
+	//{
+	//	name_tags.handle(menu.data(), xors("nametags"), &ctx.m_settings.visuals_esp_nametags);
+	//}
+	//
+	//box_color.picker(menu.data());
+	//box_outline_color.picker(menu.data());
 }
 
 void c_gui::tab_movement()
@@ -410,8 +414,8 @@ void c_gui::tab_config()
 		{
 			menu_key.handle(menu.data(), xors("key"), &ctx.m_settings.menu_key, keytype_t::kt_toggle);
 
-			menu_color.handle(menu.data(), xors("accent"), ctx.m_settings.gui_accent_color().r_ptr(), ctx.m_settings.gui_accent_color().g_ptr(), ctx.m_settings.gui_accent_color().b_ptr());
-			menu_fade_speed.handle(menu.data(), xors("fade speed"), &ctx.m_settings.gui_fade_speed, 0, 15);
+			menu_color.handle(menu.data(), xors("accent"), ctx.m_settings.gui_accent_color().r_ptr(), ctx.m_settings.gui_accent_color().g_ptr(), ctx.m_settings.gui_accent_color().b_ptr(), ctx.m_settings.gui_accent_color().a_ptr());
+			menu_fade_speed.handle(menu.data(), xors("fade speed"), &ctx.m_settings.gui_fade_speed, 1, 30);
 
 			rainbow_mode.handle(menu.data(), xors("rainbow mode"), &ctx.m_settings.gui_rainbow);
 
@@ -547,6 +551,4 @@ void c_gui::draw()
 		default:
 			break;
 	}
-
-	cursor.handle();
 }
