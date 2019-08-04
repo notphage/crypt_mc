@@ -35,7 +35,6 @@ if ( init ) \
 #include "renderer.h"
 #include "gui.h"
 #include "window.h"
-#include "memory.h"
 #include "inject.h"
 #include "connection.h"
 #include "client.h"

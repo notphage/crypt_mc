@@ -139,7 +139,7 @@
       <AdditionalDependencies>libacof64o.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateMapFile>true</GenerateMapFile>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -151,7 +151,6 @@
     <ClCompile Include="inject.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="memory.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="syscall.cpp" />
     <ClCompile Include="window.cpp" />
@@ -171,7 +170,6 @@
     <ClInclude Include="inject.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="lazy_import.h" />
-    <ClInclude Include="memory.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sdk.h" />
