@@ -38,6 +38,9 @@
     <Filter Include="SRC\hwid">
       <UniqueIdentifier>{6e27eeb6-c434-4c5d-bd6f-d1d39e7b6398}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\injection\memory">
+      <UniqueIdentifier>{bd5a6159-3141-441d-a15b-7b09d8cb8ca3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="hwid.cpp">
       <Filter>SRC\hwid</Filter>
+    </ClCompile>
+    <ClCompile Include="memory.cpp">
+      <Filter>SRC\injection\memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="hwid.h">
       <Filter>SRC\hwid</Filter>
+    </ClInclude>
+    <ClInclude Include="memory.h">
+      <Filter>SRC\injection\memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
