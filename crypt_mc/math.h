@@ -26,6 +26,12 @@ namespace math
 		return x * radpi;
 	}
 
+	inline void sin_cos(float radians, float* sine, float* cosine)
+	{
+		*sine = sin(radians);
+		*cosine = cos(radians);
+	}
+
 	__forceinline float normalize(float angle)
 	{
 		auto revolutions = angle / 360.f;
@@ -86,5 +92,35 @@ namespace math
 	inline bool is_near(float a, float b, float tolerance)
 	{
 		return fabsf(a - b) <= tolerance;
+	}
+
+	inline void angle_vectors(const vec3& angles, vec3* forward = nullptr, vec3* right = nullptr, vec3* up = nullptr)
+	{
+		float sr, sp, sy, cr, cp, cy;
+
+		sin_cos(deg2rad(angles[PITCH]), &sp, &cp);
+		sin_cos(deg2rad(angles[YAW]),   &sy, &cy);
+		sin_cos(deg2rad(angles[ROLL]),  &sr, &cr); 
+
+		if (forward)
+		{
+			forward->x = -(cp * sy);
+			forward->y = -sp;
+			forward->z = cp * cy;
+		}
+
+		if (right)
+		{
+			right->x = (-1 * sr * sp * cy + -1 * cr * -sy);
+			right->y = -1 * sr * cp;
+			right->z = (-1 * sr * sp * sy + -1 * cr * cy);
+		}
+
+		if (up)
+		{
+			up->x = (cr * sp * cy + -sr * -sy);
+			up->y = cr * cp;
+			up->z = (cr * sp * sy + -sr * cy);
+		}
 	}
 }

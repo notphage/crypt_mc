@@ -235,56 +235,57 @@ public:
 	//Combat features
 	setting_t<bool> combat_auto_clicker{&m_holder, fnvc("combat_auto_clicker"), false};
 	setting_t<keysetting_t> combat_auto_clicker_key{&m_holder, fnvc("combat_auto_clicker_key"), {}};
-	setting_t<int> combat_auto_clicker_min_cps{&m_holder, fnvc("combat_auto_clicker_min_cps"), 11};
-	setting_t<int> combat_auto_clicker_max_cps{&m_holder, fnvc("combat_auto_clicker_max_cps"), 14};
+	setting_t<int> combat_auto_clicker_min_cps{&m_holder, fnvc("combat_auto_clicker_min_cps"), 9};
+	setting_t<int> combat_auto_clicker_max_cps{&m_holder, fnvc("combat_auto_clicker_max_cps"), 13};
 
 	setting_t<bool> combat_auto_clicker_weapons_only{&m_holder, fnvc("combat_auto_clicker_weapons_only"), true};
 	setting_t<bool> combat_auto_clicker_inventory{&m_holder, fnvc("combat_auto_clicker_inventory"), true};
-	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false};
+	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false}; // remove
 
 	setting_t<bool> combat_aim_assist{&m_holder, fnvc("combat_aim_assist"), false};
 	setting_t<keysetting_t> combat_aim_assist_key{&m_holder, fnvc("combat_aim_assist_key"), {}};
 
-	setting_t<int> combat_aim_assist_fov{&m_holder, fnvc("combat_aim_assist_fov"), 60};
-	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 2.f};
+	setting_t<int> combat_aim_assist_fov{&m_holder, fnvc("combat_aim_assist_fov"), 90};
+	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 5.f};
 	setting_t<float> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 1.f};
 
-	setting_t<float> combat_aim_assist_scale{ &m_holder, fnvc("combat_aim_assist_scale"), 0.4f };
-	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.0f};
+	setting_t<float> combat_aim_assist_scale{ &m_holder, fnvc("combat_aim_assist_scale"), 0.5f };
+	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.5f};
 
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
-	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), false };
+	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), true };
 	setting_t<bool> combat_aim_assist_require_click{&m_holder, fnvc("combat_aim_assist_require_click"), true};
 	setting_t<bool> combat_aim_assist_weapons_only{&m_holder, fnvc("combat_aim_assist_weapons_only"), true};
 	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), false };
 	setting_t<bool> combat_aim_assist_nakeds{&m_holder, fnvc("combat_aim_assist_nakeds"), false};
+	setting_t<bool> combat_aim_assist_multipoint{ &m_holder, fnvc("combat_aim_assist_multipoint"), true };
 
 	setting_t<bool> combat_velocity{&m_holder, fnvc("combat_velocity"), false};
 	setting_t<keysetting_t> combat_velocity_key{&m_holder, fnvc("combat_velocity_key"), {}};
-	setting_t<bool> combat_velocity_on_sprint{ &m_holder, fnvc("combat_velocity_on_sprint"), false };
-	setting_t<bool> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), false };
-	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 9 };
-	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 80 };
+	setting_t<bool> combat_velocity_on_sprint{ &m_holder, fnvc("combat_velocity_on_sprint"), true };
+	setting_t<bool> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), true };
+	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 4 };
+	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 60 };
 	setting_t<int> combat_velocity_vertical{&m_holder, fnvc("combat_velocity_vertical"), 100};
-	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 85};
+	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 90};
 
 	setting_t<bool> combat_reach{&m_holder, fnvc("combat_reach"), false};
 	setting_t<keysetting_t> combat_reach_key{&m_holder, fnvc("combat_reach_key"), {}};
-	setting_t<bool> combat_reach_on_sprint{ &m_holder, fnvc("combat_reach_on_sprint"), false };
-	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), false };
+	setting_t<bool> combat_reach_on_sprint{ &m_holder, fnvc("combat_reach_on_sprint"), true };
+	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), true };
 	setting_t<bool> combat_reach_y_check{ &m_holder, fnvc("combat_reach_y_check"), false };
 	setting_t<bool> combat_reach_hitboxes{ &m_holder, fnvc("combat_reach_hitboxes"), false };
-	setting_t<float> combat_reach_distance_min{ &m_holder, fnvc("combat_reach_distance_min"), 3.f };
-	setting_t<float> combat_reach_distance_max{ &m_holder, fnvc("combat_reach_distance_max"), 3.2f };
+	setting_t<float> combat_reach_distance{ &m_holder, fnvc("combat_reach_distance"), 3.1f };
+	setting_t<int> combat_reach_hitchance{ &m_holder, fnvc("combat_reach_hitchance"), 80 };
 	setting_t<float> combat_reach_hitboxes_scale{ &m_holder, fnvc("combat_reach_hitboxes_scale"), 1.f };
 
 	//Player features
 	setting_t<bool> player_throw{ &m_holder, fnvc("player_throw"), false };
-	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 0 };
+	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 50 };
 
 	setting_t<keysetting_t> player_throwhealing_key{ &m_holder, fnvc("player_throwhealing_key"), {} };
 	setting_t<bool> player_throwhealing_potions{ &m_holder, fnvc("player_throwhealing_potions"), true };
-	setting_t<bool> player_throwhealing_soup{ &m_holder, fnvc("player_throwhealing_soup"), true };
+	setting_t<bool> player_throwhealing_soup{ &m_holder, fnvc("player_throwhealing_soup"), false };
 
 	setting_t<keysetting_t> player_throwpearl_key{ &m_holder, fnvc("player_throwpearl_key"), {} };
 
@@ -292,7 +293,6 @@ public:
 	setting_t<bool> player_throwdebuff_damage{ &m_holder, fnvc("player_throwdebuff_damage") };
 	setting_t<bool> player_throwdebuff_poison{ &m_holder, fnvc("player_throwdebuff_poison") };
 	setting_t<bool> player_throwdebuff_slow{ &m_holder, fnvc("player_throwdebuff_slow") };
-	setting_t<bool> player_throwdebuff_blind{ &m_holder, fnvc("player_throwdebuff_blind") };
 	setting_t<bool> player_throwdebuff_weakness{ &m_holder, fnvc("player_throwdebuff_weakness") };
 
 	setting_t<bool> player_fast_place{&m_holder, fnvc("player_fast_place"), false};
@@ -303,7 +303,7 @@ public:
 	//Movement features
 	setting_t<bool> movement_timer{&m_holder, fnvc("movement_timer"), false};
 	setting_t<keysetting_t> movement_timer_key{&m_holder, fnvc("movement_timer_key"), {}};
-	setting_t<float> movement_timer_speed{&m_holder, fnvc("movement_timer_speed"), 1.f};
+	setting_t<float> movement_timer_speed{&m_holder, fnvc("movement_timer_speed"), 1.25f};
 
     setting_t<bool> movement_air_control{ &m_holder, fnvc("movement_air_control"), false };
     setting_t<keysetting_t> movement_air_control_key{ &m_holder, fnvc("movement_air_control_key"), {} };
@@ -314,7 +314,7 @@ public:
 
     setting_t<bool> movement_flight{ &m_holder, fnvc("movement_flight"), false };
     setting_t<keysetting_t> movement_flight_key{ &m_holder, fnvc("movement_flight_key"), {} };
-    setting_t<bool> movement_flight_tight{ &m_holder, fnvc("movement_flight_tight"), false };
+    setting_t<bool> movement_flight_tight{ &m_holder, fnvc("movement_flight_tight"), true };
     setting_t<bool> movement_flight_glide{ &m_holder, fnvc("movement_flight_glide"), false };
     setting_t<float> movement_flight_hspeed{ &m_holder, fnvc("movement_flight_hspeed"), 0.4f };
     setting_t<float> movement_flight_vspeed{ &m_holder, fnvc("movement_flight_vspeed"), 0.4f };
@@ -342,7 +342,7 @@ public:
 	setting_t<keysetting_t> menu_key{ &m_holder, fnvc("menu_key"), {KEYS_INSERT, kt_toggle} };
 	setting_t<keysetting_t> hide_key{ &m_holder, fnvc("hide_key"), {} };
 	setting_t<color_t> gui_accent_color{ &m_holder, fnvc("gui_accent_color"), { 181, 0, 41, 255 } };
-	setting_t<int> gui_fade_speed{ &m_holder, fnvc("menu_fade_speed"), 8 };
+	setting_t<int> gui_fade_speed{ &m_holder, fnvc("menu_fade_speed"), 25 };
 	setting_t<bool> gui_rainbow{ &m_holder, fnvc("gui_rainbow"), false };
 	setting_t<bool> log_use_accent_color{ &m_holder, fnvc("log_use_accent_color"), false };
 	setting_t<color_t> log_color{ &m_holder, fnvc("log_color"), { 181, 0, 41, 255 } };

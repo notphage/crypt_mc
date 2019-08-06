@@ -40,6 +40,13 @@ public:
 	jdouble motion_y() override;
 	jdouble motion_z() override;
 
+	jdouble aabb_min_x() override;
+	jdouble aabb_min_y() override;
+	jdouble aabb_min_z() override;
+	jdouble aabb_max_x() override;
+	jdouble aabb_max_y() override;
+	jdouble aabb_max_z() override;
+
 	jdouble old_origin_x() override;
 	jdouble old_origin_y() override;
 	jdouble old_origin_z() override;
@@ -109,12 +116,6 @@ public:
 	std::shared_ptr<c_player> get_player() override;
 	std::shared_ptr<c_world> get_world() override;
 
-	jdouble get_render_xpos() override;
-	jdouble get_render_ypos() override;
-	jdouble get_render_zpos() override;
-
-	jfloat get_player_xview() override;
-	jfloat get_player_yview() override;
 	jfloat get_render_partial_ticks() override;
 	jfloat get_mouse_sensitivity() override;
 	jfloat get_timer_speed() override;
@@ -123,6 +124,7 @@ public:
 
 	jint get_right_click_delay() override;
 	jint get_string_width(jstring) override;
+
 	jint draw_string_with_shadow(jstring, jint, jint, jint) override;
 
 	jobject get_net_handler() override;
@@ -132,6 +134,7 @@ public:
 	void set_object_mouse_over(jobject player) override;
 	void disable_light_map() override;
 	void setup_camera_transform(jfloat, int) override;
+	void set_mouse_grabbed(jboolean grabbed) override;
 
 	jlong get_window_handle() override;
 	jint get_screen_w() override;

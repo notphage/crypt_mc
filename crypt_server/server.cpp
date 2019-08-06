@@ -5,6 +5,7 @@
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h>    //write
 #include <cmath>
+#include <tuple>
 
 static constexpr size_t thread_num = 200;
 
@@ -22,7 +23,7 @@ c_server::c_server(int16_t port)
 
 	//Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = inet_addr("127.0.0.1"); //INADDR_ANY;
+	server.sin_addr.s_addr = INADDR_ANY; //inet_addr("127.0.0.1");;
 	server.sin_port = htons(8123);
 
 	//Bind
@@ -106,9 +107,34 @@ void c_client_handler::run()
 
 	// Login Packets
 	{
+		static std::vector<std::tuple<std::string, uint64_t, uint64_t>> m_users{
+			{ "phage", 10382422081949954444, 6941575562263925942 },
+			{ "mexican", 2489908105208420549, 11399085311125507402 },
+			{ "Ciaran", 10447304709281239008, 4538760847905949811 },
+			{ "uzi", 13694325770137587408, 5988022699623831536 },
+			{ "gangsta", 5358537683607507742, 16595086355998634058 },
+			{ "hacs", 14393557407244641642, 10371841605793258569 },
+			{ "denzo", 7646908165282335792, 4134658753895949041 },
+			{ "wise", 9853761865339289714, 11395424104966938625 }
+		};
+
 		c_login_packet login_packet;
 		if (!recieve_packet<c_login_packet>(login_packet))
 			return;
+
+		auto logged_in = std::any_of(m_users.begin(), m_users.end(), [&login_packet](const std::tuple<std::string, uint64_t, uint64_t>& user)
+			{
+				auto [username, password, hwid] = user;
+				return (strcmp(username.c_str(), login_packet.m_username) == 0 && password == login_packet.m_password && hwid == login_packet.m_hwid);
+			});
+
+		if (!logged_in)
+		{
+			ctx.m_console.write(std::string("Client ") + m_client_ip + std::string(" attempted user ") + login_packet.m_username);
+			ctx.m_console.write(std::string("Pass ") + std::to_string(login_packet.m_password) + std::string(" HWID ") + std::to_string(login_packet.m_hwid));
+
+			return;
+		}
 
 		ctx.m_console.write(std::string("Client ") + m_client_ip + std::string(" logged into user ") + login_packet.m_username);
 	}
@@ -144,19 +170,5 @@ void c_client_handler::run()
 	{
 		m_connection.set_buffer(crypt_mc_dll, crypt_mc_dll_size);
 		m_connection.send();
-
-		//size_t bytes_read = 0;
-		//for (auto i = 0; i < num_packets; i++)
-		//{
-		//	c_data_packet* data_packet = m_packet_handler.create_data_packet(crypt_mc_dll_size, crypt_mc_dll, bytes_read);
-		//	m_connection.set_buffer(data_packet, sizeof *data_packet);
-		//	m_connection.send();
-		//
-		//	if (data_packet)
-		//	{
-		//		delete data_packet;
-		//		data_packet = nullptr;
-		//	}
-		//}
 	}
 }

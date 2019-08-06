@@ -63,6 +63,13 @@ struct player_fields
 	jfieldID fid_inventory_player = nullptr;
 	jfieldID fid_obj_capabilities = nullptr;
 	jfieldID fid_armor_inventory = nullptr;
+	jfieldID fid_aabb = nullptr;
+	jfieldID fid_aabb_min_x = nullptr;
+	jfieldID fid_aabb_min_y = nullptr;
+	jfieldID fid_aabb_min_z = nullptr;
+	jfieldID fid_aabb_max_x = nullptr;
+	jfieldID fid_aabb_max_y = nullptr;
+	jfieldID fid_aabb_max_z = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -101,6 +108,7 @@ struct player_fields
 	jclass cls_potion_effect = nullptr;
 	jclass cls_player_controller = nullptr;
 	jclass cls_inventory = nullptr;
+	jclass cls_aabb = nullptr;
 };
 
 struct game_fields
@@ -145,6 +153,7 @@ struct game_fields
 
 	jmethodID mid_screen_constructor = nullptr;
 	jmethodID mid_get_string_width = nullptr;
+	jmethodID mid_set_mouse_grabbed = nullptr;
 	jmethodID mid_draw_string_with_shadow = nullptr;
 	jmethodID mid_enabled_light_map = nullptr;
 	jmethodID mid_disable_light_map = nullptr;
@@ -323,6 +332,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.cls_potion_effect = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.potion.PotionEffect")));
 		playerfields.cls_player_controller = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.client.multiplayer.PlayerControllerMP")));
 		playerfields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.entity.player.InventoryPlayer")));
+		playerfields.cls_aabb = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.util.AxisAlignedBB")));
 
 		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70738_aO"), xors("I"));
 		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70737_aN"), xors("I"));
@@ -352,6 +362,14 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.fid_inventory_player = jni->GetFieldID(playerfields.entity_player_class, xors("field_71071_by"), xors("Lnet/minecraft/entity/player/InventoryPlayer;"));
 		playerfields.fid_obj_capabilities = jni->GetFieldID(playerfields.entity_player_class, xors("field_71075_bZ"), xors("Lnet/minecraft/entity/player/PlayerCapabilities;"));
 		playerfields.fid_armor_inventory = jni->GetFieldID(playerfields.cls_inventory, xors("field_70460_b"), xors("[Lnet/minecraft/item/ItemStack;"));
+		playerfields.fid_aabb = jni->GetFieldID(playerfields.entity_class, xors("field_70121_D"), xors("Lnet/minecraft/util/AxisAlignedBB;"));
+		playerfields.fid_aabb_min_x = jni->GetFieldID(playerfields.cls_aabb, xors("field_72340_a"), xors("D"));
+		playerfields.fid_aabb_min_y = jni->GetFieldID(playerfields.cls_aabb, xors("field_72338_b"), xors("D"));
+		playerfields.fid_aabb_min_z = jni->GetFieldID(playerfields.cls_aabb, xors("field_72339_c"), xors("D"));
+		playerfields.fid_aabb_max_x = jni->GetFieldID(playerfields.cls_aabb, xors("field_72336_d"), xors("D"));
+		playerfields.fid_aabb_max_y = jni->GetFieldID(playerfields.cls_aabb, xors("field_72337_e"), xors("D"));
+		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("field_72334_f"), xors("D"));
+
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70660_b"), xors("(Lnet/minecraft/potion/Potion;)Lnet/minecraft/potion/PotionEffect;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76458_c"), xors("()I"));
@@ -511,6 +529,36 @@ jdouble c_player_1710::motion_y()
 jdouble c_player_1710::motion_z()
 {
 	return jni->GetDoubleField(player_instance, playerfields.fid_zmotion);
+}
+
+jdouble c_player_1710::aabb_min_x()
+{
+	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_min_x);
+}
+
+jdouble c_player_1710::aabb_min_y()
+{
+	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_min_y);
+}
+
+jdouble c_player_1710::aabb_min_z()
+{
+	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_min_z);
+}
+
+jdouble c_player_1710::aabb_max_x()
+{
+	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_max_x);
+}
+
+jdouble c_player_1710::aabb_max_y()
+{
+	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_max_y);
+}
+
+jdouble c_player_1710::aabb_max_z()
+{
+	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_max_z);
 }
 
 jdouble c_player_1710::old_origin_x()
@@ -720,6 +768,7 @@ void c_game_1710::instantiate(JNIEnv* _jni = nullptr)
 		gamefields.mid_set_cursor_pos = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setCursorPosition"), xors("(II)V"));
 		gamefields.mid_get_width = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getWidth"), xors("()I"));
 		gamefields.mid_get_height = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getHeight"), xors("()I"));
+		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
 
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
 		gamefields.obj_render_manager = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_render_manager_obj));
@@ -814,31 +863,6 @@ std::shared_ptr<c_world> c_game_1710::get_world()
 	return world_ptr;
 }
 
-jdouble c_game_1710::get_render_xpos()
-{
-	return jni->GetStaticDoubleField(gamefields.render_manager, gamefields.fid_render_xpos);
-}
-
-jdouble c_game_1710::get_render_ypos()
-{
-	return jni->GetStaticDoubleField(gamefields.render_manager, gamefields.fid_render_ypos);
-}
-
-jdouble c_game_1710::get_render_zpos()
-{
-	return jni->GetStaticDoubleField(gamefields.render_manager, gamefields.fid_render_zpos);
-}
-
-jfloat c_game_1710::get_player_xview()
-{
-	return jni->GetFloatField(gamefields.obj_render_manager, gamefields.fid_player_xview);
-}
-
-jfloat c_game_1710::get_player_yview()
-{
-	return jni->GetFloatField(gamefields.obj_render_manager, gamefields.fid_player_yview);
-}
-
 jfloat c_game_1710::get_render_partial_ticks()
 {
 	return jni->GetFloatField(gamefields.obj_timer, gamefields.fid_render_partial_ticks);
@@ -862,6 +886,11 @@ jint c_game_1710::get_right_click_delay()
 jint c_game_1710::get_string_width(jstring string)
 {
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_get_string_width, string);
+}
+
+void c_game_1710::set_mouse_grabbed(jboolean grabbed)
+{
+	jni->CallStaticVoidMethod(gamefields.cls_lwjgl_mouse, gamefields.mid_set_mouse_grabbed, grabbed);
 }
 
 jint c_game_1710::draw_string_with_shadow(jstring par1, jint par2, jint par3, jint par4)

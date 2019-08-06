@@ -10,7 +10,7 @@ void c_anti_afk::on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c
 	
 	static auto delay = util::random_delay(60000, 180000);
 	
-	if (ctx.m_settings.player_anti_afk && delta > delay)
+	if (ctx.m_settings.player_anti_afk && delta > delay && self->is_collided_vertically())
 	{
 		old = now;
 		delay = util::random_delay(60000, 180000);

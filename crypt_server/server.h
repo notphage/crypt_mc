@@ -31,11 +31,7 @@ public:
 	c_client_handler(const std::string& ip, int client_socket)
 		: m_client_ip(ip), m_client_socket(client_socket), m_connection(client_socket, ip)
 	{ 
-		m_games.emplace_back("TEST0", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_OFFLINE);
-		m_games.emplace_back("TEST1", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_NOSUB);
-		m_games.emplace_back("TEST2", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_DOWN);
-		m_games.emplace_back("TEST3", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_UPDATING);
-		m_games.emplace_back("TEST4", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_ONLINE);
+		m_games.emplace_back("Crypt Ghost", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_ONLINE);
 	}
 
 	~c_client_handler();

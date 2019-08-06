@@ -198,7 +198,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AssemblyDebug>false</AssemblyDebug>
       <AdditionalDependencies>libacof64o.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;jvm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
@@ -221,6 +221,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="raytrace.cpp" />
     <ClCompile Include="reach.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="sdk.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="menu.h" />
     <ClInclude Include="MinHook.h" />
     <ClInclude Include="precompiled.h" />
+    <ClInclude Include="raytrace.h" />
     <ClInclude Include="reach.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sdk.h" />

@@ -70,6 +70,7 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 
 	static bool healing_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwhealing_key) || healing_running))
+	{
 		if (self->get_max_health() - self->get_health() >= 7.f || healing_running)
 		{
 			if (auto slot = find_healing(self); slot >= 0)
@@ -79,6 +80,7 @@ void c_throw::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 		}
 		else
 			g_input.toggle_key(ctx.m_settings.player_throwhealing_key);
+	}
 
 	static bool pearl_running = false;
 	if ((valid_keystate(ctx.m_settings.player_throwpearl_key) || pearl_running) && !healing_running)
@@ -175,10 +177,8 @@ int c_throw::find_debuff(const std::shared_ptr<c_player>& self) const
 		debuffs.emplace_back(7, &ctx.m_settings.player_throwdebuff_damage);
 		debuffs.emplace_back(19, &ctx.m_settings.player_throwdebuff_poison);
 		debuffs.emplace_back(2, &ctx.m_settings.player_throwdebuff_slow);
-		debuffs.emplace_back(15, &ctx.m_settings.player_throwdebuff_blind);
 		debuffs.emplace_back(18, &ctx.m_settings.player_throwdebuff_weakness);
 	)
-
 
 	auto class_loader = ctx.get_class_loader();
 	auto cls_potion = class_loader->find_class(xors("net.minecraft.item.ItemPotion"));

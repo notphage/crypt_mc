@@ -23,3 +23,4 @@
 #include "gui.h"
 #include "math.h"
 #include "feature.h"
+#include "raytrace.h"

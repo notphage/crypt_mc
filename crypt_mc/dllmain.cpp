@@ -80,15 +80,20 @@ void hack(HINSTANCE bin)
 		{
 			ctx.m_ingame = true;
 
+			HWND old_window = nullptr;
 			if (ctx.m_menu_opening)
 			{
-				mc->set_not_in_focus();
+				//mc->set_not_in_focus();
+				mc->set_mouse_grabbed(false);
 			}
 			else if (ctx.m_menu_closing)
 			{
-				mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
-				mc->set_in_focus();
+				//mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
+				//mc->set_in_focus();
+				mc->set_mouse_grabbed(true);
 			}
+
+			ctx.m_in_chat = mc->is_in_chat();
 
 			for (auto&& feature : ctx.m_features)
 				feature->on_tick(mc, self, world);
@@ -124,46 +129,37 @@ void hack(HINSTANCE bin)
 #endif
 }
 
-void fuck_skids()
+void fuck_skids(void* bin)
 {
 	//DELETE_START(0);
 	// stop most debuggers from working as breakpoint is patched to exit process call
 
 	unsigned long old_protection = 0;
 
-	uintptr_t exit_process = (uintptr_t)GetProcAddress(GetModuleHandleA(xors("kernel32.dll")), xors("ExitProcess"));
-	uintptr_t dbg_ui_remote_breakin = (uintptr_t)GetProcAddress(GetModuleHandleA(xors("ntdll.dll")), xors("DbgUiRemoteBreakin"));
-	uintptr_t dbg_break_point = (uintptr_t)GetProcAddress(GetModuleHandleA(xors("ntdll.dll")), xors("DbgBreakPoint"));
+	uintptr_t exit_process = (uintptr_t)LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("kernel32.dll")), xors("ExitProcess"));
+	uintptr_t dbg_ui_remote_breakin = (uintptr_t)LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("ntdll.dll")), xors("DbgUiRemoteBreakin"));
+	uintptr_t dbg_break_point = (uintptr_t)LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("ntdll.dll")), xors("DbgBreakPoint"));
 
 	// fuck DbgUiRemoteBreakin
-	VirtualProtect((void*)dbg_ui_remote_breakin, 6, PAGE_EXECUTE_READWRITE, &old_protection);
+	LI_FN(VirtualProtect).cached()((void*)dbg_ui_remote_breakin, 6, PAGE_EXECUTE_READWRITE, &old_protection);
 
 	*(uint8_t*)(dbg_ui_remote_breakin) = 0x68; // push
 	*(uintptr_t*)(dbg_ui_remote_breakin + 1) = exit_process;
 	*(uint8_t*)(dbg_ui_remote_breakin + 5) = 0xC3; // ret
 
-	VirtualProtect((void*)dbg_ui_remote_breakin, 6, old_protection, &old_protection);
+	LI_FN(VirtualProtect).cached()((void*)dbg_ui_remote_breakin, 6, old_protection, &old_protection);
 
 	// fuck DbgBreakPoint
-	VirtualProtect((void*)dbg_break_point, 6, PAGE_EXECUTE_READWRITE, &old_protection);
+	LI_FN(VirtualProtect).cached()((void*)dbg_break_point, 6, PAGE_EXECUTE_READWRITE, &old_protection);
 
 	*(uint8_t*)(dbg_break_point) = 0x68; // push
 	*(uintptr_t*)(dbg_break_point + 1) = exit_process;
 	*(uint8_t*)(dbg_break_point + 5) = 0xC3; // ret
 
-	VirtualProtect((void*)dbg_break_point, 6, old_protection, &old_protection);
+	LI_FN(VirtualProtect).cached()((void*)dbg_break_point, 6, old_protection, &old_protection);
 
-	// break tools like scylla and such as they check signatures on dos/nt header
-
-	// we dont have a header in public mode
-
-	/*
-	// fuck dos header signature
-	*(uint16_t*)( process ) = 0;
-
-	// fuck nt header signature
-	*(uint32_t*)( process + ( (IMAGE_DOS_HEADER*)process )->e_lfanew ) = 0;
-	*/
+	LI_FN(VirtualProtect).cached()(bin, 4096, PAGE_READWRITE, &old_protection);
+	RtlSecureZeroMemory(bin, 4096);
 
 	//DELETE_END(0);
 }
@@ -193,9 +189,8 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 			freopen(xors("CONOUT$"), xors("w"), stdout);
 		}
 #else
-		//fuck_skids();
+		fuck_skids(instance);
 		// take username and sub days left out of custom header
-		// delete PE header
 #endif
 
 		LI_FN(CreateThread).cached()(0, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, 0);

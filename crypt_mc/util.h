@@ -269,7 +269,7 @@ namespace util
 
 		LI_FN(RegQueryInfoKeyA).cached()(config_key, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &num_sub_keys, nullptr, nullptr, nullptr, nullptr);
 
-		for (auto i = 0; i < num_sub_keys; i++)
+		for (uint32_t i = 0; i < num_sub_keys; i++)
 		{
 			char buffer[64];
 			DWORD len = sizeof(buffer);

@@ -50,8 +50,8 @@ void c_gui::tab_combat()
 
 	static UI::c_enable_groupbox reach_groupbox;
 	static UI::c_key_bind reach_key;
-	static UI::c_float_slider reach_distance_min;
-	static UI::c_float_slider reach_distance_max;
+	static UI::c_float_slider reach_distance;
+	static UI::c_slider reach_hitchance;
 	static UI::c_float_slider reach_hitboxes_scale;
 	static UI::c_multi_dropdown reach_conditions;
 
@@ -78,10 +78,11 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_reach)
 				reach_key.handle(menu.data(), "", &ctx.m_settings.combat_reach_key, keytype_t::kt_all);
 
-			reach_distance_min.handle(menu.data(), xors("min"), &ctx.m_settings.combat_reach_distance_min, 3.f, 5.99f, 0.01f, xors("%.2f"));
-			reach_distance_max.handle(menu.data(), xors("max"), &ctx.m_settings.combat_reach_distance_max, ctx.m_settings.combat_reach_distance_min, 6.f, 0.01f, xors("%.2f"));
+			reach_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_reach_distance, 3.f, 6.f, 0.01f, xors("%.2f"));
+			reach_hitchance.handle(menu.data(), xors("hitchance"), &ctx.m_settings.combat_reach_hitchance, 1, 100, 1, xors("%"));
+			
 			if (ctx.m_settings.combat_reach_hitboxes)
-				reach_hitboxes_scale.handle(menu.data(), xors("hitbox scale"), &ctx.m_settings.combat_reach_hitboxes_scale, 1.f, 2.f, 0.01f, xors("%.2f"));
+				reach_hitboxes_scale.handle(menu.data(), xors("hitbox scale"), &ctx.m_settings.combat_reach_hitboxes_scale, 1.f, 5.f, 0.01f, xors("%.2f"));
 
 			reach_conditions.handle(menu.data(), xors("conditions"),
 				{
@@ -118,6 +119,7 @@ void c_gui::tab_combat()
 				{
 					{&ctx.m_settings.combat_aim_assist_require_click, xors("require click")},
 					{&ctx.m_settings.combat_aim_assist_weapons_only, xors("weapons only")},
+					{&ctx.m_settings.combat_aim_assist_multipoint, xors("multipoint")},
 					{&ctx.m_settings.combat_aim_assist_vertical, xors("vertical")},
 					{&ctx.m_settings.combat_aim_assist_sticky, xors("sticky")},
 					{&ctx.m_settings.combat_aim_assist_invisibles, xors("invisibles")},
@@ -192,7 +194,6 @@ void c_gui::tab_player()
 					{&ctx.m_settings.player_throwdebuff_damage, xors("damage")},
 					{&ctx.m_settings.player_throwdebuff_poison, xors("poison")},
 					{&ctx.m_settings.player_throwdebuff_slow, xors("slow")},
-					{&ctx.m_settings.player_throwdebuff_blind, xors("blind")},
 					{&ctx.m_settings.player_throwdebuff_weakness, xors("weakness")},
 				});
 

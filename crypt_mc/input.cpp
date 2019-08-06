@@ -134,7 +134,7 @@ void c_input_manager::toggle_key(keysetting_t key)
 	keytype_t keytype = (keytype_t)key.type;
 
 	if (keytype == kt_toggle)
-		m_toggled[pressed] = !m_toggled[pressed];
+		m_toggled[pressed] = false;
 }
 
 std::string c_input_manager::get_key_name(VirtualKeys_t key)

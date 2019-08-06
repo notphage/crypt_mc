@@ -1293,6 +1293,13 @@ public:
 	virtual jdouble motion_y() = 0;
 	virtual jdouble motion_z() = 0;
 
+	virtual jdouble aabb_min_x() = 0;
+	virtual jdouble aabb_min_y() = 0;
+	virtual jdouble aabb_min_z() = 0;
+	virtual jdouble aabb_max_x() = 0;
+	virtual jdouble aabb_max_y() = 0;
+	virtual jdouble aabb_max_z() = 0;
+
 	virtual jdouble old_origin_x() = 0;
 	virtual jdouble old_origin_y() = 0;
 	virtual jdouble old_origin_z() = 0;
@@ -1367,17 +1374,12 @@ public:
 	virtual void set_pointed_entity(jobject ent) = 0;
 	virtual void set_object_mouse_over(jobject moving) = 0;
 	virtual void set_in_focus() = 0;
+	virtual void set_mouse_grabbed(jboolean grabbed) = 0;
 	virtual void set_not_in_focus() = 0;
 
 	virtual std::shared_ptr<c_player> get_player() = 0;
 	virtual std::shared_ptr<c_world> get_world() = 0;
 
-	virtual jdouble get_render_xpos() = 0;
-	virtual jdouble get_render_ypos() = 0;
-	virtual jdouble get_render_zpos() = 0;
-
-	virtual jfloat get_player_xview() = 0;
-	virtual jfloat get_player_yview() = 0;
 	virtual jfloat get_render_partial_ticks() = 0;
 	virtual jfloat get_mouse_sensitivity() = 0;
 	virtual jfloat get_timer_speed() = 0;

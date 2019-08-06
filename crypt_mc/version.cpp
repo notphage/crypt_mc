@@ -162,7 +162,7 @@ std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)
 
 		case MC_18X:
 		{
-			//ptr = std::make_shared<c_class_loader_18X>();
+			ptr = std::make_shared<c_class_loader_18X>();
 			break;
 		}
 
@@ -192,7 +192,7 @@ std::shared_ptr<c_game> c_context::get_game(JNIEnv* _jni)
 
 		case MC_18X:
 		{
-			//ptr = std::make_shared<c_game_18X>();
+			ptr = std::make_shared<c_game_18X>();
 			break;
 		}
 

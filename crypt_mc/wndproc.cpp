@@ -31,7 +31,8 @@ long long __stdcall hooked::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam, i
 	if (msg == WM_DESTROY)
 		ctx.m_panic = true;
 
-	g_input.register_key_press(static_cast<VirtualKeyEvents_t>(msg), static_cast<VirtualKeys_t>(uparam));
+	if (!ctx.m_in_chat)
+		g_input.register_key_press(static_cast<VirtualKeyEvents_t>(msg), static_cast<VirtualKeys_t>(uparam));
 
 	// dont pass mouse input to game when menu is open
 	if (ctx.m_menu_open)

@@ -74,7 +74,8 @@ public:
 	int m_current_cfg{};
 
 	float m_frametime = 0.f;
-	std::atomic<bool> m_ingame = false;
+	std::atomic_bool m_ingame = false;
+	std::atomic_bool m_in_chat = false;
 
 public:
 	void determine_version();

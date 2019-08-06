@@ -59,7 +59,7 @@ void c_gui::draw_landing()
 	if (ctx.m_selected_cheat != old_cheat && !ctx.m_game_list.empty())
 	{
 		const auto& cheat = ctx.m_game_list.at(ctx.m_selected_cheat);
-		loader_console.insert(cheat.m_name + std::string(xors(": ")) + client.game_status_to_string(cheat.m_status) + std::string(xors(" (")) + std::to_string(cheat.m_version) + xors(")"), color_t(255, 255, 255));
+		loader_console.insert(cheat.m_name + std::string(xors(": ")) + client.game_status_to_string(cheat.m_status), color_t(255, 255, 255));
 		old_cheat = ctx.m_selected_cheat;
 	}
 }
