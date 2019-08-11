@@ -7,19 +7,19 @@ class c_client
 {
 	std::thread m_connection_thread;
 	std::atomic<connection_stage> m_stage;
-	std::string m_username;
-	uint64_t m_password;
-	uint64_t m_hwid;
+	std::string m_username{};
+	uint64_t m_password = 0;
+	uint64_t m_hwid = 0;
 
 	c_connection m_connection;
 	c_packet_handler m_packet_handler;
 
 	template <typename T>
-	bool recieve_packet(T& packet)
+	bool receive_packet(T& packet)
 	{
 		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
 
-		if (m_connection.recieve() == SOCKET_ERROR)
+		if (m_connection.receive() == SOCKET_ERROR)
 			return false;
 
 		RtlSecureZeroMemory(&packet, sizeof packet);
@@ -34,7 +34,7 @@ class c_client
 
 public:
 	c_client()
-		: m_connection_thread(std::thread(&c_client::run, this)), m_stage(connection_stage::STAGE_WAITING)
+		: m_connection_thread(std::thread(&c_client::run, this)), m_stage(connection_stage::STAGE_WAITING), m_connection()
 	{ }
 
 	void set_stage(connection_stage stage)
@@ -42,7 +42,7 @@ public:
 		m_stage = stage;
 	}
 
-	connection_stage get_stage()
+	connection_stage get_stage() const
 	{
 		return m_stage;
 	}

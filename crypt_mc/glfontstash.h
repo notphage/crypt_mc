@@ -51,6 +51,7 @@ static int glfons__renderCreate(void* userPtr, int width, int height)
 	LI_FN(glGenTextures).cached()(1, &gl->tex);
 	if (!gl->tex)
 		return 0;
+
 	gl->width = width;
 	gl->height = height;
 	LI_FN(glBindTexture).cached()(GL_TEXTURE_2D, gl->tex);
@@ -74,6 +75,7 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
 
 	if (gl->tex == 0)
 		return;
+
 	LI_FN(glPushClientAttrib).cached()(GL_CLIENT_PIXEL_STORE_BIT);
 	LI_FN(glBindTexture).cached()(GL_TEXTURE_2D, gl->tex);
 	LI_FN(glPixelStorei).cached()(GL_UNPACK_ALIGNMENT, 1);
@@ -96,6 +98,23 @@ static void glfons__renderDraw(void* userPtr, const float* verts, const float* t
 		vertex_t vert(vec2{ verts[i * 2 + 0], verts[i * 2 + 1] }, col.from_rgba(colors[i]), vec2{ tcoords[i * 2 + 0], tcoords[i * 2 + 1] });
 		ctx.m_renderer->add_vertex(vert, GL_TRIANGLES, gl->tex);
 	}
+
+	//glBindTexture(GL_TEXTURE_2D, gl->tex);
+	//glEnable(GL_TEXTURE_2D);
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
+	//
+	//glVertexPointer(2, GL_FLOAT, sizeof(float) * 2, verts);
+	//glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 2, tcoords);
+	//glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(unsigned int), colors);
+	//
+	//glDrawArrays(GL_TRIANGLES, 0, nverts);
+	//
+	//glDisable(GL_TEXTURE_2D);
+	//glDisableClientState(GL_VERTEX_ARRAY);
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glDisableClientState(GL_COLOR_ARRAY);
 }
 
 static void glfons__renderDelete(void* userPtr)
@@ -103,6 +122,7 @@ static void glfons__renderDelete(void* userPtr)
 	GLFONScontext* gl = (GLFONScontext*)userPtr;
 	if (gl->tex != 0)
 		LI_FN(glDeleteTextures).cached()(1, &gl->tex);
+
 	gl->tex = 0;
 	free(gl);
 }
@@ -115,6 +135,7 @@ FONScontext* glfonsCreate(int width, int height, int flags)
 	gl = (GLFONScontext*)malloc(sizeof(GLFONScontext));
 	if (gl == NULL)
 		goto error;
+
 	memset(gl, 0, sizeof(GLFONScontext));
 
 	memset(&params, 0, sizeof(params));
@@ -133,6 +154,7 @@ FONScontext* glfonsCreate(int width, int height, int flags)
 error:
 	if (gl != NULL)
 		free(gl);
+
 	return NULL;
 }
 

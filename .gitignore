@@ -70,7 +70,6 @@ artifacts/
 *.scc
 *.dll
 *.exe
-*.lib
 *.o
 *.pdf
 *.zip

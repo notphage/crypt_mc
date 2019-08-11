@@ -1,14 +1,15 @@
 #include "context.h"
 #include <Windows.h>
-#include <iostream>
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
 c_context ctx;
 
-int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd_line, int32_t cmd_show)
+int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 {
-	ctx.m_syscall.init();
+	if (!ctx.m_syscall.init())
+		return 0;
+
 	ctx.m_instance = instance;
 	ctx.m_loader_window.create();
 
@@ -26,7 +27,7 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* cmd
 			// proper frametime
 			static auto old = std::chrono::high_resolution_clock::now();
 			auto now = std::chrono::high_resolution_clock::now();
-			float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - old).count();
+			const float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - old).count();
 			old = now;
 
 			ctx.m_frametime = delta / 1000.f;

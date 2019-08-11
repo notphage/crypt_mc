@@ -84,14 +84,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>c:\hack\</OutDir>
-    <IncludePath>$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\asmlib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(ProjectDir)..\include;$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\lib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>c:\hack\</OutDir>
     <TargetExt>.dll</TargetExt>
-    <IncludePath>$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\asmlib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(ProjectDir)..\include;$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\lib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -176,7 +176,7 @@
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <OmitFramePointers>true</OmitFramePointers>
+      <OmitFramePointers>false</OmitFramePointers>
       <PreprocessorDefinitions>PUBLICBUILD;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS; NOMINMAX; _WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
@@ -192,6 +192,7 @@
       <ForcedIncludeFiles>precompiled.h</ForcedIncludeFiles>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

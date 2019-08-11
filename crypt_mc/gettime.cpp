@@ -5,9 +5,9 @@ decltype(hooked::o_get_time) hooked::o_get_time;
 
 long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 {
-	if (ctx.m_ingame)
+	if (ctx.m_ingame && jni != nullptr && caller != nullptr)
 	{
-		static std::shared_ptr<c_stack_trace> stack_class = std::make_shared<c_stack_trace>();
+		std::shared_ptr<c_stack_trace> stack_class = std::make_shared<c_stack_trace>();
 		stack_class->instantiate(jni);
 
 		stack_trace stack;
@@ -19,10 +19,10 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 
 			auto self = mc->get_player();
 			auto world = mc->get_world();
-
+			
 			if (self && world)
 			{
-				if (std::string(stack.method_name) == std::string(xors("func_71407_l"))) // func_71407_l
+				if (stack.method_name == fnvc("func_71407_l")) // func_71407_l
 				{
 					for (auto&& feature : ctx.m_features)
 						feature->on_time(mc, self, world);

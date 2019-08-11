@@ -31,6 +31,8 @@ public:
 	jfloat get_forward() override;
 	jobject get_held_item() override;
 	jboolean holding_weapon() override;
+	jboolean holding_projectile() override;
+	jboolean holding_block() override;
 
 	jdouble origin_x() override;
 	jdouble origin_y() override;
@@ -54,7 +56,9 @@ public:
 	jboolean is_dead() override;
 	jboolean is_collided_vertically() override;
 	jboolean is_collided_horizontally() override;
+	jboolean is_on_ground() override;
 	jboolean is_sprinting() override;
+	jboolean is_visible(jobject) override;
 	jboolean in_water() override;
 
 	jfloat get_width() override;

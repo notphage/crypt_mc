@@ -8,9 +8,9 @@ class c_window
 
 	c_gui m_gui;
 public:
-	void create();
+	void create() const;
 	void render();
-	void end();
+	static void end();
 
 	c_gui& get_gui()
 	{

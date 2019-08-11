@@ -58,28 +58,28 @@ void hack(HINSTANCE bin)
 	while (!ctx.m_panic)
 	{
 		using namespace std::chrono_literals;
-
+		
 		auto mc = ctx.get_game();
-
+		
 		if (auto cur_hwnd = (HWND)mc->get_window_handle(); cur_hwnd != ctx.m_window)
 		{
 			ctx.m_window = cur_hwnd;
 			hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, (long long)hooked::wnd_proc));
-
+		
 			RECT rect;
 			LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
-
+		
 			ctx.m_screen_w = rect.right - rect.left;
 			ctx.m_screen_h = rect.bottom - rect.top;
 		}
-
+		
 		auto self = mc->get_player();
 		auto world = mc->get_world();
-
+		
 		if (self && world)
 		{
 			ctx.m_ingame = true;
-
+		
 			HWND old_window = nullptr;
 			if (ctx.m_menu_opening)
 			{
@@ -92,18 +92,18 @@ void hack(HINSTANCE bin)
 				//mc->set_in_focus();
 				mc->set_mouse_grabbed(true);
 			}
-
+		
 			ctx.m_in_chat = mc->is_in_chat();
-
+		
 			for (auto&& feature : ctx.m_features)
 				feature->on_tick(mc, self, world);
-
+		
 			std::this_thread::sleep_for(1ms);
 		}
 		else
 		{
 			ctx.m_ingame = false;
-			std::this_thread::sleep_for(1s);
+			std::this_thread::sleep_for(5s);
 		}
 	}
 

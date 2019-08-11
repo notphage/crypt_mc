@@ -1,14 +1,18 @@
 #include "context.h"
-#include <iostream>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
-int c_connection::send_impl(const void* data, size_t size)
+int c_connection::send_impl(const void* data, size_t size) const
 {
-	const char* data_ptr = (const char*)data;
+	DWORD tv = 5000;
+	setsockopt(m_conn_socket, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<const char*>(&tv), sizeof(DWORD));
+
+	const char* data_ptr = static_cast<const char*>(data);
 	int32_t bytes_sent = 0;
 
 	while (size > 0)
 	{
-		if ((bytes_sent = ::send(m_conn_socket, data_ptr, size, 0)) == SOCKET_ERROR)
+		if ((bytes_sent = SSL_write(static_cast<SSL*>(m_client_ssl), data_ptr, size)) <= 0)
 			return SOCKET_ERROR;
 
 		data_ptr += bytes_sent;
@@ -18,26 +22,17 @@ int c_connection::send_impl(const void* data, size_t size)
 	return 1;
 }
 
-int c_connection::recieve_impl(void* data, size_t size)
+int c_connection::receive_impl(void* data, size_t size) const
 {
-	fd_set read_fds;
-	FD_ZERO(&read_fds);
-	FD_SET(m_conn_socket, &read_fds);
+	DWORD tv = 5000;
+	setsockopt(m_conn_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)& tv, sizeof(DWORD));
 
-	timeval time_out;
-	time_out.tv_sec = 5;
-	time_out.tv_usec = 0; //30 Microseconds for Polling
-
-	auto ret = 0;
-	if ((ret = ::select(m_conn_socket + 1, &read_fds, nullptr, nullptr, &time_out)) <= 0)
-		return -1;
-
-	char* data_ptr = (char*)data;
+	char* data_ptr = static_cast<char*>(data);
 	int32_t bytes_recv = 0;
 
 	while (size > 0)
 	{
-		if ((bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0)) <= 0)
+		if ((bytes_recv = SSL_read(static_cast<SSL*>(m_client_ssl), data_ptr, size)) <= 0)
 			return SOCKET_ERROR;
 
 		data_ptr += bytes_recv;
@@ -49,46 +44,33 @@ int c_connection::recieve_impl(void* data, size_t size)
 
 bool c_connection::connect()
 {
+	WSADATA ws_data;
 	auto retval = 0;
-	addrinfo* results = nullptr, *addr = nullptr, hints;
+	addrinfo* results = nullptr, *addr, hints{};
 
-	if ((retval = WSAStartup(MAKEWORD(2, 2), &m_wsa_data)))
-	{
-		//printf("> WSAStartup failed: %i\n", retval);
+	if ((retval = WSAStartup(MAKEWORD(2, 2), &ws_data)))
 		goto cleanup;
-	}
 
 	RtlSecureZeroMemory(&hints, sizeof addrinfo);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	if ((retval = LI_FN(getaddrinfo).cached()(xors("108.175.10.81"), xors("8123"), &hints, &results)))
-	{
-		//printf("> getaddrinfo failed: %i\n", retval);
+	if ((retval = LI_FN(getaddrinfo).cached()(xors("108.175.10.81"), xors("8123"), &hints, &results))) // 127.0.0.1
 		goto cleanup;
-	}
 
 	if (!results)
-	{
-		//printf("> localhost could not be resolved.\n");
 		goto cleanup;
-	}
 
 	addr = results;
 	while (addr)
 	{
 		if ((m_conn_socket = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) == INVALID_SOCKET)
-		{
-			//printf("> socket failed: %i\n", WSAGetLastError());
 			goto cleanup;
-		}
 
-		if ((retval = ::connect(m_conn_socket, addr->ai_addr, (socklen_t)addr->ai_addrlen)) == SOCKET_ERROR)
+		if ((retval = ::connect(m_conn_socket, addr->ai_addr, static_cast<socklen_t>(addr->ai_addrlen))) == SOCKET_ERROR)
 		{
-			retval = LI_FN(closesocket).cached()(m_conn_socket);
-			//if (retval == SOCKET_ERROR)
-				//printf("> closesocket failed: %i\n", WSAGetLastError());
+			LI_FN(closesocket).cached()(m_conn_socket);
 
 			m_conn_socket = INVALID_SOCKET;
 
@@ -102,28 +84,25 @@ bool c_connection::connect()
 	results = nullptr;
 
 	if (m_conn_socket == INVALID_SOCKET)
-	{
-		//printf("> Unable to establish a connection...\n");
 		goto cleanup;
-	}
-
-	//printf("> Connection established...\n");
 
 	return true;
 
 cleanup:
 
+	if (m_client_ssl)
+	{
+		SSL_shutdown(static_cast<SSL*>(m_client_ssl));
+		SSL_free(static_cast<SSL*>(m_client_ssl));
+		SSL_CTX_free(static_cast<SSL_CTX*>(m_ssl_ctx));
+
+		m_client_ssl = nullptr;
+	}
+
 	if (m_conn_socket != INVALID_SOCKET)
 	{
-		// No more data to send
 		retval = LI_FN(shutdown).cached()(m_conn_socket, SD_BOTH);
-		//if (retval == SOCKET_ERROR)
-			//printf("> Shutdown failed: %i\n", WSAGetLastError());
-
 		retval = LI_FN(closesocket).cached()(m_conn_socket);
-		//if (retval == SOCKET_ERROR)
-			//printf("> closesocket failed: %i\n", WSAGetLastError());
-
 		m_conn_socket = INVALID_SOCKET;
 	}
 
@@ -137,20 +116,37 @@ cleanup:
 	return false;
 }
 
+bool c_connection::tls_connect()
+{
+	if ((m_ssl_ctx = static_cast<void*>(SSL_CTX_new(TLS_client_method()))) == nullptr)
+		return false;
+
+	m_client_ssl = static_cast<void*>(SSL_new(static_cast<SSL_CTX*>(m_ssl_ctx)));
+	SSL_set_fd(static_cast<SSL*>(m_client_ssl), m_conn_socket);
+	if (SSL_connect(static_cast<SSL*>(m_client_ssl)) < 0)
+		return false;
+
+	return true;
+}
+
 void c_connection::disconnect()
 {
 	auto retval = 0;
 
+	if (m_client_ssl)
+	{
+		SSL_shutdown(static_cast<SSL*>(m_client_ssl));
+		SSL_free(static_cast<SSL*>(m_client_ssl));
+		SSL_CTX_free(static_cast<SSL_CTX*>(m_ssl_ctx));
+
+		m_client_ssl = nullptr;
+	}
+
 	if (m_conn_socket != INVALID_SOCKET)
 	{
 		// No more data to send
-		retval = LI_FN(shutdown).cached()(m_conn_socket, SD_BOTH);
-		//if (retval == SOCKET_ERROR)
-			//printf("> Shutdown failed: %i\n", WSAGetLastError());
-
-		retval = LI_FN(closesocket).cached()(m_conn_socket);
-		//if (retval == SOCKET_ERROR)
-			//printf("> closesocket failed: %i\n", WSAGetLastError());
+		LI_FN(shutdown).cached()(m_conn_socket, SD_BOTH);
+		LI_FN(closesocket).cached()(m_conn_socket);
 
 		m_conn_socket = INVALID_SOCKET;
 	}
@@ -170,20 +166,20 @@ int c_connection::send()
 	return result;
 }
 
-int c_connection::recieve()
+int c_connection::receive()
 {
 	m_buffer.clear();
 
 	size_t size = 0;
 	int result = 0;
 
-	if ((result = recieve_impl(&size, sizeof size)) == 1)
+	if ((result = receive_impl(&size, sizeof size)) == 1)
 	{
 		if (size > 0)
 		{
 			m_buffer.resize(size);
 
-			if ((result = recieve_impl(m_buffer.data(), size)) != 1)
+			if ((result = receive_impl(m_buffer.data(), size)) != 1)
 				m_buffer.clear();
 		}
 	}

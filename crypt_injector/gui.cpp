@@ -3,7 +3,6 @@
 
 UI::c_window loader;
 UI::c_console loader_console;
-c_client client;
 
 void c_gui::draw_login()
 {
@@ -19,11 +18,11 @@ void c_gui::draw_login()
 		password.handle(loader.data(), xors("password"), password_str, true);
 
 		login.handle(loader.data(), xors("login"), []() {
-			client.set_login_info(username_str, fnvr(password_str), ctx.m_hwid.get_hwid());
+			ctx.m_client.set_login_info(username_str, fnvr(password_str), ctx.m_hwid.get_hwid());
 			RtlSecureZeroMemory(username_str, sizeof username_str);
 			RtlSecureZeroMemory(password_str, sizeof password_str);
 
-			client.set_stage(connection_stage::STAGE_LOGIN);
+			ctx.m_client.set_stage(connection_stage::STAGE_LOGIN);
 			loader.m_current_stage = PAGE_LANDING;
 			});
 	}
@@ -50,7 +49,7 @@ void c_gui::draw_landing()
 
 		load.handle(loader.data(), xors("load"), []()
 			{
-				client.set_stage(connection_stage::STAGE_SELECT);
+				ctx.m_client.set_stage(connection_stage::STAGE_SELECT);
 			});
 
 		cheat_dropdown.dropdown(loader.data());
@@ -59,7 +58,7 @@ void c_gui::draw_landing()
 	if (ctx.m_selected_cheat != old_cheat && !ctx.m_game_list.empty())
 	{
 		const auto& cheat = ctx.m_game_list.at(ctx.m_selected_cheat);
-		loader_console.insert(cheat.m_name + std::string(xors(": ")) + client.game_status_to_string(cheat.m_status), color_t(255, 255, 255));
+		loader_console.insert(cheat.m_name + std::string(xors(": ")) + ctx.m_client.game_status_to_string(cheat.m_status), color_t(255, 255, 255));
 		old_cheat = ctx.m_selected_cheat;
 	}
 }

@@ -29,6 +29,18 @@ void c_client::run()
 					ctx.m_panic = true;
 					return;
 				}
+				
+				if (!m_connection.tls_connect())
+				{
+					m_stage = connection_stage::STAGE_INVALID;
+					ctx.m_loader_window.get_gui().insert_text(xors("Couldn't establish a secure connection."), color_t(255, 0, 0));
+					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
+				
+					std::this_thread::sleep_for(std::chrono::seconds(5));
+				
+					ctx.m_panic = true;
+					return;
+				}
 
 				ctx.m_loader_window.get_gui().insert_text(xors("Success."), color_t(255, 255, 255));
 
@@ -42,7 +54,7 @@ void c_client::run()
 						break;
 					}
 
-					if (!recieve_packet<c_version_packet>(version_packet))
+					if (!receive_packet<c_version_packet>(version_packet))
 					{
 						m_stage = connection_stage::STAGE_CLOSE;
 						break;
@@ -72,7 +84,7 @@ void c_client::run()
 				// Games Packets
 				{
 					c_games_packet games_packet;
-					if (!recieve_packet<c_games_packet>(games_packet))
+					if (!receive_packet<c_games_packet>(games_packet))
 					{
 						m_stage = connection_stage::STAGE_CLOSE;
 						break;
@@ -82,7 +94,7 @@ void c_client::run()
 
 					for (auto i = 0; i < games_packet.m_num; i++)
 					{
-						if (!recieve_packet<c_games_packet>(games_packet))
+						if (!receive_packet<c_games_packet>(games_packet))
 						{
 							m_stage = connection_stage::STAGE_CLOSE;
 							break;
@@ -109,7 +121,7 @@ void c_client::run()
 						break;
 					}
 
-					if (!recieve_packet<c_cheat_packet>(cheat_packet))
+					if (!receive_packet<c_cheat_packet>(cheat_packet))
 					{
 						m_stage = connection_stage::STAGE_CLOSE;
 						break;
@@ -122,11 +134,15 @@ void c_client::run()
 
 				// Cheat Data
 				{
-					m_connection.recieve();
+					m_connection.receive();
 					std::copy(m_connection.get_buffer().data(), m_connection.get_buffer().data() + m_connection.get_buffer().size(), std::back_inserter(ctx.m_buffer));
 				}
 
-				ctx.m_injector.inject_from_memory(ctx.m_buffer.data());
+				if (ctx.m_injector.inject_from_memory(ctx.m_buffer.data()))
+					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Injection successful")), color_t(255, 255, 255));
+				else
+					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Injection failed")), color_t(255, 255, 255));
+
 				ctx.m_buffer.clear();
 
 				m_stage = connection_stage::STAGE_CLOSE;

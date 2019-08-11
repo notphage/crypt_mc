@@ -47,6 +47,7 @@ class c_context
 public:
 	HINSTANCE m_instance;
 	HWND m_window;
+	HGLRC m_rendering_ctx;
 
 	char m_username[32];
 
@@ -60,7 +61,7 @@ public:
 	LONG m_screen_w = 0;
 	LONG m_screen_h = 0;
 
-	MC_VERSION m_version;
+	std::atomic<MC_VERSION> m_version;
 	JavaVM* m_jvm;
 	JNIEnv* m_jni;
 

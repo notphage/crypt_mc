@@ -29,15 +29,12 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	vec3 self_forward;
 	math::angle_vectors(self_angle, &self_forward);
 	
-	for (auto player : world->get_players())
+	for (const auto& player : world->get_players())
 	{
-	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player))
+	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player) || (ctx.m_settings.combat_reach_visible && !self->is_visible(player->player_instance)))
 	        continue;
 
 		const vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());
-
-		if (ctx.m_settings.combat_reach_y_check && fabs(self_origin.y - player_origin.y) > 0.2f)
-			continue;
 
 		vec3 player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
 		vec3 player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());

@@ -4,8 +4,15 @@ c_context ctx;
 
 int main()
 {
-	c_server server(8123);
+	try
+	{
+		c_server server(8123);
+		server.run();
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 
-	server.run();
     return 0;
 }

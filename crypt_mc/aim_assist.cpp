@@ -35,7 +35,7 @@ void c_aim_assist::find_best_point(const std::shared_ptr<c_player>& self, const 
 
 	float pitch = self->get_pitch(), yaw = self->get_yaw();
 	float best_distance = ctx.m_settings.combat_aim_assist_distance;
-	for (auto&& point : points)
+	for (const auto& point : points)
 	{
 		vec3 diff = point - trace_origin;
 		auto hypoteneuse = sqrt(diff.x * diff.x + diff.z * diff.z);
@@ -77,15 +77,16 @@ void c_aim_assist::find_target(const std::shared_ptr<c_game>& mc, const std::sha
 	vec3 trace_origin = self_prev_origin + ((self_origin - self_prev_origin) * mc->get_render_partial_ticks());
 	trace_origin.y += self->get_eye_height();
 
-	if (ctx.m_settings.combat_aim_assist_sticky && target_entity)
+	if (ctx.m_settings.combat_aim_assist_sticky && target_entity != nullptr)
 		find_best_point(self, target_entity, trace_origin, best_target_data);
 	
 	float best_distance = ctx.m_settings.combat_aim_assist_distance;
 	if (!best_target_data.m_valid)
 	{
-		for (auto player : world->get_players())
+		target_entity = nullptr;
+		for (const auto& player : world->get_players())
 		{
-			if (!player || !player->player_instance || player->is_dead() || self->is_same(player))
+			if (!player || !player->player_instance || player->is_dead() || self->is_same(player) || !self->is_visible(player->player_instance))
 				continue;
 
 			if (!ctx.m_settings.combat_aim_assist_invisibles && player->is_invisible())
@@ -94,19 +95,16 @@ void c_aim_assist::find_target(const std::shared_ptr<c_game>& mc, const std::sha
 			if (!ctx.m_settings.combat_aim_assist_nakeds && !player->has_armor())
 				continue;
 
-			target_t target_data;
+			target_t target_data{};
 			find_best_point(self, player, trace_origin, target_data);
 
-			if (target_data.m_distance <= best_distance)
+			if (target_data.m_valid && target_data.m_distance <= best_distance)
 			{
 				best_distance = target_data.m_distance;
 				best_target_data = target_data;
 			}
 		}
 	}
-
-	if (best_target_data.m_valid)
-		best_target_data.m_target = target_entity;
 }
 
 //MC sens code
@@ -169,7 +167,7 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	jfloat yaw = self->get_yaw(), pitch = self->get_pitch();
 
-	target_t target_data;
+	target_t target_data{};
 	find_target(mc, self, world, target_data);
 
 	if (!target_data.m_valid)

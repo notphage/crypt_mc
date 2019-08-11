@@ -18,6 +18,8 @@ bool c_memory::open(const CLIENT_ID& id)
 	if (!m_proc)
 		return false;
 
+	m_client_id = id;
+
 	return true;
 }
 
@@ -34,28 +36,9 @@ bool c_memory::alloc(void*& addr, size_t* size, int32_t alloc_type, int32_t prot
 
 bool c_memory::thread(HANDLE& thread, void* entry, void* arg)
 {
-	struct NtCreateThreadExBuffer
-	{
-		ULONG Size;
-		ULONG Unknown1;
-		ULONG Unknown2;
-		PULONG Unknown3;
-		ULONG Unknown4;
-		ULONG Unknown5;
-		ULONG Unknown6;
-		PULONG Unknown7;
-		ULONG Unknown8;
-	};
+	auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtCreateThreadEx")), &thread, 0x1FFFFF, nullptr, m_proc, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry), arg, 0, nullptr, nullptr, nullptr, nullptr);
 
-	NtCreateThreadExBuffer ntbuffer;
-
-	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtCreateThreadEx")), &thread, 0x1FFFFF, 0, m_proc, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry), arg, 0, nullptr, nullptr, nullptr, nullptr); status != STATUS_SUCCESS)
-		return false;
-
-	if (!thread)
-		return false;
-
-	return true;
+	return status == STATUS_SUCCESS;
 }
 
 void c_memory::close()
@@ -181,9 +164,15 @@ uintptr_t c_memory::proc_addr(const char* mod, const char* func)
 			if ((reinterpret_cast<uintptr_t>(func) <= 0xFFFF && (uint16_t)((uintptr_t)func) == (ord_idx + exp_data->Base)) ||
 				(reinterpret_cast<uintptr_t>(func) > 0xFFFF && strcmp(func_name, func) == 0))
 			{
-				// TODO: Future check for forwarded imports
+				uintptr_t proc_addr = func_addrs[ord_idx] + (uintptr_t)remote_mod;
 
-				return func_addrs[ord_idx] + (uintptr_t)remote_mod;
+				//if (proc_addr >= (uintptr_t)remote_mod + exp_base &&
+				//	proc_addr <= (uintptr_t)remote_mod + exp_base + exp_size)
+				//{
+				//	MessageBoxA(nullptr, func_name, "Forwarded", MB_OK);
+				//}
+
+				return proc_addr;
 			}
 		}
 	}

@@ -44,19 +44,27 @@ void c_stack_trace::get_stack_trace(int index, stack_trace& stack)
 	jint stack_trace_depth = jni->CallIntMethod(obj_exception, stacktracefields.mid_get_stack_trace_depth);
 
 	if (stack_trace_depth <= index)
+	{
+		jni->DeleteLocalRef(obj_exception);
 		return;
+	}
 
 	jobject stack_trace_element = jni->CallObjectMethod(obj_exception, stacktracefields.mid_get_stack_trace_element, index);
 	jstring str_method_name = reinterpret_cast<jstring>(jni->GetObjectField(stack_trace_element, stacktracefields.fid_method_name));
 
 	jint line_number = jni->GetIntField(stack_trace_element, stacktracefields.fid_line_number);
 
+	jni->DeleteLocalRef(obj_exception);
 	jni->DeleteLocalRef(stack_trace_element);
 
+	jboolean is_copy = false;
+	auto str = jni->GetStringUTFChars(str_method_name, &is_copy);
+
 	stack.valid = true;
-	stack.method_name = jni->GetStringUTFChars(str_method_name, false);
-	stack.str_name = str_method_name;
+	stack.method_name = fnvr(str);
 	stack.line_number = line_number;
+
+	jni->ReleaseStringUTFChars(str_method_name, str);
 
 	return;
 }

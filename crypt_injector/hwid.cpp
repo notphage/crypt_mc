@@ -62,41 +62,11 @@ typedef struct _IDENTIFY_DATA {
 
 #pragma pack()
 
-void c_hwid::error(LPTSTR lpszFunction)
-{
-	LPVOID lpMsgBuf;
-	LPVOID lpDisplayBuf;
-	DWORD dw = GetLastError();
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)& lpMsgBuf,
-		0, NULL);
-
-	// Display the error message and exit the process
-
-	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
-		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
-	StringCchPrintf((LPTSTR)lpDisplayBuf,
-		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-		TEXT("%s failed with error %d: %s"),
-		lpszFunction, dw, lpMsgBuf);
-	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
-
-	LocalFree(lpMsgBuf);
-	LocalFree(lpDisplayBuf);
-}
-
 uint64_t c_hwid::disk_serials()
 {
 	uint64_t hwid_disk = 0;
 
-	auto convert_to_str = [](DWORD disk_data[256], int first, int last, char* buf) -> char*
+	const auto convert_to_str = [](const DWORD disk_data[256], int first, int last, char* buf) -> char*
 	{
 		int index = 0;
 		int position = 0;
@@ -105,10 +75,10 @@ uint64_t c_hwid::disk_serials()
 		for (index = first; index <= last; index++)
 		{
 			//  get high byte for 1st character
-			buf[position++] = (char)(disk_data[index] / 256);
+			buf[position++] = static_cast<char>(disk_data[index] / 256);
 
 			//  get low byte for 2nd character
-			buf[position++] = (char)(disk_data[index] % 256);
+			buf[position++] = static_cast<char>(disk_data[index] % 256);
 		}
 
 		//  end the string 
@@ -127,12 +97,12 @@ uint64_t c_hwid::disk_serials()
 
 		wsprintfW(disk_name, xors(L"\\\\.\\PhysicalDrive%i"), i);
 
-		auto device = LI_FN(CreateFileW).cached()(disk_name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+		const auto device = LI_FN(CreateFileW).cached()(disk_name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
 		if (device != INVALID_HANDLE_VALUE)
 		{
 			size_t command_size = sizeof(SENDCMDINPARAMS) + IDENTIFY_BUFFER_SIZE;
-			PSENDCMDINPARAMS cmd = (PSENDCMDINPARAMS)malloc(command_size);
+			PSENDCMDINPARAMS cmd = static_cast<PSENDCMDINPARAMS>(malloc(command_size));
 			cmd->irDriveRegs.bCommandReg = 0xEC;
 			DWORD bytes_ret = 0;
 
@@ -149,7 +119,6 @@ uint64_t c_hwid::disk_serials()
 					diskdata[ijk] = pIdSector[ijk];
 
 				char serial[1024];
-				char model[1024];
 				convert_to_str(diskdata, 10, 19, serial);
 				convert_to_str(diskdata, 27, 46, serial);
 
@@ -171,10 +140,9 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
 
 uint64_t c_hwid::boot_uuid()
 {
-	PSYSTEM_BOOT_ENVIRONMENT_INFORMATION boot_info;
-	size_t needed = 8 * 1024 * 1024;
+	constexpr size_t needed = 8 * 1024 * 1024;
 
-	boot_info = (PSYSTEM_BOOT_ENVIRONMENT_INFORMATION)malloc(needed);
+	auto boot_info = static_cast<PSYSTEM_BOOT_ENVIRONMENT_INFORMATION>(malloc(needed));
 
 	if (!boot_info)
 		return 0;

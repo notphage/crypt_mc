@@ -3,6 +3,7 @@
 #include "glfontstash.h"
 
 #include <gl/GL.h>
+#include "glext.h"
 #pragma comment (lib, "opengl32.lib")
 
 FONScontext* c_renderer::make_font_context() const
@@ -17,46 +18,74 @@ render_list_t::ptr c_renderer::make_render_list() const
 
 void c_renderer::draw_scene()
 {
+	static auto glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress(xors("glBindBuffer"));
+	static auto glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)wglGetProcAddress(xors("glEnableVertexAttribArray"));
+	static auto glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)wglGetProcAddress(xors("glVertexAttribPointer"));
+	static auto glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress(xors("glBufferData"));
+	static auto glActiveTexture = (PFNGLACTIVETEXTUREPROC)wglGetProcAddress(xors("glActiveTexture"));
+	static auto glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress(xors("glBindVertexArray"));
+	static auto glBindSampler = (PFNGLBINDSAMPLERPROC)wglGetProcAddress(xors("glBindSampler"));
+	static auto glBlendEquationSeparate = (PFNGLBLENDEQUATIONSEPARATEPROC)wglGetProcAddress(xors("glBlendEquationSeparate"));
+	static auto glBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)wglGetProcAddress(xors("glBlendFuncSeparate"));
+
 	if (m_render_list->batches.empty())
 		return;
 
 	// Backup GL state
-	LI_FN(glGetIntegerv).cached()(GL_TEXTURE_BINDING_2D, &m_last_texture);
-	LI_FN(glGetIntegerv).cached()(GL_POLYGON_MODE, m_last_polygon_mode);
-	LI_FN(glGetIntegerv).cached()(GL_VIEWPORT, m_last_viewport);
-	LI_FN(glGetIntegerv).cached()(GL_SCISSOR_BOX, m_last_scissor_box);
-	LI_FN(glPushAttrib).cached()(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT);
+	GLenum last_active_texture; LI_FN(glGetIntegerv).cached()(GL_ACTIVE_TEXTURE, (GLint*)&last_active_texture);
+	glActiveTexture(GL_TEXTURE0);
+	GLint last_program; LI_FN(glGetIntegerv).cached()(GL_CURRENT_PROGRAM, &last_program);
+	GLint last_texture; LI_FN(glGetIntegerv).cached()(GL_TEXTURE_BINDING_2D, &last_texture);
+#ifdef GL_SAMPLER_BINDING
+	GLint last_sampler; LI_FN(glGetIntegerv).cached()(GL_SAMPLER_BINDING, &last_sampler);
+#endif
+	GLint last_array_buffer; LI_FN(glGetIntegerv).cached()(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
+#ifdef GL_POLYGON_MODE
+	GLint last_polygon_mode[2]; LI_FN(glGetIntegerv).cached()(GL_POLYGON_MODE, last_polygon_mode);
+#endif
+	GLint last_viewport[4]; LI_FN(glGetIntegerv).cached()(GL_VIEWPORT, last_viewport);
+	GLint last_scissor_box[4]; LI_FN(glGetIntegerv).cached()(GL_SCISSOR_BOX, last_scissor_box);
+	GLenum last_blend_src_rgb; LI_FN(glGetIntegerv).cached()(GL_BLEND_SRC_RGB, (GLint*)& last_blend_src_rgb);
+	GLenum last_blend_dst_rgb; LI_FN(glGetIntegerv).cached()(GL_BLEND_DST_RGB, (GLint*)& last_blend_dst_rgb);
+	GLenum last_blend_src_alpha; LI_FN(glGetIntegerv).cached()(GL_BLEND_SRC_ALPHA, (GLint*)& last_blend_src_alpha);
+	GLenum last_blend_dst_alpha; LI_FN(glGetIntegerv).cached()(GL_BLEND_DST_ALPHA, (GLint*)& last_blend_dst_alpha);
+	GLenum last_blend_equation_rgb; LI_FN(glGetIntegerv).cached()(GL_BLEND_EQUATION_RGB, (GLint*)& last_blend_equation_rgb);
+	GLenum last_blend_equation_alpha; LI_FN(glGetIntegerv).cached()(GL_BLEND_EQUATION_ALPHA, (GLint*)& last_blend_equation_alpha);
+	GLboolean last_enable_blend = LI_FN(glIsEnabled).cached()(GL_BLEND);
+	GLboolean last_enable_cull_face = LI_FN(glIsEnabled).cached()(GL_CULL_FACE);
+	GLboolean last_enable_depth_test = LI_FN(glIsEnabled).cached()(GL_DEPTH_TEST);
+	GLboolean last_enable_scissor_test = LI_FN(glIsEnabled).cached()(GL_SCISSOR_TEST);
+	bool clip_origin_lower_left = true;
+#if defined(GL_CLIP_ORIGIN) && !defined(__APPLE__)
+	GLenum last_clip_origin = 0; LI_FN(glGetIntegerv).cached()(GL_CLIP_ORIGIN, (GLint*)& last_clip_origin); // Support for GL 4.5's glClipControl(GL_UPPER_LEFT)
+	if (last_clip_origin == GL_UPPER_LEFT)
+		clip_origin_lower_left = false;
+#endif
 
-	LI_FN(glShadeModel).cached()(GL_SMOOTH);
+	LI_FN(glPushAttrib).cached()(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT);
 	LI_FN(glEnable).cached()(GL_BLEND);
 	LI_FN(glBlendFunc).cached()(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	LI_FN(glDisable).cached()(GL_CULL_FACE);
 	LI_FN(glDisable).cached()(GL_DEPTH_TEST);
-	LI_FN(glDisable).cached()(GL_LIGHTING);
-	LI_FN(glDisable).cached()(GL_COLOR_MATERIAL);
 	LI_FN(glEnable).cached()(GL_SCISSOR_TEST);
 	LI_FN(glEnableClientState).cached()(GL_VERTEX_ARRAY);
 	LI_FN(glEnableClientState).cached()(GL_TEXTURE_COORD_ARRAY);
 	LI_FN(glEnableClientState).cached()(GL_COLOR_ARRAY);
 	LI_FN(glEnable).cached()(GL_TEXTURE_2D);
-	LI_FN(glPolygonMode).cached()(GL_FRONT_AND_BACK, GL_FILL);
-
 	LI_FN(glViewport).cached()(0, 0, ctx.m_screen_w, ctx.m_screen_h);
 	LI_FN(glMatrixMode).cached()(GL_PROJECTION);
 	LI_FN(glPushMatrix).cached()();
 	LI_FN(glLoadIdentity).cached()();
-	LI_FN(glOrtho).cached()(0, ctx.m_screen_w, ctx.m_screen_h, 0, -1, 1);
+	LI_FN(glOrtho).cached()(0.0f, ctx.m_screen_w, ctx.m_screen_h, 0.0f, -1.0f, +1.0f);
 	LI_FN(glMatrixMode).cached()(GL_MODELVIEW);
 	LI_FN(glPushMatrix).cached()();
 	LI_FN(glLoadIdentity).cached()();
-
-	LI_FN(glScissor).cached()(0, 0, ctx.m_screen_w, ctx.m_screen_h);
 
 	auto vtx_buffer = m_render_list->vertices.data();
 	LI_FN(glVertexPointer).cached()(2, GL_FLOAT, sizeof(vertex_t), (const GLvoid*)((const char*)vtx_buffer + offsetof(vertex_t, m_pos)));
 	LI_FN(glColorPointer).cached()(4, GL_UNSIGNED_BYTE, sizeof(vertex_t), (const GLvoid*)((const char*)vtx_buffer + offsetof(vertex_t, m_col)));
 	LI_FN(glTexCoordPointer).cached()(2, GL_FLOAT, sizeof(vertex_t), (const GLvoid*)((const char*)vtx_buffer + offsetof(vertex_t, m_tex)));
-
+	
 	std::size_t pos = 0;
 
 	// Normal Shapes
@@ -77,20 +106,33 @@ void c_renderer::draw_scene()
 		}
 	}
 
-	// Restore modified GL state
 	LI_FN(glDisableClientState).cached()(GL_COLOR_ARRAY);
 	LI_FN(glDisableClientState).cached()(GL_TEXTURE_COORD_ARRAY);
 	LI_FN(glDisableClientState).cached()(GL_VERTEX_ARRAY);
-	LI_FN(glBindTexture).cached()(GL_TEXTURE_2D, (GLuint)m_last_texture);
 	LI_FN(glMatrixMode).cached()(GL_MODELVIEW);
 	LI_FN(glPopMatrix).cached()();
 	LI_FN(glMatrixMode).cached()(GL_PROJECTION);
 	LI_FN(glPopMatrix).cached()();
 	LI_FN(glPopAttrib).cached()();
-	LI_FN(glPolygonMode).cached()(GL_FRONT, (GLenum)m_last_polygon_mode[0]);
-	LI_FN(glPolygonMode).cached()(GL_BACK, (GLenum)m_last_polygon_mode[1]);
-	LI_FN(glViewport).cached()(m_last_viewport[0], m_last_viewport[1], (GLsizei)m_last_viewport[2], (GLsizei)m_last_viewport[3]);
-	LI_FN(glScissor).cached()(m_last_scissor_box[0], m_last_scissor_box[1], (GLsizei)m_last_scissor_box[2], (GLsizei)m_last_scissor_box[3]);
+
+	// Restore modified GL state
+	LI_FN(glBindTexture).cached()(GL_TEXTURE_2D, last_texture);
+#ifdef GL_SAMPLER_BINDING
+	glBindSampler(0, last_sampler);
+#endif
+	glActiveTexture(last_active_texture);
+	glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
+	glBlendEquationSeparate(last_blend_equation_rgb, last_blend_equation_alpha);
+	glBlendFuncSeparate(last_blend_src_rgb, last_blend_dst_rgb, last_blend_src_alpha, last_blend_dst_alpha);
+	if (last_enable_blend) LI_FN(glEnable).cached()(GL_BLEND); else LI_FN(glDisable).cached()(GL_BLEND);
+	if (last_enable_cull_face) LI_FN(glEnable).cached()(GL_CULL_FACE); else LI_FN(glDisable).cached()(GL_CULL_FACE);
+	if (last_enable_depth_test) LI_FN(glEnable).cached()(GL_DEPTH_TEST); else LI_FN(glDisable).cached()(GL_DEPTH_TEST);
+	if (last_enable_scissor_test) LI_FN(glEnable).cached()(GL_SCISSOR_TEST); else LI_FN(glDisable).cached()(GL_SCISSOR_TEST);
+#ifdef GL_POLYGON_MODE
+	LI_FN(glPolygonMode).cached()(GL_FRONT_AND_BACK, (GLenum)last_polygon_mode[0]);
+#endif
+	LI_FN(glViewport).cached()(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
+	LI_FN(glScissor).cached()(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
 
 	m_render_list->clear();
 }

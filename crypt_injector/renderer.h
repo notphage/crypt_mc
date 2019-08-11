@@ -33,7 +33,8 @@ void safe_release(type& com_ptr)
 struct font_handle_t
 {
 	font_handle_t() = default;
-	font_handle_t(std::size_t id)
+
+	explicit font_handle_t(const std::size_t id)
 		: m_id(id)
 	{ }
 

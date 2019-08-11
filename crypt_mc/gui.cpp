@@ -86,9 +86,9 @@ void c_gui::tab_combat()
 
 			reach_conditions.handle(menu.data(), xors("conditions"),
 				{
+					{&ctx.m_settings.combat_reach_visible, xors("visible")},
 					{&ctx.m_settings.combat_reach_on_sprint, xors("on sprint")},
 					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
-					{&ctx.m_settings.combat_reach_y_check, xors("y check")},
 					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes") }
 				});
 		}
@@ -143,6 +143,7 @@ void c_gui::tab_combat()
 			velocity_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_velocity_on_sprint, xors("on sprint")},
+					//{&ctx.m_settings.combat_velocity_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_velocity_delay, xors("delay")}
 				});
 		}
@@ -171,6 +172,7 @@ void c_gui::tab_player()
 
 	static UI::c_enable_groupbox fast_place_groupbox;
 	static UI::c_key_bind fast_place_key;
+	static UI::c_multi_dropdown fast_place_items;
 
 	static UI::c_groupbox afk_groupbox;
 	static UI::c_checkbox afk;
@@ -213,6 +215,12 @@ void c_gui::tab_player()
 		fast_place_groupbox.start(menu.data(), xors("fast place"));
 		{
 			fast_place_key.handle(menu.data(), "", &ctx.m_settings.player_fast_place_key, keytype_t::kt_all);
+			fast_place_items.handle(menu.data(), xors("items"),
+				{
+					{&ctx.m_settings.player_fast_place_blocks, xors("blocks")},
+					{&ctx.m_settings.player_fast_place_projectiles, xors("projectiles")},
+				});
+
 		}
 		fast_place_groupbox.end(menu.data(), &ctx.m_settings.player_fast_place);
 
@@ -223,6 +231,7 @@ void c_gui::tab_player()
 		afk_groupbox.end(menu.data());
 
 		fast_place_key.dropdown(menu.data());
+		fast_place_items.dropdown(menu.data());
 	}
 }
 

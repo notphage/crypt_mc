@@ -3,9 +3,15 @@
 
 decltype(hooked::o_swap_buffers) hooked::o_swap_buffers;
 
+static bool init = false;
 int __stdcall hooked::swap_buffers(HDC hdc)
 {
-	anti_rin(
+	//HGLRC o_ctx = wglGetCurrentContext();
+	if (!ctx.m_init)
+	{
+		//ctx.m_rendering_ctx = wglCreateContext(hdc);
+		//wglMakeCurrent(hdc, ctx.m_rendering_ctx);
+
 		RECT rect;
 		LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
 
@@ -19,7 +25,9 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 		ctx.m_gui = std::make_shared<c_gui>();
 
 		ctx.m_init = true;
-	)
+	}
+	//else
+	//	wglMakeCurrent(hdc, ctx.m_rendering_ctx);
 
 	// proper frametime
 	static auto old = std::chrono::high_resolution_clock::now();
@@ -37,6 +45,8 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 		
 		ctx.m_renderer->draw_scene();
 	}
+
+	//wglMakeCurrent(hdc, o_ctx);
 
 	return hooked::o_swap_buffers(hdc);
 }

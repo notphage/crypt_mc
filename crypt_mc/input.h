@@ -150,7 +150,7 @@ struct keysetting_t
 };
 
 // used to check if the user is pressing the key, if the code reliant on it should be ran
-#define valid_keystate(keysetting) ( g_input.is_key_pressed( keysetting( ) ) && valid_keysetting( keysetting ) )
+#define valid_keystate(keysetting) ( g_input.is_key_pressed( keysetting( ) ) && valid_keysetting( keysetting ) && !ctx.m_in_chat )
 
 // used to check if the user has selected the setting
 #define valid_keysetting(keysetting) ( keysetting( ).key > KEYS_NONE || keysetting( ).type == kt_always )

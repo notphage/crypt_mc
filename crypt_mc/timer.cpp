@@ -5,7 +5,7 @@ void c_timer::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 {
     if (!ctx.m_settings.movement_timer || !valid_keystate(ctx.m_settings.movement_timer_key))
     {
-        mc->set_timer_speed(1.0);
+        mc->set_timer_speed(1.f);
         return;
     }
 

@@ -2,17 +2,21 @@
 
 class c_connection
 {
-	WSADATA m_wsa_data;
+	// gay hack
+	void* m_client_ssl = nullptr;
+	void* m_ssl_ctx = nullptr;
+	WSADATA m_wsa_data = {};
 	SOCKET m_conn_socket = INVALID_SOCKET;
 	std::vector<uint8_t> m_buffer;
 
-	int send_impl(const void* data, size_t size);
-	int recieve_impl(void* data, size_t size);
+	int send_impl(const void* data, size_t size) const;
+	int receive_impl(void* data, size_t size) const;
 public:
 	bool connect();
+	bool tls_connect();
 	void disconnect();
 	int send();
-	int recieve();
+	int receive();
 
 	__forceinline void set_buffer(const std::vector<uint8_t>& buffer)
 	{

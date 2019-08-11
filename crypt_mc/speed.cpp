@@ -3,6 +3,8 @@
 
 void c_speed::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
+	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
+
 	if (valid_keystate(ctx.m_settings.movement_longjump_key))
 		longjump(self);
 	else if (ctx.m_settings.movement_speed && valid_keystate(ctx.m_settings.movement_speed_key))
@@ -63,13 +65,13 @@ void c_speed::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 		}
 	}
 	else if (ctx.m_settings.movement_air_control && valid_keystate(ctx.m_settings.movement_air_control_key))
-		if (!self->is_collided_vertically())
+		if (!m_on_ground)
 			set_speed(self, get_base_speed(self));
 }
 
 void c_speed::bhop(std::shared_ptr<c_player> self) const
 {
-    if (self->is_collided_vertically())
+    if (m_on_ground)
     {
         set_speed(self, get_base_speed(self) + 0.22);
 
@@ -81,7 +83,7 @@ void c_speed::bhop(std::shared_ptr<c_player> self) const
 
 void c_speed::slowhop(std::shared_ptr<c_player> self) const
 {
-    if (self->is_collided_vertically())
+    if (m_on_ground)
     {
         set_speed(self, get_base_speed(self) + 0.14);
 
@@ -104,7 +106,7 @@ void c_speed::custom(std::shared_ptr<c_player> self) const
     float slowdown_speed = 0.1f;
     float fall_speed = 0.1f;
 
-    if (self->is_collided_vertically())
+    if (m_on_ground)
     {
         set_speed(self, get_base_speed(self) + 0.14);
 
@@ -117,7 +119,7 @@ void c_speed::custom(std::shared_ptr<c_player> self) const
 
 void c_speed::minihop(std::shared_ptr<c_player> self) const
 {
-    if (self->is_collided_vertically())
+    if (m_on_ground)
     {
         set_speed(self, get_base_speed(self) + 0.08);
 
@@ -129,7 +131,7 @@ void c_speed::minihop(std::shared_ptr<c_player> self) const
 
 void c_speed::glidehop(std::shared_ptr<c_player> self) const
 {
-    if (self->is_collided_vertically())
+    if (m_on_ground)
     {
         set_speed(self, get_base_speed(self) + 0.6);
 
@@ -145,7 +147,7 @@ void c_speed::glidehop(std::shared_ptr<c_player> self) const
 
 void c_speed::yport(std::shared_ptr<c_player> self) const
 {
-    if (self->is_collided_vertically())
+    if (m_on_ground)
     {
         set_speed(self, get_base_speed(self) + 0.33);
 
@@ -161,13 +163,13 @@ void c_speed::yport(std::shared_ptr<c_player> self) const
 
 void c_speed::vanilla(std::shared_ptr<c_player> self) const
 {
-    if (self->is_collided_vertically())
+    if (m_on_ground)
         set_speed(self, get_base_speed(self) + 0.15);
 }
 
 void c_speed::longjump(std::shared_ptr<c_player> self) const
 {
-	if (self->is_collided_vertically())
+	if (m_on_ground)
 	{
 		set_speed(self, get_base_speed(self) + ctx.m_settings.movement_longjump_boost);
 		jump(self, 0.42);

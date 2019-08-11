@@ -13,6 +13,9 @@
     <Filter Include="SRC\utils">
       <UniqueIdentifier>{cb6beac0-ecfd-401d-ac56-5ed97836b03d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\server\cert">
+      <UniqueIdentifier>{f174a301-1d70-4045-9e9e-83150cc8bbf4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -38,9 +41,6 @@
     <ClInclude Include="thread_pool.h">
       <Filter>SRC\utils</Filter>
     </ClInclude>
-    <ClInclude Include="console.h">
-      <Filter>SRC\utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\packets.h">
       <Filter>SRC\server</Filter>
     </ClInclude>
@@ -49,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="cheat.h">
       <Filter>SRC\server</Filter>
+    </ClInclude>
+    <ClInclude Include="cert.h">
+      <Filter>SRC\server\cert</Filter>
+    </ClInclude>
+    <ClInclude Include="key.h">
+      <Filter>SRC\server\cert</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

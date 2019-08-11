@@ -50,6 +50,7 @@ struct player_fields
 	jfieldID fid_is_dead = nullptr;
 	jfieldID fid_collided_vertically = nullptr;
 	jfieldID fid_collided_horizontally = nullptr;
+	jfieldID fid_on_ground = nullptr;
 	jfieldID fid_move_strafing = nullptr;
 	jfieldID fid_move_forward = nullptr;
 	jfieldID fid_pitch = nullptr;
@@ -93,6 +94,7 @@ struct player_fields
 	jmethodID mid_get_effects = nullptr;
 	jmethodID mid_send_use_item = nullptr;
 	jmethodID mid_get_eye_height = nullptr;
+	jmethodID mid_is_visible = nullptr;
 
 	jclass entity_class = nullptr;
 	jclass entity_player_sp_class = nullptr;
@@ -101,6 +103,9 @@ struct player_fields
 	jclass item_stack_class = nullptr;
 	jclass item_sword_class = nullptr;
 	jclass item_axe_class = nullptr;
+	jclass item_egg_class = nullptr;
+	jclass item_snowball_class = nullptr;
+	jclass item_block_class = nullptr;
 	jclass cls_container = nullptr;
 	jclass cls_slot = nullptr;
 	jclass cls_item_potion = nullptr;
@@ -275,7 +280,7 @@ std::vector<std::shared_ptr<c_player>> c_world_1710::get_players()
 	jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
 
 	if (!arr_player_ents)
-		return {};
+		return players;
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_player_ents); i++)
 	{
@@ -333,6 +338,9 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.cls_player_controller = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.client.multiplayer.PlayerControllerMP")));
 		playerfields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.entity.player.InventoryPlayer")));
 		playerfields.cls_aabb = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.util.AxisAlignedBB")));
+		playerfields.item_egg_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemEgg")));
+		playerfields.item_snowball_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemSnowball")));
+		playerfields.item_block_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemBlock")));
 
 		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70738_aO"), xors("I"));
 		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70737_aN"), xors("I"));
@@ -349,6 +357,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.fid_is_dead = jni->GetFieldID(playerfields.entity_class, xors("field_70128_L"), xors("Z"));
 		playerfields.fid_collided_vertically = jni->GetFieldID(playerfields.entity_class, xors("field_70124_G"), xors("Z"));
 		playerfields.fid_collided_horizontally = jni->GetFieldID(playerfields.entity_class, xors("field_70123_F"), xors("Z"));
+		playerfields.fid_on_ground = jni->GetFieldID(playerfields.entity_class, xors("field_70122_E"), xors("Z"));
 		playerfields.fid_move_strafing = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70702_br"), xors("F"));
 		playerfields.fid_move_forward = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70701_bs"), xors("F"));
 		playerfields.fid_pitch = jni->GetFieldID(playerfields.entity_class, xors("field_70125_A"), xors("F"));
@@ -369,7 +378,6 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.fid_aabb_max_x = jni->GetFieldID(playerfields.cls_aabb, xors("field_72336_d"), xors("D"));
 		playerfields.fid_aabb_max_y = jni->GetFieldID(playerfields.cls_aabb, xors("field_72337_e"), xors("D"));
 		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("field_72334_f"), xors("D"));
-
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70660_b"), xors("(Lnet/minecraft/potion/Potion;)Lnet/minecraft/potion/PotionEffect;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76458_c"), xors("()I"));
@@ -393,6 +401,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.mid_get_effects = jni->GetMethodID(playerfields.cls_item_potion, xors("func_77832_l"), xors("(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"));
 		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("func_78769_a"), "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z");
 		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("func_70047_e"), xors("()F"));
+		playerfields.mid_is_visible = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70685_l"), xors("(Lnet/minecraft/entity/Entity;)Z"));
 
 		init_fields = true;
 	}
@@ -443,6 +452,11 @@ jboolean c_player_1710::is_sprinting()
     return jni->CallBooleanMethod(player_instance, playerfields.mid_is_sprinting);
 }
 
+jboolean c_player_1710::is_visible(jobject player)
+{
+	return jni->CallBooleanMethod(player_instance, playerfields.mid_is_visible, player);
+}
+
 jboolean c_player_1710::in_water()
 {
 	return jni->CallBooleanMethod(player_instance, playerfields.mid_in_water);
@@ -461,6 +475,11 @@ jboolean c_player_1710::is_collided_vertically()
 jboolean c_player_1710::is_collided_horizontally()
 {
     return jni->GetBooleanField(player_instance, playerfields.fid_collided_horizontally);
+}
+
+jboolean c_player_1710::is_on_ground()
+{
+	return jni->GetBooleanField(player_instance, playerfields.fid_on_ground);
 }
 
 jfloat c_player_1710::get_pitch()
@@ -495,10 +514,26 @@ jobject c_player_1710::get_item(jobject item_stack)
 
 jboolean c_player_1710::holding_weapon()
 {
-	if (!this->get_held_item())
-		return false;
+	if (auto held_item = this->get_held_item(); held_item != nullptr)
+		return jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
 
-	return jni->IsInstanceOf(this->get_held_item(), playerfields.item_sword_class) || jni->IsInstanceOf(this->get_held_item(), playerfields.item_axe_class);
+	return false;
+}
+
+jboolean c_player_1710::holding_projectile()
+{
+	if (auto held_item = this->get_held_item(); held_item != nullptr)
+		return jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
+
+	return false;
+}
+
+jboolean c_player_1710::holding_block()
+{
+	if (auto held_item = this->get_held_item(); held_item != nullptr)
+		return jni->IsInstanceOf(held_item, playerfields.item_block_class);
+
+	return false;
 }
 
 jdouble c_player_1710::origin_x()

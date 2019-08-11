@@ -2,14 +2,14 @@
 #include <iostream>
 #include <unistd.h>
 
-int c_connection::send_impl(const void* data, size_t size)
+int c_connection::send_impl(const void* data, size_t size) const
 {
 	const char* data_ptr = (const char*)data;
 	int32_t bytes_sent = 0;
 
 	while (size > 0)
 	{
-		if ((bytes_sent = ::send(m_conn_socket, data_ptr, size, 0)) == -1)
+		if ((bytes_sent = SSL_write(m_ssl, data_ptr, size)) == -1)
 			return -1;
 
 		data_ptr += bytes_sent;
@@ -19,7 +19,7 @@ int c_connection::send_impl(const void* data, size_t size)
 	return 1;
 }
 
-int c_connection::recieve_impl(void* data, size_t size)
+int c_connection::receive_impl(void* data, size_t size) const
 {
 	fd_set read_fds;
 	FD_ZERO(&read_fds);
@@ -38,7 +38,7 @@ int c_connection::recieve_impl(void* data, size_t size)
 
 	while (size > 0)
 	{
-		if ((bytes_recv = ::recv(m_conn_socket, data_ptr, size, 0)) <= 0)
+		if ((bytes_recv = SSL_read(m_ssl, data_ptr, size)) <= 0)
 			return -1;
 
 		data_ptr += bytes_recv;
@@ -52,20 +52,20 @@ void c_connection::disconnect()
 {
 	if (shutdown(m_conn_socket, SHUT_RDWR) < 0)
 	{
-		ctx.m_console.write(std::string("Client ") + m_ip + std::string(" errored on disconnect: ") + strerror(errno));
+		printf("> Client %s | Errored on disconnect (%s)\n", m_ip.c_str(), strerror(errno));
 		force_disconnect();
 
 		return;
 	}
 
-	ctx.m_console.write(std::string("Client ") + m_ip + std::string(" was disconnected gracefully"));
+	printf("> Client %s | Disconnected gracefully\n", m_ip.c_str());
 	close(m_conn_socket);
 }
 
-void c_connection::force_disconnect()
+void c_connection::force_disconnect() const
 {
 	close(m_conn_socket);
-	ctx.m_console.write(std::string("Client ") + m_ip + std::string(" was disconnected forcefully"));
+	printf("> Client %s | Disconnected forcefully\n", m_ip.c_str());
 }
 
 int c_connection::send()
@@ -80,20 +80,20 @@ int c_connection::send()
 	return result;
 }
 
-int c_connection::recieve()
+int c_connection::receive()
 {
 	m_buffer.clear();
 
 	size_t size = 0;
 	int result = 0;
 
-	if ((result = recieve_impl(&size, sizeof size)) == 1)
+	if ((result = receive_impl(&size, sizeof size)) == 1)
 	{
 		if (size > 0)
 		{
 			m_buffer.resize(size);
 
-			if ((result = recieve_impl(m_buffer.data(), size)) != 1)
+			if ((result = receive_impl(m_buffer.data(), size)) != 1)
 				m_buffer.clear();
 		}
 	}

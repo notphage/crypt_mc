@@ -76,9 +76,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <MultiProcNumber>16</MultiProcNumber>
+    <IncludePath>
+    </IncludePath>
+    <LibraryPath>
+    </LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <MultiProcNumber>16</MultiProcNumber>
+    <IncludePath>
+    </IncludePath>
+    <LibraryPath>
+    </LibraryPath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="connection.cpp" />
@@ -87,11 +95,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\packets.h" />
+    <ClInclude Include="cert.h" />
     <ClInclude Include="cheat.h" />
     <ClInclude Include="connection.h" />
-    <ClInclude Include="console.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="game_list.h" />
+    <ClInclude Include="key.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="thread_pool.h" />
   </ItemGroup>
@@ -102,9 +111,11 @@
       <LinkTimeOptimization>true</LinkTimeOptimization>
       <RelaxIEEE>true</RelaxIEEE>
       <HideInlineMethods>true</HideInlineMethods>
+      <AdditionalOptions>-L/usr/local/ssl/lib %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>pthread;</LibraryDependencies>
+      <LibraryDependencies>pthread;ssl;crypto;</LibraryDependencies>
+      <AdditionalOptions>-lssl -lcrypto -L/usr/lib/x86_64-linux-gnu/ %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -112,7 +123,8 @@
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>pthread;</LibraryDependencies>
+      <LibraryDependencies>pthread;ssl;crypto;</LibraryDependencies>
+      <AdditionalOptions>-lssl -lcrypto -L/usr/lib/x86_64-linux-gnu/ %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -110,11 +110,14 @@ enum font_t
 
 class c_renderer : std::enable_shared_from_this<c_renderer>
 {
-	int32_t m_last_texture;
-	int32_t m_last_polygon_mode[2];
-	int32_t m_last_viewport[4];
-	int32_t m_last_scissor_box[4];
-	int32_t m_last_program;
+	int32_t m_program;
+	int32_t m_vert_shader;
+	int32_t m_frag_shader;
+	int32_t m_uniform_tex;
+	int32_t m_uniform_proj;
+	int32_t m_attrib_pos;
+	int32_t m_attrib_uv;
+	int32_t m_attrib_col;
 
 	static const std::size_t m_max_vertices = 12288;
 

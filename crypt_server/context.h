@@ -14,8 +14,13 @@
 #include <iostream>
 #include <fstream>
 
+#include <openssl/crypto.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/engine.h>
+#include <openssl/conf.h>
+
 #include "thread_pool.h"
-#include "console.h"
 #include "connection.h"
 #include "server.h"
 
@@ -31,8 +36,7 @@ class c_context
 {
 public:
 	std::atomic<uint64_t> m_clients = 0;
-	uint64_t m_required_version = 1;
-	c_console m_console;
+	uint64_t m_required_version = 2;
 };
 
 extern c_context ctx;

@@ -6,5 +6,8 @@ void c_fast_place::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 	if (!ctx.m_settings.player_fast_place || !valid_keystate(ctx.m_settings.player_fast_place_key))
 		return;
 
+	if ((!ctx.m_settings.player_fast_place_blocks && self->holding_block()) || (!ctx.m_settings.player_fast_place_projectiles && self->holding_projectile()))
+		return;
+
 	mc->set_right_click_delay(0);
 }

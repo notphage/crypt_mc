@@ -1284,6 +1284,8 @@ public:
 	virtual jfloat get_forward() = 0;
 	virtual jobject get_held_item() = 0;
 	virtual jboolean holding_weapon() = 0;
+	virtual jboolean holding_projectile() = 0;
+	virtual jboolean holding_block() = 0;
 
 	virtual jdouble origin_x() = 0;
 	virtual jdouble origin_y() = 0;
@@ -1307,7 +1309,9 @@ public:
 	virtual jboolean is_dead() = 0;
     virtual jboolean is_collided_vertically() = 0;
     virtual jboolean is_collided_horizontally() = 0;
+	virtual jboolean is_on_ground() = 0;
     virtual jboolean is_sprinting() = 0;
+	virtual jboolean is_visible(jobject) = 0;
 	virtual jboolean in_water() = 0;
 
 	virtual jfloat get_width() = 0;
@@ -1404,8 +1408,7 @@ public:
 struct stack_trace
 {
 	bool valid = false;
-	const char* method_name = nullptr;
-	jstring str_name = nullptr;
+	uint64_t method_name = 0;
 	jint line_number = 0;
 };
 

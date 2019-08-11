@@ -26,7 +26,7 @@ long long __stdcall c_window::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam,
 	return DefWindowProcA(hwnd, msg, uparam, param);
 }
 
-void c_window::create()
+void c_window::create() const
 {
 	// Register the window class.
 	const char CLASS_NAME[] = " ";
@@ -47,7 +47,7 @@ void c_window::create()
 	// Get the size of screen to the variable desktop
 	LI_FN(GetWindowRect).cached()(desk, &desk_rect);
 
-	HWND hwnd = LI_FN(CreateWindowExA).cached()(
+	const HWND hwnd = LI_FN(CreateWindowExA).cached()(
 		0,                              // Optional window styles.
 		CLASS_NAME,                     // Window class
 		"",    // Window text
@@ -56,10 +56,10 @@ void c_window::create()
 		// Size and position
 		(desk_rect.right / 2) - 160, (desk_rect.bottom / 2) - 120, ctx.m_screen_w, ctx.m_screen_h,
 
-		NULL,       // Parent window    
-		NULL,       // Menu
+		nullptr,       // Parent window    
+		nullptr,       // Menu
 		ctx.m_instance,  // Instance handle
-		NULL        // Additional application data
+		nullptr        // Additional application data
 	);
 
 	if (hwnd == nullptr)

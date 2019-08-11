@@ -2,6 +2,8 @@
 
 class c_speed : public c_feature
 {
+	bool m_on_ground = false;
+
     void bhop(std::shared_ptr<c_player> self) const;
     void slowhop(std::shared_ptr<c_player> self) const;
     void custom(std::shared_ptr<c_player> self) const;

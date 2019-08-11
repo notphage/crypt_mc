@@ -19,5 +19,5 @@ class c_gui
 public:
 	void draw();
 
-	void insert_text(const std::string& str, const color_t& col);
+	static void insert_text(const std::string& str, const color_t& col);
 };

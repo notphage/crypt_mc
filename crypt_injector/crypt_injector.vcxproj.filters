@@ -29,17 +29,20 @@
     <Filter Include="SRC\window\gui">
       <UniqueIdentifier>{ee8ade36-9c9a-434b-a261-3f902a38a5eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\injection">
-      <UniqueIdentifier>{80e20270-2880-4410-a757-3fa3b960a402}</UniqueIdentifier>
+    <Filter Include="SRC\client\protection">
+      <UniqueIdentifier>{9986b67e-2e4a-4f13-8432-09e16fdc3014}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\injection\syscall">
-      <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRC\hwid">
+    <Filter Include="SRC\client\hwid">
       <UniqueIdentifier>{6e27eeb6-c434-4c5d-bd6f-d1d39e7b6398}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\injection\memory">
+    <Filter Include="SRC\client\injection">
+      <UniqueIdentifier>{80e20270-2880-4410-a757-3fa3b960a402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\memory">
       <UniqueIdentifier>{bd5a6159-3141-441d-a15b-7b09d8cb8ca3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\syscall">
+      <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -47,7 +50,7 @@
       <Filter>SRC</Filter>
     </ClCompile>
     <ClCompile Include="inject.cpp">
-      <Filter>SRC\injection</Filter>
+      <Filter>SRC\client\injection</Filter>
     </ClCompile>
     <ClCompile Include="connection.cpp">
       <Filter>SRC\client\connection</Filter>
@@ -71,13 +74,16 @@
       <Filter>SRC\window\gui</Filter>
     </ClCompile>
     <ClCompile Include="syscall.cpp">
-      <Filter>SRC\injection\syscall</Filter>
+      <Filter>SRC\syscall</Filter>
     </ClCompile>
     <ClCompile Include="hwid.cpp">
-      <Filter>SRC\hwid</Filter>
+      <Filter>SRC\client\hwid</Filter>
     </ClCompile>
     <ClCompile Include="memory.cpp">
-      <Filter>SRC\injection\memory</Filter>
+      <Filter>SRC\client\injection\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="protection.cpp">
+      <Filter>SRC\client\protection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,10 +97,10 @@
       <Filter>SRC</Filter>
     </ClInclude>
     <ClInclude Include="inject.h">
-      <Filter>SRC\injection</Filter>
+      <Filter>SRC\client\injection</Filter>
     </ClInclude>
     <ClInclude Include="syscall.h">
-      <Filter>SRC\injection\syscall</Filter>
+      <Filter>SRC\syscall</Filter>
     </ClInclude>
     <ClInclude Include="connection.h">
       <Filter>SRC\client\connection</Filter>
@@ -142,15 +148,18 @@
       <Filter>SRC\utils</Filter>
     </ClInclude>
     <ClInclude Include="hwid.h">
-      <Filter>SRC\hwid</Filter>
+      <Filter>SRC\client\hwid</Filter>
     </ClInclude>
     <ClInclude Include="memory.h">
-      <Filter>SRC\injection\memory</Filter>
+      <Filter>SRC\client\injection\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="protection.h">
+      <Filter>SRC\client\protection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="syscall_stub.asm">
-      <Filter>SRC\injection\syscall</Filter>
+      <Filter>SRC\syscall</Filter>
     </MASM>
   </ItemGroup>
 </Project>
