@@ -1,18 +1,24 @@
 #pragma once
 
 #include "../packets.h"
+#include "../shared_mem.h"
 #include "game_list.h"
 
 class c_client
 {
-	std::thread m_connection_thread;
-	std::atomic<connection_stage> m_stage;
+	std::atomic<connection_stage> m_conn_stage;
+	std::thread m_socket_thread;
+	std::atomic<shared_mem_stage> m_shared_mem_stage;
+	std::thread m_shared_mem_thread;
 	std::string m_username{};
 	uint64_t m_password = 0;
 	uint64_t m_hwid = 0;
+	uint64_t m_last_mem_key = 0;
 
 	c_connection m_connection;
 	c_packet_handler m_packet_handler;
+	c_shared_mem_queue m_mem_queue;
+	c_mem_handler m_mem_handler;
 
 	template <typename T>
 	bool receive_packet(T& packet)
@@ -30,21 +36,33 @@ class c_client
 		return true;
 	}
 
-	void run();
-
+	void run_socket();
+	void run_shared_mem();
 public:
 	c_client()
-		: m_connection_thread(std::thread(&c_client::run, this)), m_stage(connection_stage::STAGE_WAITING), m_connection()
+		: m_conn_stage(connection_stage::STAGE_WAITING), m_socket_thread(std::thread(&c_client::run_socket, this)),
+		  m_shared_mem_stage(shared_mem_stage::STAGE_CREATE), m_shared_mem_thread(std::thread(&c_client::run_shared_mem, this)),
+		  m_mem_queue(xors("Local\\Spotify"), 0x100000, c_shared_mem_queue::mode::server)
 	{ }
 
-	void set_stage(connection_stage stage)
+	void set_conn_stage(connection_stage stage)
 	{
-		m_stage = stage;
+		m_conn_stage = stage;
 	}
 
-	connection_stage get_stage() const
+	connection_stage get_conn_stage() const
 	{
-		return m_stage;
+		return m_conn_stage;
+	}
+
+	void set_shared_mem_stage(shared_mem_stage stage)
+	{
+		m_shared_mem_stage = stage;
+	}
+
+	shared_mem_stage get_shared_mem_stage() const
+	{
+		return m_shared_mem_stage;
 	}
 
 	__forceinline std::string game_status_to_string(game_packet_status_t status)

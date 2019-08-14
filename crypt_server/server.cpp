@@ -4,10 +4,10 @@
 #include "key.h"
 
 #include <sys/socket.h>
-#include <arpa/inet.h> //inet_addr
 #include <unistd.h>    //write
 #include <cmath>
 #include <tuple>
+#include <algorithm>
 
 c_server::c_server(int16_t port)
 	: m_port(port)
@@ -59,7 +59,7 @@ void c_server::bind_socket()
 
 	//Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY; //inet_addr("127.0.0.1");
+	server.sin_addr.s_addr = inet_addr("127.0.0.1"); //INADDR_ANY;
 	server.sin_port = htons(8123);
 
 	//Bind
@@ -72,6 +72,80 @@ void c_server::bind_socket()
 	printf("> Server | Initialized sucessfully\n");
 }
 
+bool c_server::add_infraction(const std::shared_ptr<c_client_handler>& client)
+{
+	constexpr uint64_t infrac_cooldown = 24 * 60 * 60;
+	constexpr uint32_t max_infractions = 3;
+
+	const uint64_t cur_time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
+	const uint32_t client_ip = client->get_sock_addr().sin_addr.s_addr;
+
+	std::lock_guard<std::mutex> lock_guard(m_ip_infractions_mutex);
+	
+	bool new_infrac = true;
+	if (!m_ip_infractions.empty())
+	{
+		m_ip_infractions.erase(std::remove_if(m_ip_infractions.begin(), m_ip_infractions.end(), [&infrac_cooldown, &cur_time](auto&& ip_infrac)
+			{
+				return cur_time - ip_infrac.m_infraction_time > infrac_cooldown;
+			}), m_ip_infractions.end());
+		
+		for (auto&& ip_infrac : m_ip_infractions)
+		{
+			if (ip_infrac.m_ip != client_ip)
+				continue;
+
+			new_infrac = false;
+
+			ip_infrac.m_infraction_count++;
+			ip_infrac.m_infraction_time = cur_time;
+			if (ip_infrac.m_infraction_count >= max_infractions)
+			{
+				// ip ban for 24 hours
+
+				printf("> Server | Banned IP blocked\n");
+				return false;
+			}
+		}
+	}
+
+	if (new_infrac)
+	{
+		m_ip_infractions.push_back({ client_ip,  1, cur_time });
+		printf("> Server | Infraction added\n");
+
+		return true;
+	}
+
+	printf("> Server | Infraction modified\n");
+	return true;
+}
+
+bool c_server::is_ip_banned(const sockaddr_in& client)
+{
+	const uint32_t client_ip = client.sin_addr.s_addr;
+	constexpr uint32_t max_infractions = 3;
+	const uint64_t cur_time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
+	if (m_ip_infractions.empty())
+		return false;
+
+	for (auto&& ip_infrac : m_ip_infractions)
+	{
+		if (ip_infrac.m_ip == client_ip && ip_infrac.m_infraction_count >= max_infractions)
+		{
+			// reset the infraction time
+			ip_infrac.m_infraction_time = cur_time;
+
+			printf("> Server | Banned ip tried to connect\n");
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 void c_server::run()
 {
 	srand(time(nullptr));
@@ -79,10 +153,16 @@ void c_server::run()
 	bind_socket();
 
 	int client_socket = -1, c = sizeof(struct sockaddr_in);
-	struct sockaddr_in client;
+	struct sockaddr_in client_addr;
 
-	while ((client_socket = accept(m_socket_desc, reinterpret_cast<struct sockaddr*>(&client), reinterpret_cast<socklen_t*>(&c))))
+	while ((client_socket = accept(m_socket_desc, reinterpret_cast<struct sockaddr*>(&client_addr), reinterpret_cast<socklen_t*>(&c))))
 	{
+		if (is_ip_banned(client_addr))
+		{
+			close(m_socket_desc);
+			continue;
+		}
+		
 		struct timeval tv;
 		tv.tv_sec = 30;
 		tv.tv_usec = 0;
@@ -90,9 +170,9 @@ void c_server::run()
 		setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
 		static char ip_str[INET_ADDRSTRLEN];
-		inet_ntop(AF_INET, &client.sin_addr, ip_str, INET_ADDRSTRLEN);
+		inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, INET_ADDRSTRLEN);
 
-		auto client_handler = std::make_shared<c_client_handler>(ip_str, client_socket);
+		auto client_handler = std::make_shared<c_client_handler>(ip_str, client_socket, client_addr);
 		const auto ret = client_handler->initialize(m_ssl_ctx);
 
 		if (ret == CHI_SUCCESS)
@@ -105,18 +185,19 @@ void c_server::run()
 		else
 		{
 			printf("> Server | Client %s rejected for %i\n", ip_str, ret);
+			add_infraction(client_handler);
 		}
+
+		m_clients.erase(std::remove_if(m_clients.begin(), m_clients.end(), [](auto&& client)
+			{
+				return client->is_disconnected();
+			}), m_clients.end());
 	}
 
 	if (client_socket < 0)
 		throw std::runtime_error("Accept Failed");
 
 	close(m_socket_desc);
-}
-
-c_client_handler::~c_client_handler()
-{
-	m_connection.disconnect();
 }
 
 client_handler_init_t c_client_handler::initialize(SSL_CTX* ssl_context)
@@ -138,15 +219,23 @@ client_handler_init_t c_client_handler::initialize(SSL_CTX* ssl_context)
 void c_client_handler::run()
 {
 	m_thread = std::thread(&c_client_handler::handle_client, this);
+	m_thread.detach();
 }
 
 void c_client_handler::handle_client()
 {
 	// Version Packets
 	{
+		m_stage = CHS_VERSION;
+		
 		c_version_packet version_packet;
-		if (!receive_packet<c_version_packet>(version_packet))
+		if (const auto ret = handle_packet<c_version_packet>(version_packet); ret != CHPS_VALID)
+		{
+			if (ret == CHPS_INVALID)
+				ctx.m_server->add_infraction(shared_from_this());
+			
 			return;
+		}
 
 		if (ctx.m_required_version > version_packet.m_version)
 		{
@@ -168,6 +257,8 @@ void c_client_handler::handle_client()
 
 	// Login Packets
 	{
+		m_stage = CHS_LOGIN;
+		
 		static std::vector<std::tuple<std::string, uint64_t, uint64_t>> m_users{
 			{ "phage", 10382422081949954444, 6941575562263925942 },
 			{ "mexican", 2489908105208420549, 11399085311125507402 },
@@ -182,8 +273,13 @@ void c_client_handler::handle_client()
 		};
 
 		c_login_packet login_packet;
-		if (!receive_packet<c_login_packet>(login_packet))
+		if (const auto ret = handle_packet<c_login_packet>(login_packet); ret != CHPS_VALID)
+		{
+			if (ret == CHPS_INVALID)
+				ctx.m_server->add_infraction(shared_from_this());
+
 			return;
+		}
 
 		auto logged_in = std::any_of(m_users.begin(), m_users.end(), [&login_packet](const std::tuple<std::string, uint64_t, uint64_t>& user)
 			{
@@ -215,13 +311,20 @@ void c_client_handler::handle_client()
 		}
 	}
 
-	size_t num_packets = (size_t)std::ceil((float)crypt_mc_dll_size / (float)max_data_len);
+	//size_t num_packets = (size_t)std::ceil((float)crypt_mc_dll_size / (float)max_data_len);
 
 	// Game Selection
 	c_cheat_packet cheat_packet;
 	{
-		if (!receive_packet<c_cheat_packet>(cheat_packet))
+		m_stage = CHS_SELECTION;
+		
+		if (const auto ret = handle_packet<c_cheat_packet>(cheat_packet); ret != CHPS_VALID)
+		{
+			if (ret == CHPS_INVALID)
+				ctx.m_server->add_infraction(shared_from_this());
+
 			return;
+		}
 
 		cheat_packet = m_packet_handler.create_cheat_packet("LWJGL", cheat_packet.m_id);
 		m_connection.set_buffer(&cheat_packet, sizeof cheat_packet);
@@ -233,4 +336,7 @@ void c_client_handler::handle_client()
 		m_connection.set_buffer(crypt_mc_dll, crypt_mc_dll_size);
 		m_connection.send();
 	}
+
+	m_connection.disconnect();
+	m_disconnected = true;
 }

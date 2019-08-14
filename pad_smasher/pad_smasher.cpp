@@ -126,19 +126,20 @@ void parse_map_file(uintptr_t file_ptr)
 
 		function.m_raw_addr = file_ptr + rva_to_offset(function.m_rva_addr - image_base, section, sections_num);
 
-		auto func_addr = function.m_raw_addr;
-		for (auto ins = *reinterpret_cast<uint8_t*>(func_addr - 1); ins == 0xCC || ins == 0x90;)
+		for (auto i = 1; i < 16; i++)
 		{
-			ins = *reinterpret_cast<uint8_t*>(func_addr - 1);
-			func_addr -= 1;
-			function.m_pad_len++;
+			auto current_ins = reinterpret_cast<uint8_t*>(function.m_raw_addr - i);
+
+			if (*current_ins != 0xcc && *current_ins != 0x90)
+				break;
+
+			++function.m_pad_len;
 		}
 
-		if (function.m_pad_len > 0)
-		{
-			function.m_pad_len -= 1;
-			function.m_pad_start = function.m_raw_addr - function.m_pad_len;
-		}
+		if (function.m_pad_len < 1)
+			continue;
+		
+		function.m_pad_start = function.m_raw_addr - function.m_pad_len;
 
 		functions.push_back(function);
 		
@@ -163,9 +164,6 @@ int main()
 	for (auto function_iter = functions.begin(); function_iter < functions.end(); ++function_iter)
 	{
 		auto function = *function_iter;
-		
-		if (function.m_pad_len < 1)
-			continue;
 
 		auto next_function = *std::next(function_iter);
 		auto bytes_left = function.m_pad_len;
@@ -178,16 +176,16 @@ int main()
 			for (size_t i = 0; i < function.m_pad_len; i++)
 				*(current_ins + i - 1) = 0x90; // nop
 
-			if (function.m_pad_len >= 9)
-			{
-				*(current_ins + function.m_pad_len - 8) = 0x48; // xor rax, rax
-				*(current_ins + function.m_pad_len - 7) = 0x31;
-				*(current_ins + function.m_pad_len - 6) = 0xd0;
-				*(current_ins + function.m_pad_len - 5) = 0x74; // jz 0x1
-				*(current_ins + function.m_pad_len - 4) = 0xfc;
-				*(current_ins + function.m_pad_len - 3) = 0xe9; // jmp
-				*(current_ins + function.m_pad_len - 2) = 0x58; // pop rax
-			}
+			//if (function.m_pad_len >= 7)
+			//{
+			//	*(current_ins - 1) = 0x48; // xor rcx, rcx
+			//	*(current_ins + 0) = 0x31;
+			//	*(current_ins + 1) = 0xc9;
+			//	*(current_ins + 2) = 0x74; // jz 0x4
+			//	*(current_ins + 3) = 0xff;
+			//	*(current_ins + 4) = 0xe9; // jmp
+			//	*(current_ins + 5) = 0x59; // pop rax
+			//}
 
 			printf("%s: wrote nop sled to 0x%" PRIx64 "\n", function.m_name.c_str(), reinterpret_cast<uintptr_t>(current_ins));
 		}

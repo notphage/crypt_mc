@@ -15,7 +15,7 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 
 	MSG msg{};
 	LI_FN(PeekMessageA).cached()(&msg, nullptr, 0, 0, PM_REMOVE);
-	while (msg.message != WM_QUIT && !ctx.m_panic)
+	while (msg.message != WM_QUIT && !ctx.m_panic && !ctx.m_watchdog)
 	{
 		if (LI_FN(PeekMessageA).cached()(&msg, ctx.m_window, 0, 0, PM_REMOVE))
 		{
@@ -37,6 +37,14 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 	}
 
 	ctx.m_loader_window.end();
+
+	if (ctx.m_watchdog)
+	{
+		while (ctx.m_watchdog)
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+	}
 
 	return 0;
 }

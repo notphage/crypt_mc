@@ -44,6 +44,9 @@
     <Filter Include="SRC\syscall">
       <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\client\shared_memory">
+      <UniqueIdentifier>{bf76b426-306a-4dfb-9c83-83582a944777}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -155,6 +158,18 @@
     </ClInclude>
     <ClInclude Include="protection.h">
       <Filter>SRC\client\protection</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_signal.h">
+      <Filter>SRC\client\shared_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_mutex.h">
+      <Filter>SRC\client\shared_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_queue.h">
+      <Filter>SRC\client\shared_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared_mem.h">
+      <Filter>SRC\client</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

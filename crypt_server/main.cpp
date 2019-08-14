@@ -6,8 +6,8 @@ int main()
 {
 	try
 	{
-		c_server server(8123);
-		server.run();
+		ctx.m_server = std::make_unique<c_server>(8123);
+		ctx.m_server->run();
 	}
 	catch (std::exception& e)
 	{

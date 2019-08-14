@@ -170,6 +170,7 @@
     <ClInclude Include="..\asmlib\asmlib.h" />
     <ClInclude Include="..\asmlib\asmlibran.h" />
     <ClInclude Include="..\packets.h" />
+    <ClInclude Include="..\shared_mem.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="connection.h" />
     <ClInclude Include="context.h" />
@@ -186,6 +187,9 @@
     <ClInclude Include="protection.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sdk.h" />
+    <ClInclude Include="shared_mutex.h" />
+    <ClInclude Include="shared_queue.h" />
+    <ClInclude Include="shared_signal.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="syscall.h" />
     <ClInclude Include="util.h" />

@@ -18,7 +18,7 @@ void unload()
 	MH_RemoveHook(gl_disable);
     MH_RemoveHook(get_time);
 
-	SetWindowLongPtrA(ctx.m_window, -4, (long long)hooked::o_wnd_proc);
+	SetWindowLongPtrA(ctx.m_window, -4, reinterpret_cast<long long>(hooked::o_wnd_proc));
 
 	MH_Uninitialize();
 }
@@ -61,10 +61,10 @@ void hack(HINSTANCE bin)
 		
 		auto mc = ctx.get_game();
 		
-		if (auto cur_hwnd = (HWND)mc->get_window_handle(); cur_hwnd != ctx.m_window)
+		if (const auto cur_hwnd = reinterpret_cast<HWND>(mc->get_window_handle()); cur_hwnd != ctx.m_window)
 		{
 			ctx.m_window = cur_hwnd;
-			hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, (long long)hooked::wnd_proc));
+			hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, reinterpret_cast<long long>(hooked::wnd_proc)));
 		
 			RECT rect;
 			LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
@@ -80,7 +80,6 @@ void hack(HINSTANCE bin)
 		{
 			ctx.m_ingame = true;
 		
-			HWND old_window = nullptr;
 			if (ctx.m_menu_opening)
 			{
 				//mc->set_not_in_focus();
@@ -141,22 +140,22 @@ void fuck_skids(void* bin)
 	uintptr_t dbg_break_point = (uintptr_t)LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("ntdll.dll")), xors("DbgBreakPoint"));
 
 	// fuck DbgUiRemoteBreakin
-	LI_FN(VirtualProtect).cached()((void*)dbg_ui_remote_breakin, 6, PAGE_EXECUTE_READWRITE, &old_protection);
+	LI_FN(VirtualProtect).cached()(reinterpret_cast<void*>(dbg_ui_remote_breakin), 6, PAGE_EXECUTE_READWRITE, &old_protection);
 
-	*(uint8_t*)(dbg_ui_remote_breakin) = 0x68; // push
-	*(uintptr_t*)(dbg_ui_remote_breakin + 1) = exit_process;
-	*(uint8_t*)(dbg_ui_remote_breakin + 5) = 0xC3; // ret
+	*reinterpret_cast<uint8_t*>(dbg_ui_remote_breakin) = 0x68; // push
+	*reinterpret_cast<uintptr_t*>(dbg_ui_remote_breakin + 1) = exit_process;
+	*reinterpret_cast<uint8_t*>(dbg_ui_remote_breakin + 5) = 0xC3; // ret
 
-	LI_FN(VirtualProtect).cached()((void*)dbg_ui_remote_breakin, 6, old_protection, &old_protection);
+	LI_FN(VirtualProtect).cached()(reinterpret_cast<void*>(dbg_ui_remote_breakin), 6, old_protection, &old_protection);
 
 	// fuck DbgBreakPoint
-	LI_FN(VirtualProtect).cached()((void*)dbg_break_point, 6, PAGE_EXECUTE_READWRITE, &old_protection);
+	LI_FN(VirtualProtect).cached()(reinterpret_cast<void*>(dbg_break_point), 6, PAGE_EXECUTE_READWRITE, &old_protection);
 
-	*(uint8_t*)(dbg_break_point) = 0x68; // push
-	*(uintptr_t*)(dbg_break_point + 1) = exit_process;
-	*(uint8_t*)(dbg_break_point + 5) = 0xC3; // ret
+	*reinterpret_cast<uint8_t*>(dbg_break_point) = 0x68; // push
+	*reinterpret_cast<uintptr_t*>(dbg_break_point + 1) = exit_process;
+	*reinterpret_cast<uint8_t*>(dbg_break_point + 5) = 0xC3; // ret
 
-	LI_FN(VirtualProtect).cached()((void*)dbg_break_point, 6, old_protection, &old_protection);
+	LI_FN(VirtualProtect).cached()(reinterpret_cast<void*>(dbg_break_point), 6, old_protection, &old_protection);
 
 	LI_FN(VirtualProtect).cached()(bin, 4096, PAGE_READWRITE, &old_protection);
 	RtlSecureZeroMemory(bin, 4096);

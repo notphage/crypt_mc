@@ -56,7 +56,7 @@ bool c_connection::connect()
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	if ((retval = LI_FN(getaddrinfo).cached()(xors("108.175.10.81"), xors("8123"), &hints, &results))) // 127.0.0.1
+	if ((retval = LI_FN(getaddrinfo).cached()(xors("127.0.0.1"), xors("8123"), &hints, &results))) // 108.175.10.81
 		goto cleanup;
 
 	if (!results)

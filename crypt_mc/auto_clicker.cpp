@@ -7,6 +7,7 @@ bool left_click = true;
 int current_delay = 0;
 int clicks = 0;
 int clicks_until_skip = 38;
+float multiplier = 0.5;
 
 long last_click = 0;
 
@@ -15,9 +16,9 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 	if (!ctx.m_settings.combat_auto_clicker || !valid_keystate(ctx.m_settings.combat_auto_clicker_key) || ctx.m_menu_open)
 		return;
 
-	bool in_inventory = mc->is_in_inventory();
-	bool has_weapon = self->holding_weapon();
-	bool has_focus = mc->in_game_has_focus();
+	const bool in_inventory = mc->is_in_inventory();
+	const bool has_weapon = self->holding_weapon();
+	const bool has_focus = mc->in_game_has_focus();
 
 	if (!in_inventory && !has_focus)
 		return;
@@ -52,10 +53,11 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 			return;
 		}
 
-		if (left_click && ((clock() - last_click) > util::random(current_delay / 2, (current_delay / 2) + current_delay / util::random(9, 21))))
+		if (left_click && ((clock() - last_click) > util::random((int)(current_delay * multiplier), (int)(current_delay * multiplier) + current_delay / util::random(9, 21))))
 		{
 			g_input.press_mouse(true);
 			left_click = false;
+			multiplier = util::random(0.45, 0.55);
 		}
 		else if (!left_click && clock() - last_click > current_delay)
 		{

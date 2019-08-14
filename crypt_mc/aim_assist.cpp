@@ -114,7 +114,7 @@ void c_aim_assist::scan()
 
 	for (auto d = 0; d < 30; d++)
 	{
-		jfloat sens = (ctx.m_settings.combat_aim_assist_scale * 0.5f) * 0.6f * 0.6f + 0.2f;
+		jfloat sens = (ctx.m_settings.combat_aim_assist_scale * 0.5f) * 0.6f + 0.2f;
 
 		jfloat rsens = sens * sens * sens * 8.0f;
 		jfloat delta = d * rsens * 0.15f;
@@ -182,7 +182,7 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 			if (abs(target_data.m_pitch_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint)
 				self->set_pitch(pitch + (target_data.m_pitch_change < 0 ? -get_y_speed() : get_y_speed()));
 
-	if (util::random(0, 50) <= 1)
+	if (util::random(0, 50) <= 3)
 	{
 		self->set_pitch(pitch + (util::random(-m_vec.at(1), m_vec.at(1))));
 		self->set_yaw(yaw + (util::random(-m_vec.at(1), m_vec.at(1))));

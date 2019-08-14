@@ -35,7 +35,7 @@ if ( init ) \
 class c_context
 {
 public:
-	std::atomic<uint64_t> m_clients = 0;
+	std::unique_ptr<c_server> m_server;
 	uint64_t m_required_version = 2;
 };
 

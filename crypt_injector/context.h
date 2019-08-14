@@ -40,6 +40,9 @@ if ( init ) \
 #include "memory.h"
 #include "inject.h"
 #include "connection.h"
+#include "shared_signal.h"
+#include "shared_mutex.h"
+#include "shared_queue.h"
 #include "client.h"
 
 class c_context
@@ -49,11 +52,13 @@ public:
 	HWND m_window;
 	uint64_t m_version = 2;
 	int32_t m_selected_cheat = -1;
-	bool m_panic = false;
 	bool m_block_keyinput = false;
 	std::vector<uint8_t> m_buffer;
 	std::string m_window_class;
 	std::string m_username;
+
+	std::atomic_bool m_panic = false;
+	std::atomic_bool m_watchdog = false;
 
 	float m_frametime = 0.f;
 

@@ -5,6 +5,7 @@ enum class connection_stage : uint8_t
 	STAGE_WAITING,
 	STAGE_LOGIN,
 	STAGE_SELECT,
+	STAGE_WATCHDOG,
 	STAGE_CLOSE,
 	STAGE_INVALID
 };
@@ -15,7 +16,8 @@ enum class packet_type_t : uint64_t
 	PACKET_LOGIN,
 	PACKET_GAMES,
 	PACKET_CHEAT,
-	PACKET_DATA
+	PACKET_DATA,
+	PACKET_WATCHDOG
 };
 
 enum class game_packet_status_t : uint8_t
@@ -121,6 +123,18 @@ public:
 			login_p[i] ^= p[i % 8];
 	}
 
+	template <typename T>
+	bool validate_packet(const T& packet)
+	{
+		if (packet.m_type < packet_type_t::PACKET_VERSION || packet.m_type > packet_type_t::PACKET_WATCHDOG)
+			return false;
+
+		if (packet.m_send_time > static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()))
+			return false;
+
+		return true;
+	}
+
 	c_version_packet create_version_packet(uint64_t version, bool update_required)
 	{
 		c_version_packet version_packet;
@@ -164,7 +178,7 @@ public:
 		return games_packet;
 	}
 
-	c_cheat_packet create_cheat_packet(const std::string& window_class, uint64_t id)
+	c_cheat_packet create_cheat_packet(const std::string& window_class, uint8_t id)
 	{
 		c_cheat_packet cheat_packet;
 		create_base_packet(cheat_packet, packet_type_t::PACKET_CHEAT);
