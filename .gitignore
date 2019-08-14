@@ -251,8 +251,3 @@ ModelManifest.xml
 *.lastbuildstate
 
 *.tlog
-
-*.asm
-
-
-csgo_internal/developer
