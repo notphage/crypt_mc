@@ -41,6 +41,6 @@ public:
 	
 	bool reset() const
 	{
-		return ResetEvent(m_event) == NULL ? false : true;
+		return ResetEvent(m_event) != 0;
 	}
 };

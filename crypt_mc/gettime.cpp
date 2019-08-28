@@ -17,8 +17,8 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 		{
 			auto mc = ctx.get_game(jni);
 
-			auto self = mc->get_player();
-			auto world = mc->get_world();
+			const auto self = mc->get_player();
+			const auto world = mc->get_world();
 			
 			if (self && world)
 			{
@@ -31,5 +31,5 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 		}
 	}
 
-	return hooked::o_get_time(jni, caller);
+	return o_get_time(jni, caller);
 }

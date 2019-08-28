@@ -3,15 +3,15 @@
 
 decltype(hooked::o_swap_buffers) hooked::o_swap_buffers;
 
-static bool init = false;
+static HGLRC crypt_ctx = nullptr;
 int __stdcall hooked::swap_buffers(HDC hdc)
 {
-	//HGLRC o_ctx = wglGetCurrentContext();
+	HGLRC old_ctx = wglGetCurrentContext();
 	if (!ctx.m_init)
 	{
-		//ctx.m_rendering_ctx = wglCreateContext(hdc);
-		//wglMakeCurrent(hdc, ctx.m_rendering_ctx);
-
+		crypt_ctx = wglCreateContext(hdc);
+		wglMakeCurrent(hdc, crypt_ctx);
+		
 		RECT rect;
 		LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
 
@@ -26,27 +26,27 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 
 		ctx.m_init = true;
 	}
-	//else
-	//	wglMakeCurrent(hdc, ctx.m_rendering_ctx);
+	else
+		wglMakeCurrent(hdc, crypt_ctx);
 
 	// proper frametime
 	static auto old = std::chrono::high_resolution_clock::now();
-	auto now = std::chrono::high_resolution_clock::now();
-	float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - old).count();
+	const auto now = std::chrono::high_resolution_clock::now();
+	const float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - old).count();
 	old = now;
 
 	ctx.m_frametime = delta / 1000.f;
 
 	//rendering shit goes here
+	ctx.m_renderer->draw_begin();
 	{
 		ctx.m_gui->background();
-		
 		ctx.m_gui->draw();
-		
 		ctx.m_renderer->draw_scene();
 	}
+	ctx.m_renderer->draw_end();
 
-	//wglMakeCurrent(hdc, o_ctx);
+	wglMakeCurrent(hdc, old_ctx);
 
-	return hooked::o_swap_buffers(hdc);
+	return o_swap_buffers(hdc);
 }

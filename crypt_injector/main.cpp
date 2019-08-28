@@ -35,8 +35,8 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 			ctx.m_loader_window.render();
 		}
 	}
-
-	ctx.m_loader_window.end();
+	
+	c_window::end();
 
 	if (ctx.m_watchdog)
 	{
@@ -45,6 +45,8 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 	}
+
+	std::this_thread::sleep_for(std::chrono::seconds(3));
 
 	return 0;
 }

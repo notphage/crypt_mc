@@ -1,6 +1,7 @@
 #pragma once
 
-#include <mutex>
+#include "shared_signal.h"
+#include "shared_mutex.h"
 
 struct mem_message_t
 {
@@ -28,16 +29,15 @@ struct shared_mem_header_t
 
 class c_shared_mem_queue
 {
-	mutable c_shared_mem_mutex m_mutex;
-	shared_mem_header_t* m_out_header;
-	shared_mem_header_t* m_in_header;
+	mutable c_shared_mutex m_mutex;
+	shared_mem_header_t* m_out_header = nullptr;
+	shared_mem_header_t* m_in_header = nullptr;
 	uint32_t m_buf_size;
 	uint8_t* m_buffer;
 	HANDLE m_mapped_file = nullptr;
 	std::thread m_message_thread;
 	c_shared_signal m_server_to_client_signal;
 	c_shared_signal m_client_to_server_signal;
-	bool m_init;
 	std::function<void()> m_received_callback;
 	
 public:
@@ -48,9 +48,10 @@ public:
 	};
 
 	mode m_type;
+	bool m_init;
 	
 	c_shared_mem_queue(const std::string& server_name, const uint32_t buf_size, mode type)
-		: m_mutex(std::string(server_name + "_MTX"), (type == mode::server) ? c_shared_mem_mutex::mode::server : c_shared_mem_mutex::mode::client),
+		: m_mutex(std::string(server_name + "_MTX"), (type == mode::server) ? c_shared_mutex::mode::server : c_shared_mutex::mode::client),
 		m_server_to_client_signal(std::string(server_name + "_SC_SGNL")), m_client_to_server_signal(std::string(server_name + "_CS_SGNL"))
 	{
 		m_init = true;
@@ -134,14 +135,14 @@ public:
 			return false;
 		
 		if (!manual_lock)
-			std::lock_guard<c_shared_mem_mutex> lock_guard(m_mutex);
+			std::lock_guard<c_shared_mutex> lock_guard(m_mutex);
 
 		auto write_loc = reinterpret_cast<uint8_t*>(m_out_header) + sizeof(shared_mem_header_t) + m_out_header->m_offset_to_last_message;
 
 		//sizeof(uint32_t) = sizeof(MemMessage::m_size), Qt doesn't like that syntax
 		//Make sure we don't overrun our buffer
-		const uintptr_t delta = (write_loc + msg.m_size + sizeof(uint32_t)) - reinterpret_cast<uint8_t*>(m_out_header);
-		if (delta >= (m_buf_size / 2))
+		const uintptr_t delta = write_loc + msg.m_size + sizeof(uint32_t) - reinterpret_cast<uint8_t*>(m_out_header);
+		if (delta >= m_buf_size / 2)
 			return false;
 
 		//Write Data
@@ -162,7 +163,7 @@ public:
 		if (!m_init)
 			return false;
 
-		std::lock_guard<c_shared_mem_mutex> Lock(m_mutex);
+		std::lock_guard<c_shared_mutex> Lock(m_mutex);
 		if (m_in_header->m_message_count < 1)
 			return false;
 
@@ -191,7 +192,7 @@ public:
 		if (!m_init)
 			return false;
 
-		std::lock_guard<c_shared_mem_mutex> lock_guard(m_mutex);
+		std::lock_guard<c_shared_mutex> lock_guard(m_mutex);
 		if (m_in_header->m_message_count > 0)
 			return true;
 
@@ -213,7 +214,7 @@ public:
 			if (!m_server_to_client_signal.wait())
 				return false;
 			
-			if (m_server_to_client_signal.reset())
+			if (!m_server_to_client_signal.reset())
 				return false;
 		}
 		
@@ -228,7 +229,7 @@ public:
 		if (!m_init)
 			return 0;
 
-		std::lock_guard<c_shared_mem_mutex> lock_guard(m_mutex);
+		std::lock_guard<c_shared_mutex> lock_guard(m_mutex);
 		return m_out_header->m_message_count;
 	}
 	
@@ -237,7 +238,7 @@ public:
 		if (!m_init)
 			return 0;
 
-		std::lock_guard<c_shared_mem_mutex> lock_guard(m_mutex);
+		std::lock_guard<c_shared_mutex> lock_guard(m_mutex);
 		return m_in_header->m_message_count;
 	}
 };

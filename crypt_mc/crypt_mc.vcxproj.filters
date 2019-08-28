@@ -32,9 +32,6 @@
     <Filter Include="SRC\render\text">
       <UniqueIdentifier>{c144c892-05e6-4849-8d7c-ca4533d3c237}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\SDK\1.7.10">
-      <UniqueIdentifier>{cee4ab53-72f7-4bd2-ae59-dd453f78b830}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\features\fast_place">
       <UniqueIdentifier>{510f7008-92be-444a-af3e-3802329897f8}</UniqueIdentifier>
     </Filter>
@@ -52,9 +49,6 @@
     </Filter>
     <Filter Include="SRC\features\speed">
       <UniqueIdentifier>{b4f19ae5-7bcd-4f8e-b635-212a0d13819e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRC\SDK\1.8.X">
-      <UniqueIdentifier>{93229119-9e49-4cae-97d2-99ba429ddaad}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\features\visuals">
       <UniqueIdentifier>{cb186cc8-7dad-4afc-bc77-3f6ce92298c4}</UniqueIdentifier>
@@ -86,6 +80,24 @@
     <Filter Include="SRC\hack\raytrace">
       <UniqueIdentifier>{e5592e26-1566-414c-aab4-8d8ab22d6677}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\client">
+      <UniqueIdentifier>{e1e74e22-3695-4d91-9037-9f2d56504a85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\shared_mem">
+      <UniqueIdentifier>{37c50e74-7dca-4c9e-80b8-bde02e90ac5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK\Forge 1.7.10">
+      <UniqueIdentifier>{cee4ab53-72f7-4bd2-ae59-dd453f78b830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK\Vanilla 1.7.10">
+      <UniqueIdentifier>{5ffa7e1e-8feb-44d3-ae2d-e21ece5339c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK\Forge 1.8.X">
+      <UniqueIdentifier>{93229119-9e49-4cae-97d2-99ba429ddaad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\SDK\Vanilla 1.8.X">
+      <UniqueIdentifier>{df41ce66-ddcb-49f6-ac07-48ebbf21b1f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aim_assist.cpp">
@@ -105,12 +117,6 @@
     </ClCompile>
     <ClCompile Include="precompiled.cpp">
       <Filter>SRC</Filter>
-    </ClCompile>
-    <ClCompile Include="sdk_1.7.10.cpp">
-      <Filter>SRC\SDK\1.7.10</Filter>
-    </ClCompile>
-    <ClCompile Include="sdk_1.8.X.cpp">
-      <Filter>SRC\SDK\1.8.X</Filter>
     </ClCompile>
     <ClCompile Include="sdk.cpp">
       <Filter>SRC\SDK</Filter>
@@ -184,6 +190,21 @@
     <ClCompile Include="raytrace.cpp">
       <Filter>SRC\hack\raytrace</Filter>
     </ClCompile>
+    <ClCompile Include="client.cpp">
+      <Filter>SRC\client</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_forge_1.7.10.cpp">
+      <Filter>SRC\SDK\Forge 1.7.10</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_1.7.10.cpp">
+      <Filter>SRC\SDK\Vanilla 1.7.10</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_forge_1.8.X.cpp">
+      <Filter>SRC\SDK\Forge 1.8.X</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_1.8.X.cpp">
+      <Filter>SRC\SDK\Vanilla 1.8.X</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aim_assist.h">
@@ -209,12 +230,6 @@
     </ClInclude>
     <ClInclude Include="util.h">
       <Filter>SRC\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="sdk_1.7.10.h">
-      <Filter>SRC\SDK\1.7.10</Filter>
-    </ClInclude>
-    <ClInclude Include="sdk_1.8.X.h">
-      <Filter>SRC\SDK\1.8.X</Filter>
     </ClInclude>
     <ClInclude Include="sdk.h">
       <Filter>SRC\SDK</Filter>
@@ -315,5 +330,34 @@
     <ClInclude Include="raytrace.h">
       <Filter>SRC\hack\raytrace</Filter>
     </ClInclude>
+    <ClInclude Include="client.h">
+      <Filter>SRC\client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared_mem.h">
+      <Filter>SRC\client\shared_mem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared_mutex.h">
+      <Filter>SRC\client\shared_mem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared_queue.h">
+      <Filter>SRC\client\shared_mem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared_signal.h">
+      <Filter>SRC\client\shared_mem</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_forge_1.7.10.h">
+      <Filter>SRC\SDK\Forge 1.7.10</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_1.7.10.h">
+      <Filter>SRC\SDK\Vanilla 1.7.10</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_forge_1.8.X.h">
+      <Filter>SRC\SDK\Forge 1.8.X</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sdk_1.8.X.h">
+      <Filter>SRC\SDK\Vanilla 1.8.X</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -53,12 +53,12 @@ public:
 		m_buffer.clear();
 	}
 
-	__forceinline const std::vector<uint8_t>& get_buffer()
+	__forceinline const std::vector<uint8_t>& get_buffer() const
 	{
 		return m_buffer;
 	}
 
-	__forceinline size_t buffer_size()
+	__forceinline size_t buffer_size() const
 	{
 		return m_buffer.size();
 	}

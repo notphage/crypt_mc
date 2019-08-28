@@ -40,9 +40,7 @@ if ( init ) \
 #include "memory.h"
 #include "inject.h"
 #include "connection.h"
-#include "shared_signal.h"
-#include "shared_mutex.h"
-#include "shared_queue.h"
+#include "protection.h"
 #include "client.h"
 
 class c_context

@@ -43,7 +43,7 @@ namespace util
 
 		__forceinline constexpr uint64_t hash(const char* str)
 		{
-			size_t out = fnv64_basis;
+			uint64_t out = fnv64_basis;
 			size_t len = hash::strlen(str);
 
 			for (size_t i = 0; i < len; ++i)
@@ -54,7 +54,7 @@ namespace util
 
 		__forceinline constexpr uint64_t hash(const wchar_t* str)
 		{
-			size_t out = fnv64_basis;
+			uint64_t out = fnv64_basis;
 			size_t len = hash::strlen(str);
 
 			for (size_t i = 0; i < len; ++i)
@@ -63,22 +63,13 @@ namespace util
 			return out;
 		}
 
-		__forceinline uint64_t hash(const char* str, size_t len)
+		__forceinline constexpr uint64_t hash(const uint64_t num)
 		{
-			size_t out = fnv64_basis;
+			uint64_t out = fnv64_basis;
 
-			for (size_t i = 0; i < len; ++i)
-				out = (out ^ str[i]) * fnv64_prime;
-
-			return out;
-		}
-
-		__forceinline uint64_t hash(const wchar_t* str, size_t len)
-		{
-			size_t out = fnv64_basis;
-
-			for (size_t i = 0; i < len; ++i)
-				out = (out ^ str[i]) * fnv64_prime;
+			auto* p = (uint8_t*)&num;
+			for (auto i = 0; i < 8; i++)
+				out = (out ^ p[i]) * fnv64_prime;
 
 			return out;
 		}

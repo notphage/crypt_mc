@@ -16,6 +16,17 @@ void c_client::run_socket()
 
 			case connection_stage::STAGE_LOGIN:
 			{
+				if (!m_protection.init_safety_check())
+				{
+					ctx.m_loader_window.get_gui().insert_text(m_protection.m_err_str, color_t(255, 0, 0));
+					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
+
+					std::this_thread::sleep_for(std::chrono::seconds(5));
+
+					ctx.m_panic = true;
+					return;
+				}
+				
 				ctx.m_loader_window.get_gui().insert_text(xors("Connecting..."), color_t(255, 255, 255));
 
 				if (!m_connection.connect())
@@ -128,8 +139,7 @@ void c_client::run_socket()
 					}
 
 					ctx.m_window_class.resize(64);
-					memcpy(ctx.m_window_class.data(), cheat_packet.m_window_class, sizeof cheat_packet.m_window_class);
-					ctx.m_window_class.resize(6);
+					strcpy(const_cast<char*>(ctx.m_window_class.c_str()), cheat_packet.m_window_class);
 				}
 
 				// Cheat Data
@@ -161,9 +171,42 @@ void c_client::run_socket()
 				{
 					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Disconnected from server")), color_t(255, 255, 255));
 					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
-
+					
 					std::this_thread::sleep_for(std::chrono::seconds(5));
+
 					ctx.m_watchdog = true;
+					break;
+				}
+
+				static auto old = std::chrono::high_resolution_clock::now();
+				auto now = std::chrono::high_resolution_clock::now();
+				uint32_t delta;
+
+				do
+				{
+					now = std::chrono::high_resolution_clock::now();
+					delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - old).count();
+					std::this_thread::sleep_for(std::chrono::seconds(1));
+				} while (delta < 3000);
+
+				old = now;
+
+				auto status = watchdog_packet_status_t::WATCHDOG_KEEPALIVE;
+
+				// Run detections
+
+				if (!ctx.m_watchdog)
+					status = watchdog_packet_status_t::WATCHDOG_CLOSE;
+
+				auto watchdog_packet = m_packet_handler.create_watchdog_packet(status);
+				
+				m_connection.set_buffer(&watchdog_packet, sizeof watchdog_packet);
+				if (m_connection.send() == SOCKET_ERROR || status == watchdog_packet_status_t::WATCHDOG_CLOSE)
+				{
+					m_connection.disconnect();
+					ctx.m_panic = true;
+					
+					return;
 				}
 
 				break;
@@ -185,8 +228,11 @@ void c_client::run_socket()
 
 void c_client::run_shared_mem()
 {
-	while (m_shared_mem_stage != shared_mem_stage::STAGE_INVALID && ctx.m_watchdog)
+	while (m_shared_mem_stage != shared_mem_stage::STAGE_INVALID)
 	{
+		if (!ctx.m_watchdog)
+			continue;
+		
 		switch (m_shared_mem_stage)
 		{
 			case shared_mem_stage::STAGE_WAITING:
@@ -206,7 +252,7 @@ void c_client::run_shared_mem()
 					break;
 				}
 
-				auto base_mem_packet = reinterpret_cast<c_mem_packet*>(msg.m_data.data());
+				const auto base_mem_packet = reinterpret_cast<c_mem_packet*>(msg.m_data.data());
 				switch (base_mem_packet->m_type)
 				{
 					case mem_type_t::MEM_HOOK:
@@ -218,16 +264,34 @@ void c_client::run_shared_mem()
 					
 					case mem_type_t::MEM_PING:
 					{
-						if (!m_mem_handler.validate_mem_packet(base_mem_packet))
+						const auto ping_packet = reinterpret_cast<c_mem_ping_packet*>(msg.m_data.data());
+						if (!m_mem_handler.validate_mem_packet(*ping_packet))
 						{
 							m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
 
 							break;
 						}
+						m_mem_handler.xor_mem_packet(*ping_packet);
+
+						if (ping_packet->m_hash == 0)
+						{
+							m_shared_mem_stage = shared_mem_stage::STAGE_CLOSE;
+
+							break;
+						}
+
+						if (ping_packet->m_hash != m_cookie)
+						{
+							m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
+
+							break;
+						}
+
+						m_cookie = fnvr(ping_packet->m_hash);
 						
 						break;
 					}
-					
+
 					default:
 					{
 						m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
@@ -241,9 +305,11 @@ void c_client::run_shared_mem()
 			
 			case shared_mem_stage::STAGE_CREATE:
 			{
-				auto hook_packet = m_mem_handler.create_hook_mem_packet(0);
+				m_cookie = fnvr(fnvr(m_username.c_str()) ^ m_hwid);
+				auto init_packet = m_mem_handler.create_init_mem_packet(m_username.c_str(), m_cookie);
+				m_cookie = fnvr(m_cookie);
 
-				const mem_message_t msg(reinterpret_cast<uint8_t*>(&hook_packet), sizeof hook_packet);
+				const mem_message_t msg(reinterpret_cast<uint8_t*>(&init_packet), sizeof init_packet);
 				
 				if (!m_mem_queue.push_message(msg))
 					m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
@@ -251,6 +317,32 @@ void c_client::run_shared_mem()
 					m_shared_mem_stage = shared_mem_stage::STAGE_WAITING;
 				
 				break;
+			}
+
+			case shared_mem_stage::STAGE_CLOSE:
+			{
+				std::this_thread::sleep_for(std::chrono::seconds(5));
+
+				if (!ctx.m_injector.unload())
+				{
+					system(xors("taskkill /F /T /IM javaw.exe"));
+				}
+
+				ctx.m_watchdog = false;
+
+				return;
+			}
+
+			case shared_mem_stage::STAGE_FORCECLOSE:
+			{
+				if (!ctx.m_injector.unload())
+				{
+					system(xors("taskkill /F /T /IM javaw.exe"));
+				}
+
+				ctx.m_watchdog = false;
+
+				return;
 			}
 			
 			default: ;

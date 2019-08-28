@@ -199,7 +199,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AssemblyDebug>false</AssemblyDebug>
       <AdditionalDependencies>libacof64o.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;jvm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
@@ -208,6 +208,7 @@
     <ClCompile Include="anti_afk.cpp" />
     <ClCompile Include="auto_clicker.cpp" />
     <ClCompile Include="buffer.cpp" />
+    <ClCompile Include="client.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fast_place.cpp" />
     <ClCompile Include="flight.cpp" />
@@ -228,6 +229,8 @@
     <ClCompile Include="sdk.cpp" />
     <ClCompile Include="sdk_1.7.10.cpp" />
     <ClCompile Include="sdk_1.8.X.cpp" />
+    <ClCompile Include="sdk_forge_1.7.10.cpp" />
+    <ClCompile Include="sdk_forge_1.8.X.cpp" />
     <ClCompile Include="speed.cpp" />
     <ClCompile Include="sprint.cpp" />
     <ClCompile Include="step.cpp" />
@@ -243,10 +246,15 @@
   <ItemGroup>
     <ClInclude Include="..\asmlib\asmlib.h" />
     <ClInclude Include="..\asmlib\asmlibran.h" />
+    <ClInclude Include="..\shared_mem.h" />
+    <ClInclude Include="..\shared_mutex.h" />
+    <ClInclude Include="..\shared_queue.h" />
+    <ClInclude Include="..\shared_signal.h" />
     <ClInclude Include="aim_assist.h" />
     <ClInclude Include="anti_afk.h" />
     <ClInclude Include="auto_clicker.h" />
     <ClInclude Include="buffer.h" />
+    <ClInclude Include="client.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="fast_place.h" />
     <ClInclude Include="feature.h" />
@@ -270,7 +278,8 @@
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sdk.h" />
     <ClInclude Include="sdk_1.7.10.h" />
-    <ClInclude Include="sdk_1.8.X.h" />
+    <ClInclude Include="sdk_forge_1.7.10.h" />
+    <ClInclude Include="sdk_forge_1.8.X.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="speed.h" />
     <ClInclude Include="sprint.h" />
@@ -284,6 +293,9 @@
     <ClInclude Include="util.h" />
     <ClInclude Include="velocity.h" />
     <ClInclude Include="visuals.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sdk_1.8.X.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

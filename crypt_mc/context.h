@@ -12,6 +12,7 @@
 #include <atomic>
 #include <chrono>
 #include <optional>
+#include <mutex>
 
 #define anti_rin( items )\
  static bool init = true; \
@@ -34,6 +35,7 @@ typedef HWND hwnd_t;
 #include "math.h"
 #include "input.h"
 #include "settings.h"
+#include "client.h"
 
 enum MC_VERSION
 {
@@ -70,6 +72,7 @@ public:
 	std::shared_ptr<c_renderer> m_renderer;
 	std::shared_ptr<c_gui> m_gui;
 	c_settings m_settings;
+	//c_client m_client;
 
 	std::vector<std::string> m_cfg_list;
 	int m_current_cfg{};
@@ -77,6 +80,7 @@ public:
 	float m_frametime = 0.f;
 	std::atomic_bool m_ingame = false;
 	std::atomic_bool m_in_chat = false;
+	std::atomic_bool m_forge = false;
 
 public:
 	void determine_version();

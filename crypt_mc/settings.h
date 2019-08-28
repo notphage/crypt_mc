@@ -32,7 +32,7 @@ public:
 
 	void load(const char* path, const char* file)
 	{
-		HKEY config_key = util::open_reg_key(path);
+		const HKEY config_key = util::open_reg_key(path);
 		if (!config_key)
 			return;
 
@@ -43,9 +43,21 @@ public:
 			x->load_setting(config_str);
 	}
 
+	void load(std::string& config)
+	{
+		for (auto x : m_nodes)
+			x->load_setting(config);
+	}
+
+	void save(std::string& config)
+	{
+		for (auto x : m_nodes)
+			x->save_setting(config);
+	}
+
 	void save(const char* path, const char* file) const
 	{
-		HKEY config_key = util::open_reg_key(path);
+		const HKEY config_key = util::open_reg_key(path);
 		if (!config_key)
 			return;
 
@@ -325,6 +337,7 @@ public:
 
     setting_t<bool> movement_sprint{ &m_holder, fnvc("movement_sprint"), false };
     setting_t<keysetting_t> movement_sprint_key{ &m_holder, fnvc("movement_sprint_key"), {} };
+	setting_t<bool> movement_sprint_omni{ &m_holder, fnvc("movement_sprint_omni"), false };
 
 	setting_t<bool> movement_speed{&m_holder, fnvc("movement_speed"), false};
 	setting_t<keysetting_t> movement_speed_key{&m_holder, fnvc("movement_speed_key"), {}};
@@ -362,4 +375,6 @@ public:
 
 	void save(const char* name) { m_holder.save(xors("Software\\Spotify"), name); }
 	void load(const char* name) { m_holder.load(xors("Software\\Spotify"), name); }
+	void save_conf(std::string& config) { m_holder.save(config); }
+	void load_conf(std::string& config) { m_holder.load(config); }
 };

@@ -22,7 +22,7 @@ void c_gui::draw_login()
 			RtlSecureZeroMemory(username_str, sizeof username_str);
 			RtlSecureZeroMemory(password_str, sizeof password_str);
 
-			ctx.m_client.set_stage(connection_stage::STAGE_LOGIN);
+			ctx.m_client.set_conn_stage(connection_stage::STAGE_LOGIN);
 			loader.m_current_stage = PAGE_LANDING;
 			});
 	}
@@ -49,7 +49,7 @@ void c_gui::draw_landing()
 
 		load.handle(loader.data(), xors("load"), []()
 			{
-				ctx.m_client.set_stage(connection_stage::STAGE_SELECT);
+				ctx.m_client.set_conn_stage(connection_stage::STAGE_SELECT);
 			});
 
 		cheat_dropdown.dropdown(loader.data());

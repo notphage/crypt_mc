@@ -129,6 +129,18 @@ public:
 		m_games.emplace_back("Crypt Ghost", "lol.exe", "crypt_lol.dll", 1, game_packet_status_t::GAME_ONLINE);
 	}
 
+	~c_client_handler()
+	{
+		if (!m_disconnected)
+			m_connection.disconnect();
+
+		if (m_ssl)
+		{
+			SSL_free(m_ssl);
+			m_ssl = nullptr;
+		}
+	}
+
 	client_handler_init_t initialize(SSL_CTX* ssl_context);
 	void run();
 
@@ -157,11 +169,11 @@ struct ip_infraction_t
 
 class c_server
 {
-	SSL_CTX* m_ssl_ctx;
+	SSL_CTX* m_ssl_ctx = nullptr;
 	
-	std::vector<std::shared_ptr<c_client_handler>> m_clients;
-	std::vector<ip_infraction_t> m_ip_infractions;
-	std::mutex m_ip_infractions_mutex;
+	std::vector<std::shared_ptr<c_client_handler>> m_clients{};
+	std::vector<ip_infraction_t> m_ip_infractions{};
+	std::mutex m_ip_infractions_mutex{};
 
 	int16_t m_port;
 	int m_socket_desc = -1;

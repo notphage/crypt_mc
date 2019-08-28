@@ -159,17 +159,17 @@
     <ClInclude Include="protection.h">
       <Filter>SRC\client\protection</Filter>
     </ClInclude>
-    <ClInclude Include="shared_signal.h">
+    <ClInclude Include="..\shared_mutex.h">
       <Filter>SRC\client\shared_memory</Filter>
     </ClInclude>
-    <ClInclude Include="shared_mutex.h">
+    <ClInclude Include="..\shared_queue.h">
       <Filter>SRC\client\shared_memory</Filter>
     </ClInclude>
-    <ClInclude Include="shared_queue.h">
+    <ClInclude Include="..\shared_signal.h">
       <Filter>SRC\client\shared_memory</Filter>
     </ClInclude>
     <ClInclude Include="..\shared_mem.h">
-      <Filter>SRC\client</Filter>
+      <Filter>SRC\client\shared_memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

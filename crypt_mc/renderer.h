@@ -110,15 +110,25 @@ enum font_t
 
 class c_renderer : std::enable_shared_from_this<c_renderer>
 {
-	int32_t m_program;
-	int32_t m_vert_shader;
-	int32_t m_frag_shader;
-	int32_t m_uniform_tex;
-	int32_t m_uniform_proj;
-	int32_t m_attrib_pos;
-	int32_t m_attrib_uv;
-	int32_t m_attrib_col;
-
+	uint32_t m_last_active_texture = 0;
+	uint32_t m_last_blend_src_rgb = 0;
+	uint32_t m_last_blend_dst_rgb = 0;
+	uint32_t m_last_blend_src_alpha = 0;
+	uint32_t m_last_blend_dst_alpha = 0;
+	uint32_t m_last_blend_equation_rgb = 0;
+	uint32_t m_last_blend_equation_alpha = 0;
+	int32_t m_last_program = 0;
+	int32_t m_last_texture = 0;
+	int32_t m_last_sampler = 0;
+	int32_t m_last_array_buffer = 0;
+	int32_t m_last_polygon_mode[2]{};
+	int32_t m_last_viewport[4]{};
+	int32_t m_last_scissor_box[4]{};
+	uint8_t m_last_enable_blend = 0;
+	uint8_t m_last_enable_cull_face = 0;
+	uint8_t m_last_enable_depth_test = 0;
+	uint8_t m_last_enable_scissor_test = 0;
+	
 	static const std::size_t m_max_vertices = 12288;
 
 	std::vector<std::unique_ptr<c_font>> fonts;
@@ -130,10 +140,9 @@ public:
 	render_list_t::ptr	m_render_list{ };
 	render_list_t::ptr make_render_list() const;
 
+	void draw_begin();
 	void draw_scene();
-
-	void game_begin();
-	void game_end();
+	void draw_end();
 
 	font_handle_t get_font(font_t font)
 	{

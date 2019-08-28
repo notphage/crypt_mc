@@ -308,6 +308,7 @@ void c_gui::tab_movement()
 
 	static UI::c_enable_groupbox sprint_groupbox;
 	static UI::c_key_bind sprint_key;
+	static UI::c_checkbox sprint_omni;
 
 	static UI::c_enable_groupbox flight_groupbox;
 	static UI::c_key_bind flight_key;
@@ -379,6 +380,9 @@ void c_gui::tab_movement()
 		sprint_groupbox.start(menu.data(), xors("sprint"));
 		{
 			sprint_key.handle(menu.data(), "", &ctx.m_settings.movement_sprint_key, keytype_t::kt_all);
+
+			if (ctx.m_settings.movement_sprint)
+				sprint_omni.handle(menu.data(), xors("omni"), &ctx.m_settings.movement_sprint_omni);
 		}
 		sprint_groupbox.end(menu.data(), &ctx.m_settings.movement_sprint);
 
@@ -409,6 +413,8 @@ void c_gui::tab_config()
 	static UI::c_dropdown config;
 	static UI::c_button save;
 	static UI::c_button load;
+	static UI::c_button conf_import;
+	static UI::c_button conf_export;
 	static UI::c_button refresh;
 	static UI::c_button deletee;
 	static UI::c_label pad;
@@ -455,6 +461,46 @@ void c_gui::tab_config()
 					ctx.m_settings.load((ctx.m_cfg_list[ctx.m_current_cfg] + xors(".crypt")).c_str());
 				});
 
+			conf_import.handle(menu.data(), xors("import"), []
+				{
+					if (!OpenClipboard(ctx.m_window))
+						return;
+
+					const auto hwnd_clip = GetClipboardData(CF_TEXT);
+					if (!hwnd_clip)
+						return;
+
+					char* text_str = static_cast<char*>(GlobalLock(hwnd_clip));
+					if (!text_str)
+						return;
+
+					std::string config(text_str);
+					config = util::base64::base64_decode(config);
+					ctx.m_settings.load_conf(config);
+
+					GlobalUnlock(hwnd_clip);
+					CloseClipboard();
+				});
+
+			conf_export.handle(menu.data(), xors("export"), []
+				{
+					std::string config{};
+					ctx.m_settings.save_conf(config);
+					config = util::base64::base64_encode((const uint8_t*)config.c_str(), config.length());
+				
+					const HGLOBAL mem = GlobalAlloc(GMEM_MOVEABLE, config.length());
+					memcpy(GlobalLock(mem), config.c_str(), config.length());
+					GlobalUnlock(mem);
+					if (!OpenClipboard(nullptr))
+						return;
+				
+					EmptyClipboard();
+					if (!SetClipboardData(CF_TEXT, mem))
+						return;
+				
+					CloseClipboard();
+				});
+
 			refresh.handle(menu.data(), xors("refresh"), []
 				{
 					ctx.m_cfg_list.clear();
@@ -463,8 +509,8 @@ void c_gui::tab_config()
 
 			deletee.handle(menu.data(), xors("delete"), []
 				{
-					auto config_hash = fnvr(ctx.m_cfg_list[ctx.m_current_cfg].c_str());
-					auto default_hash = fnvc("default");
+					const auto config_hash = fnvr(ctx.m_cfg_list[ctx.m_current_cfg].c_str());
+					const auto default_hash = fnvc("default");
 					if (config_hash == default_hash)
 						return;
 

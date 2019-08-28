@@ -5,15 +5,17 @@ class c_memory
 {
 	CLIENT_ID m_client_id{};
 	HANDLE m_proc = nullptr;
+	HMODULE m_base = nullptr;
 	c_syscall m_syscall;
 public:
 	c_memory();
 
 	bool open(const CLIENT_ID& id);
 	bool alloc(void*& addr, size_t* size, int32_t alloc_type, int32_t protect);
+	bool protect(void*& addr, size_t* size, int32_t prot_type, int32_t& old_prot);
 	bool thread(HANDLE& thread, void* entry, void* arg);
-	void close();
-	HMODULE module(const char* mod);
+	void close() const;
+	HMODULE module(const char* mod) const;
 	uintptr_t proc_addr(const char* mod, const char* func);
 
 	template <class Fn>
@@ -78,7 +80,12 @@ public:
 		return ret == STATUS_SUCCESS;
 	}
 
-	CLIENT_ID get_client_id()
+	HMODULE get_base() const
+	{
+		return m_base;
+	}
+
+	CLIENT_ID get_client_id() const
 	{
 		return m_client_id;
 	}

@@ -3,6 +3,7 @@
 #include "../packets.h"
 #include "../shared_mem.h"
 #include "game_list.h"
+#include "../shared_queue.h"
 
 class c_client
 {
@@ -13,12 +14,13 @@ class c_client
 	std::string m_username{};
 	uint64_t m_password = 0;
 	uint64_t m_hwid = 0;
-	uint64_t m_last_mem_key = 0;
+	uint64_t m_cookie = 0;
 
 	c_connection m_connection;
 	c_packet_handler m_packet_handler;
 	c_shared_mem_queue m_mem_queue;
 	c_mem_handler m_mem_handler;
+	c_protection m_protection;
 
 	template <typename T>
 	bool receive_packet(T& packet)
@@ -42,8 +44,11 @@ public:
 	c_client()
 		: m_conn_stage(connection_stage::STAGE_WAITING), m_socket_thread(std::thread(&c_client::run_socket, this)),
 		  m_shared_mem_stage(shared_mem_stage::STAGE_CREATE), m_shared_mem_thread(std::thread(&c_client::run_shared_mem, this)),
-		  m_mem_queue(xors("Local\\Spotify"), 0x100000, c_shared_mem_queue::mode::server)
-	{ }
+		  m_mem_queue(xors("Spotify"), 0x100000, c_shared_mem_queue::mode::server)
+	{
+		m_socket_thread.detach();
+		m_shared_mem_thread.detach();
+	}
 
 	void set_conn_stage(connection_stage stage)
 	{

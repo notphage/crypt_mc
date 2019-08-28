@@ -114,7 +114,6 @@ public:
 	void set_view_bobbing(jboolean) override;
 	void set_timer_speed(jfloat) override;
 	void set_right_click_delay(jint) override;
-	void set_mouse_grabbed(jboolean grabbed) override;
 	void set_in_focus() override;
 	void set_not_in_focus() override;
 
@@ -129,6 +128,7 @@ public:
 
 	jint get_right_click_delay() override;
 	jint get_string_width(jstring) override;
+
 	jint draw_string_with_shadow(jstring, jint, jint, jint) override;
 
 	jobject get_net_handler() override;
@@ -138,6 +138,7 @@ public:
 	void set_object_mouse_over(jobject player) override;
 	void disable_light_map() override;
 	void setup_camera_transform(jfloat, int) override;
+	void set_mouse_grabbed(jboolean grabbed) override;
 
 	jlong get_window_handle() override;
 	jint get_screen_w() override;

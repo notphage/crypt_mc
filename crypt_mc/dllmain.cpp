@@ -3,6 +3,9 @@
 #include "MinHook.h"
 
 #include <winternl.h>
+#include <dbghelp.h>
+#include <shellapi.h>
+#include <shlobj.h>
 
 c_context ctx;
 
@@ -11,6 +14,8 @@ static void __cdecl std::_Xlength_error(const char* error) {}
 
 void unload()
 {
+	ctx.m_jvm->DetachCurrentThread();
+	
 	auto gl_disable = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
     auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
 
@@ -21,6 +26,69 @@ void unload()
 	SetWindowLongPtrA(ctx.m_window, -4, reinterpret_cast<long long>(hooked::o_wnd_proc));
 
 	MH_Uninitialize();
+
+	//ctx.m_client.set_shared_mem_stage(shared_mem_stage::STAGE_CLOSE);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+}
+
+int generate_dump(EXCEPTION_POINTERS* excp_ptr)
+{
+	// Open the file 
+	typedef BOOL(*PDUMPFN)(
+		HANDLE hProcess,
+		DWORD ProcessId,
+		HANDLE hFile,
+		MINIDUMP_TYPE DumpType,
+		PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+		PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
+		PMINIDUMP_CALLBACK_INFORMATION CallbackParam
+		);
+	
+	BOOL bMiniDumpSuccessful;
+	WCHAR szPath[MAX_PATH];
+	WCHAR szFileName[MAX_PATH];
+	wchar_t szAppName[] = L"AppName";
+	wchar_t szVersion[] = L"v1.0";
+	DWORD dwBufferSize = MAX_PATH;
+	HANDLE hDumpFile;
+	SYSTEMTIME stLocalTime;
+	MINIDUMP_EXCEPTION_INFORMATION ExpParam;
+
+	GetLocalTime(&stLocalTime);
+	GetTempPathW(dwBufferSize, szPath);
+
+	wsprintfW(szFileName, L"%s%s", szPath, szAppName);
+	CreateDirectoryW(szFileName, NULL);
+
+	wsprintfW(szFileName, L"%s%s\\%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
+		szPath, szAppName, szVersion,
+		stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
+		stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond,
+		GetCurrentProcessId(), GetCurrentThreadId());
+	hDumpFile = CreateFileW(szFileName, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+
+	ExpParam.ThreadId = GetCurrentThreadId();
+	ExpParam.ExceptionPointers = excp_ptr;
+	ExpParam.ClientPointers = TRUE;
+
+	HMODULE h = ::LoadLibraryW(L"DbgHelp.dll");
+	PDUMPFN pFn = (PDUMPFN)GetProcAddress(h, "MiniDumpWriteDump");
+
+	bMiniDumpSuccessful = (*pFn)(GetCurrentProcess(), GetCurrentProcessId(),
+		hDumpFile, MiniDumpWithDataSegs, &ExpParam, NULL, NULL);
+
+	CloseHandle(hDumpFile);
+
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+LONG WINAPI MyUnhandledExceptionFilter(
+	struct _EXCEPTION_POINTERS* ExceptionInfo
+)
+{
+	generate_dump(ExceptionInfo);
+	return EXCEPTION_EXECUTE_HANDLER;
 }
 
 void hack(HINSTANCE bin)
@@ -47,6 +115,7 @@ void hack(HINSTANCE bin)
 	printf("\n");
 
 	printf(" $> cheat base: 0x%p \n", bin);
+	SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 #endif
 
 	ctx.determine_version();
@@ -187,12 +256,12 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 
 			freopen(xors("CONOUT$"), xors("w"), stdout);
 		}
-#else
-		fuck_skids(instance);
+#else 
+		//fuck_skids(instance);
 		// take username and sub days left out of custom header
 #endif
 
-		LI_FN(CreateThread).cached()(0, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, 0);
+		LI_FN(CreateThread).cached()(nullptr, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, nullptr);
 
 		return true;
 	}

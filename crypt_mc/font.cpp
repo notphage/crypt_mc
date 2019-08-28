@@ -14,7 +14,7 @@
 #include "glfontstash.h"
 
 c_font::c_font(c_renderer* renderer, const std::string& font, float size)
-	: m_renderer(renderer), m_font(font), m_size(size)
+	: m_font(font), m_size(size), m_renderer(renderer)
 {
 	static std::string base_path(xors("C:\\Windows\\Fonts\\"));
 	static std::string extension(xors(".ttf"));

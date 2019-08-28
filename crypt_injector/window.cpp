@@ -88,5 +88,6 @@ void c_window::render()
 
 void c_window::end()
 {
+	LI_FN(DestroyWindow).cached()(ctx.m_window);
 	ctx.m_renderer->release();
 }

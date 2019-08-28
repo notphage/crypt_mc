@@ -59,7 +59,7 @@ void c_server::bind_socket()
 
 	//Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = inet_addr("127.0.0.1"); //INADDR_ANY;
+	server.sin_addr.s_addr = INADDR_ANY; //INADDR_ANY; //inet_addr("127.0.0.1");
 	server.sin_port = htons(8123);
 
 	//Bind
@@ -164,10 +164,10 @@ void c_server::run()
 		}
 		
 		struct timeval tv;
-		tv.tv_sec = 30;
+		tv.tv_sec = 15;
 		tv.tv_usec = 0;
-		setsockopt(client_socket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
-		setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+		setsockopt(client_socket, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<const char*>(&tv), sizeof tv);
+		setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&tv), sizeof tv);
 
 		static char ip_str[INET_ADDRSTRLEN];
 		inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, INET_ADDRSTRLEN);
@@ -260,16 +260,25 @@ void c_client_handler::handle_client()
 		m_stage = CHS_LOGIN;
 		
 		static std::vector<std::tuple<std::string, uint64_t, uint64_t>> m_users{
-			{ "phage", 10382422081949954444, 6941575562263925942 },
-			{ "mexican", 2489908105208420549, 11399085311125507402 },
+			{ "phage", 10382422081949954444, 5434901453752155978 },
+			{ "mexican", 2489908105208420549, 15950463431215380529 },
 			{ "Ciaran", 10447304709281239008, 4538760847905949811 },
 			{ "uzi", 13694325770137587408, 5988022699623831536 },
 			{ "gangsta", 5358537683607507742, 16595086355998634058 },
 			{ "hacs", 14393557407244641642, 10371841605793258569 },
 			{ "denzo", 7646908165282335792, 4134658753895949041 },
 			{ "wise", 9853761865339289714, 11395424104966938625 },
-			{ "_Rtinox", 1308268265119556128, 2782190989649705042 },
-			{ "nomo", 17123985505359595210, 6608510435173381934 }
+			{ "_Rtinox", 1308268265119556128, 6138202367498348673 },
+			{ "nomo", 17123985505359595210, 4670644444049306433 },
+			{ "Nash", 15055877905642066443, 15876347534175914011 },
+			{ "emprah", 3592560568222008525, 12684092619770610821 },
+			{ "Skilled", 6993857605014467185, 12131543493270600539 },
+			{ "alexandru", 3620744427807918383, 5154951702442138794 },
+			{ "NefariousUser", 16915402360579880554, 9729003570243262152 },
+			{ "Zach", 1836054350097038111, 6503586793295444129 },
+			{ "1300s", 8471790438192775144, 17327406942188991615 },
+			{ "aris", 14781963634558499306, 1593551543881069983 },
+			{ "Rust", 3392171804832091563, 13196245474954546108 }
 		};
 
 		c_login_packet login_packet;
@@ -281,7 +290,7 @@ void c_client_handler::handle_client()
 			return;
 		}
 
-		auto logged_in = std::any_of(m_users.begin(), m_users.end(), [&login_packet](const std::tuple<std::string, uint64_t, uint64_t>& user)
+		const auto logged_in = std::any_of(m_users.begin(), m_users.end(), [&login_packet](const std::tuple<std::string, uint64_t, uint64_t>& user)
 			{
 				auto [username, password, hwid] = user;
 				return (strcmp(username.c_str(), login_packet.m_username) == 0 && password == login_packet.m_password && hwid == login_packet.m_hwid);
@@ -336,6 +345,55 @@ void c_client_handler::handle_client()
 		m_connection.set_buffer(crypt_mc_dll, crypt_mc_dll_size);
 		m_connection.send();
 	}
+
+	//m_stage = CHS_WATCHDOG;
+	//bool connected = true;
+	//while (connected)
+	//{
+	//	c_watchdog_packet watchdog_packet;
+	//	if (const auto ret = handle_packet<c_watchdog_packet>(watchdog_packet); ret != CHPS_VALID)
+	//	{
+	//		if (ret == CHPS_INVALID)
+	//			ctx.m_server->add_infraction(shared_from_this());
+	//
+	//		break;
+	//	}
+	//
+	//	switch (watchdog_packet.m_status)
+	//	{
+	//		case watchdog_packet_status_t::WATCHDOG_KEEPALIVE:
+	//		{
+	//			break;
+	//		}
+	//		
+	//		case watchdog_packet_status_t::WATCHDOG_CLOSE:
+	//		{
+	//			connected = false;
+	//			break;
+	//		}
+	//		
+	//		case watchdog_packet_status_t::WATCHDOG_WARN:
+	//		{
+	//			ctx.m_server->add_infraction(shared_from_this());
+	//			connected = false;
+	//			break;
+	//		}
+	//		
+	//		case watchdog_packet_status_t::WATCHDOG_BAN:
+	//		{
+	//			// TODO: Add REST API communication to ban player
+	//			connected = false;
+	//			break;
+	//		}
+	//		
+	//		default:
+	//		{
+	//			connected = false;
+	//			break;
+	//		}
+	//	}
+	//	
+	//}
 
 	m_connection.disconnect();
 	m_disconnected = true;

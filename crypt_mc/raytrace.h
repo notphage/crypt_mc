@@ -13,5 +13,5 @@ public:
 		m_dir_inv = vec3(1.f / m_dir.x, 1.f / m_dir.y, 1.f / m_dir.z);
 	}
 
-	bool trace(const vec3& mins, const vec3& maxs, float& distance);
+	bool trace(const vec3& mins, const vec3& maxs, float& distance) const;
 };

@@ -30,7 +30,15 @@ enum class game_packet_status_t : uint8_t
 	GAME_ONLINE
 };
 
-#pragma pack(1) 
+enum class watchdog_packet_status_t : uint8_t
+{
+	WATCHDOG_KEEPALIVE,
+	WATCHDOG_CLOSE,
+	WATCHDOG_WARN,
+	WATCHDOG_BAN
+};
+
+#pragma pack(push, 1) 
 struct c_packet
 {
 	packet_type_t m_type;
@@ -38,23 +46,20 @@ struct c_packet
 	uint64_t      m_send_time;
 };
 
-#pragma pack(1) 
-struct c_version_packet : public c_packet
+struct c_version_packet : c_packet
 {
 	uint64_t m_version;
 	bool  m_upgrade_required;
 };
 
-#pragma pack(1) 
-struct c_login_packet : public c_packet
+struct c_login_packet : c_packet
 {
 	char     m_username[16];
 	uint64_t m_password;
 	uint64_t m_hwid;
 };
 
-#pragma pack(1) 
-struct c_games_packet : public c_packet
+struct c_games_packet : c_packet
 {
 	char				 m_name[64];
 	uint64_t			 m_expire;
@@ -63,20 +68,25 @@ struct c_games_packet : public c_packet
 	game_packet_status_t m_status;
 };
 
-#pragma pack(1) 
-struct c_cheat_packet : public c_packet
+struct c_cheat_packet : c_packet
 {
-	wchar_t	 m_window_class[64];
+	char	 m_window_class[64];
 	uint64_t m_cheat_key;
 	uint8_t  m_id;
 };
 
-#pragma pack(1) 
-struct c_data_packet : public c_packet
+struct c_data_packet : c_packet
 {
 	uint64_t m_len;
 	uint8_t  m_buffer[65536];
 };
+
+struct c_watchdog_packet : c_packet
+{
+	watchdog_packet_status_t m_status;
+	char					 m_detection_name[64];
+};
+#pragma pack(pop)
 
 static constexpr uint64_t max_data_len = 65535;
 
@@ -88,9 +98,9 @@ class c_packet_handler
 		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
 
 		uint64_t key = 0;
-		uint8_t* p = (uint8_t*)&key;
+		uint8_t* p = reinterpret_cast<uint8_t*>(&key);
 		for (auto i = 0; i < 8; i++)
-			p[i] = (uint8_t)(1 + rand() / (RAND_MAX / (255) + 1)); // better randomness than rand() % 255
+			p[i] = static_cast<uint8_t>(1 + rand() / (RAND_MAX / (255) + 1)); // better randomness than rand() % 255
 
 		packet.m_type = type;
 		packet.m_key = key;
@@ -100,13 +110,13 @@ class c_packet_handler
 
 public:
 	template <typename T>
-	void xor_packet(const T& packet)
+	void xor_packet(T& packet)
 	{
 		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
 		constexpr static uint8_t packet_offset = 24; // The offset from the beginning of the packet to be xor'd. Type, Key, and Time are skipped
 
-		uint8_t* p = (uint8_t*)&packet.m_key;
-		uint8_t* login_p = (uint8_t*)& packet;
+		uint8_t* p = reinterpret_cast<uint8_t*>(&packet.m_key);
+		uint8_t* login_p = reinterpret_cast<uint8_t*>(&packet);
 		for (size_t i = packet_offset; i < sizeof packet; i++)
 			login_p[i] ^= p[i % 8];
 	}
@@ -117,8 +127,8 @@ public:
 		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
 		constexpr static uint8_t packet_offset = 24; // The offset from the beginning of the packet to be xor'd. Type, Key, and Time are skipped
 
-		uint8_t* p = (uint8_t*)&packet->m_key;
-		uint8_t* login_p = (uint8_t*)packet;
+		uint8_t* p = reinterpret_cast<uint8_t*>(&packet->m_key);
+		uint8_t* login_p = reinterpret_cast<uint8_t*>(packet);
 		for (size_t i = packet_offset; i < size; i++)
 			login_p[i] ^= p[i % 8];
 	}
@@ -137,7 +147,7 @@ public:
 
 	c_version_packet create_version_packet(uint64_t version, bool update_required)
 	{
-		c_version_packet version_packet;
+		c_version_packet version_packet{};
 		create_base_packet(version_packet, packet_type_t::PACKET_VERSION);
 
 		version_packet.m_version = version;
@@ -150,7 +160,7 @@ public:
 
 	c_login_packet create_login_packet(const std::string& username, uint64_t password, uint64_t hwid)
 	{
-		c_login_packet login_packet;
+		c_login_packet login_packet{};
 		create_base_packet(login_packet, packet_type_t::PACKET_LOGIN);
 
 		memcpy(&login_packet.m_username, username.data(), sizeof login_packet.m_username);
@@ -164,7 +174,7 @@ public:
 
 	c_games_packet create_games_packet(const std::string& name, uint64_t expire, uint32_t version, uint8_t num, game_packet_status_t status)
 	{
-		c_games_packet games_packet;
+		c_games_packet games_packet{};
 		create_base_packet(games_packet, packet_type_t::PACKET_GAMES);
 
 		memcpy(&games_packet.m_name, name.data(), sizeof games_packet.m_name);
@@ -180,15 +190,16 @@ public:
 
 	c_cheat_packet create_cheat_packet(const std::string& window_class, uint8_t id)
 	{
-		c_cheat_packet cheat_packet;
+		c_cheat_packet cheat_packet{};
 		create_base_packet(cheat_packet, packet_type_t::PACKET_CHEAT);
 
 		uint64_t key = 0;
-		uint8_t* p = (uint8_t*)& key;
+		auto* p = reinterpret_cast<uint8_t*>(&key);
 		for (auto i = 0; i < 8; i++)
-			p[i] = (uint8_t)(1 + rand() / (RAND_MAX / (255) + 1)); // better randomness than rand() % 255
+			p[i] = static_cast<uint8_t>(1 + rand() / (RAND_MAX / (255) + 1)); // better randomness than rand() % 255
 
-		memcpy(cheat_packet.m_window_class, window_class.data(), std::min(sizeof cheat_packet.m_window_class, sizeof(window_class.data())));
+		const auto wnd_class = window_class.substr(0, 64);
+		strcpy(cheat_packet.m_window_class, wnd_class.c_str());
 		cheat_packet.m_cheat_key = key;
 		cheat_packet.m_id = id;
 	
@@ -201,7 +212,7 @@ public:
 	{
 		c_data_packet* data_packet = new c_data_packet;
 		create_base_packet(*data_packet, packet_type_t::PACKET_DATA);
-		auto bytes_to_read = std::min(sizeof data_packet->m_buffer, size - bytes_read);
+		const auto bytes_to_read = std::min(sizeof data_packet->m_buffer, size - bytes_read);
 	
 		data_packet->m_len = std::min(size, sizeof data_packet->m_buffer);
 		memcpy(data_packet->m_buffer + bytes_read, buffer, bytes_to_read);
@@ -210,5 +221,19 @@ public:
 		xor_packet(data_packet, sizeof *data_packet);
 	
 		return data_packet;
+	}
+
+	c_watchdog_packet create_watchdog_packet(watchdog_packet_status_t status, const std::string& detection_name = {})
+	{
+		c_watchdog_packet watchdog_packet{};
+		create_base_packet(watchdog_packet, packet_type_t::PACKET_WATCHDOG);
+
+		watchdog_packet.m_status = status;
+
+		const auto dtc_name = detection_name.substr(0, 64);
+		if (!dtc_name.empty())
+			strcpy(watchdog_packet.m_detection_name, dtc_name.c_str());
+		
+		return watchdog_packet;
 	}
 };

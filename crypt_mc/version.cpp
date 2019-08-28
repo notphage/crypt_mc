@@ -3,11 +3,10 @@
 
 // SDK include
 #include "sdk_1.7.10.h"
-#include "sdk_1.8.X.h"
+#include "sdk_forge_1.7.10.h"
 
-// GL
-#include <gl/GL.h>
-#include <gl/GLU.h>
+#include "sdk_1.8.X.h"
+#include "sdk_forge_1.8.X.h"
 
 // Feature include
 #include "fast_place.h"
@@ -31,53 +30,40 @@ int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 
 	GetWindowTextA(hwnd, window_title, TITLE_SIZE);
 
-	int length = ::GetWindowTextLength(hwnd);
-	std::string title(&window_title[0]);
-	if (length == 0 || title[0] != 'M' || title[2] != 'n' || title[4] != 'c' || title[6] != 'a' || title[8] != 't')
-		return 1;
+	std::string title(window_title);
 
-	auto hash = fnvr(title.c_str());
-
-	switch (hash)
+	if (title.find(xors("1.7.10")) != std::string::npos)
 	{
-		case 0x44686c6d995ff329: // Minecraft 1.7.10
-		{
 #ifdef TESTBUILD
-			printf(xors(" $> Version 1.7.10 loaded\n"));
+		printf(xors(" $> Version 1.7.10 loaded\n"));
 #endif
 
-			ctx.m_window = hwnd;
-			ctx.m_version = MC_1710;
+		ctx.m_window = hwnd;
+		ctx.m_version = MC_1710;
 
-			return 0;
-		}
-
-		case 0x726c9b422fc73d2d: // Minecraft 1.8
-		case 0x2220102bc95d5393: // Minecraft 1.8.8
-		case 0x562d7347453b306e: // Minecraft 1.8.9
-		{
-#ifdef TESTBUILD
-			printf(xors(" $> Version 1.8.X loaded\n"));
-#endif
-
-			ctx.m_window = hwnd;
-			ctx.m_version = MC_18X;
-
-			return 0;
-		}
-
-		default:
-		{
-#ifdef TESTBUILD
-			printf(xors(" $> Version failed to be determined\n"));
-#endif
-
-			ctx.m_window = nullptr;
-			ctx.m_version = MC_UNKNOWN;
-
-			return 0;
-		}
+		return 0;
 	}
+	
+	if (title.find(xors("1.8")) != std::string::npos || title.find(xors("1.8.8")) != std::string::npos || title.find(xors("1.8.9")) != std::string::npos)
+	{
+#ifdef TESTBUILD
+		printf(xors(" $> Version 1.8.X loaded\n"));
+#endif
+
+		ctx.m_window = hwnd;
+		ctx.m_version = MC_18X;
+
+		return 0;
+	}
+
+#ifdef TESTBUILD
+	printf(xors(" $> Version failed to be determined\n"));
+#endif
+
+	ctx.m_window = nullptr;
+	ctx.m_version = MC_UNKNOWN;
+
+	return 1;
 }
 
 void c_context::determine_version()
@@ -94,6 +80,8 @@ void c_context::determine_version()
         jint err = m_jvm->AttachCurrentThread(reinterpret_cast<void**>(&m_jni), nullptr);
         if (err != JNI_OK)
             m_jni = nullptr;
+
+		ctx.m_forge = m_jni->FindClass(xors("net/minecraftforge/classloading/FMLForgePlugin")) != nullptr;
 
 		EnumWindows(enum_windows_proc, 0);
 
@@ -156,13 +144,21 @@ std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)
 	{
 		case MC_1710:
 		{
-			ptr = std::make_shared<c_class_loader_1710>();
+			if (ctx.m_forge)
+				ptr = std::make_shared<c_class_loader_forge_1710>();
+			else
+				ptr = std::make_shared<c_class_loader_1710>();
+			
 			break;
 		}
 
 		case MC_18X:
 		{
-			ptr = std::make_shared<c_class_loader_18X>();
+			if (ctx.m_forge)
+				ptr = std::make_shared<c_class_loader_forge_18X>();
+			else
+				ptr = std::make_shared<c_class_loader_18X>();
+			
 			break;
 		}
 
@@ -186,13 +182,21 @@ std::shared_ptr<c_game> c_context::get_game(JNIEnv* _jni)
 	{
 		case MC_1710:
 		{
-			ptr = std::make_shared<c_game_1710>();
+			if (ctx.m_forge)
+				ptr = std::make_shared<c_game_forge_1710>();
+			else
+				ptr = std::make_shared<c_game_1710>();
+			
 			break;
 		}
 
 		case MC_18X:
 		{
-			ptr = std::make_shared<c_game_18X>();
+			if (ctx.m_forge)
+				ptr = std::make_shared<c_game_forge_18X>();
+			else
+				ptr = std::make_shared<c_game_18X>();
+			
 			break;
 		}
 

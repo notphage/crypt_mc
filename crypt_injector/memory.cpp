@@ -20,12 +20,18 @@ bool c_memory::open(const CLIENT_ID& id)
 
 	m_client_id = id;
 
+	TCHAR proc_name[MAX_PATH];
+	if (!K32GetProcessImageFileNameA(m_proc, proc_name, sizeof(proc_name) / sizeof(*proc_name)))
+		return false;
+
+	m_base = module(proc_name);
+
 	return true;
 }
 
 bool c_memory::alloc(void*& addr, size_t* size, int32_t alloc_type, int32_t protect)
 {
-	if (auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), m_proc, &addr, 0, size, alloc_type, protect); status != STATUS_SUCCESS)
+	if (const auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtAllocateVirtualMemory")), m_proc, &addr, 0, size, alloc_type, protect); status != STATUS_SUCCESS)
 		return false;
 
 	if (!addr)
@@ -34,19 +40,24 @@ bool c_memory::alloc(void*& addr, size_t* size, int32_t alloc_type, int32_t prot
 	return true;
 }
 
-bool c_memory::thread(HANDLE& thread, void* entry, void* arg)
+bool c_memory::protect(void*& addr, size_t* size, int32_t prot_type, int32_t& old_prot)
 {
-	auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtCreateThreadEx")), &thread, 0x1FFFFF, nullptr, m_proc, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry), arg, 0, nullptr, nullptr, nullptr, nullptr);
-
+	const auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtProtectVirtualMemory")), m_proc, &addr, size, prot_type, old_prot);
 	return status == STATUS_SUCCESS;
 }
 
-void c_memory::close()
+bool c_memory::thread(HANDLE& thread, void* entry, void* arg)
+{
+	const auto status = do_syscall<NTSTATUS>(ctx.m_syscall.get_idx(fnvc("NtCreateThreadEx")), &thread, 0x1FFFFF, nullptr, m_proc, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry), arg, 0, nullptr, nullptr, nullptr, nullptr);
+	return status == STATUS_SUCCESS;
+}
+
+void c_memory::close() const
 {
 	LI_FN(CloseHandle).cached()(m_proc);
 }
 
-HMODULE c_memory::module(const char* mod)
+HMODULE c_memory::module(const char* mod) const
 {
 	HMODULE modules[1024];
 	DWORD size_needed = 0;
@@ -70,7 +81,7 @@ HMODULE c_memory::module(const char* mod)
 				std::transform(search_name.begin(), search_name.end(), search_name.begin(),
 					[](unsigned char c) { return std::tolower(c); });
 
-				if (module_name == search_name)
+				if (search_name.find(module_name) != std::string::npos)
 					return modules[i];
 			}
 		}
@@ -95,9 +106,6 @@ HMODULE c_memory::module(const char* mod)
 
 uintptr_t c_memory::proc_addr(const char* mod, const char* func)
 {
-	for (auto it = (char*)mod; *it != '\0'; ++it)
-		* it = tolower(static_cast<unsigned char>(*it));
-
 	auto remote_mod = module(mod);
 	if (!remote_mod)
 		return 0;

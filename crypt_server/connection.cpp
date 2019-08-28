@@ -26,7 +26,7 @@ int c_connection::receive_impl(void* data, size_t size) const
 	FD_SET(m_conn_socket, &read_fds);
 
 	timeval time_out;
-	time_out.tv_sec = 60;
+	time_out.tv_sec = 15;
 	time_out.tv_usec = 0; //30 Microseconds for Polling
 
 	auto ret = 0;

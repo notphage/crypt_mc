@@ -883,7 +883,8 @@ namespace UI
 			(
 				slider_color_top.r() > 25 ? slider_color_top.r() - 25 : 0,
 				slider_color_top.g() > 25 ? slider_color_top.g() - 25 : 0,
-				slider_color_top.b() > 25 ? slider_color_top.b() - 25 : 0
+				slider_color_top.b() > 25 ? slider_color_top.b() - 25 : 0,
+				data->m_alpha
 			);
 
 			ctx.m_renderer->draw_gradient_rect({ m_slider_start.x, m_slider_start.y, m_slider_pos, m_bounds.y }, slider_color_top, slider_color_top, slider_color_bottom, slider_color_bottom);
@@ -1073,7 +1074,8 @@ namespace UI
 			(
 				slider_color_top.r() > 25 ? slider_color_top.r() - 25 : 0,
 				slider_color_top.g() > 25 ? slider_color_top.g() - 25 : 0,
-				slider_color_top.b() > 25 ? slider_color_top.b() - 25 : 0
+				slider_color_top.b() > 25 ? slider_color_top.b() - 25 : 0,
+				data->m_alpha
 			);
 
 			ctx.m_renderer->draw_gradient_rect({ m_slider_start.x, m_slider_start.y, m_slider_pos, m_bounds.y }, slider_color_top, slider_color_top, slider_color_bottom, slider_color_bottom);
@@ -2047,7 +2049,7 @@ namespace UI
 			ctx.m_renderer->draw_rect({ m_picker_window_start.x - 1.f, m_picker_window_start.y - 1.f, m_picker_window_bounds.x + 2.f, m_picker_window_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_picker_window_start.x, m_picker_window_start.y, m_picker_window_bounds.x, m_picker_window_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b()), color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b()));
+			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), 255), color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), 255));
 			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(0, 0, 0, 0), color_t(0, 0, 0, 0), color_t::black(), color_t::black());
 
 			ctx.m_renderer->draw_rect({ m_picker_start.x + (m_picker_bounds.x * (roundf(100.f * m_picker_val_x) / 100.f)) - 2.5f, m_picker_start.y + (m_picker_bounds.y * (roundf(100.f * (1.f - m_picker_val_y)) / 100.f)) - 2.5f, 5.f, 5.f }, color_t(0, 0, 0, data->m_alpha));

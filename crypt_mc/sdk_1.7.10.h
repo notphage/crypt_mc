@@ -23,7 +23,7 @@ public:
 	bool is_same(std::shared_ptr<c_player>) override;
 	jboolean is_invisible() override;
 	jboolean is_sneaking() override;
-    jboolean is_potion_active(jint) override;
+	jboolean is_potion_active(jint) override;
 
 	jfloat get_pitch() override;
 	jfloat get_yaw() override;
@@ -54,17 +54,17 @@ public:
 	jdouble old_origin_z() override;
 
 	jboolean is_dead() override;
-    jboolean is_collided_vertically() override;
-    jboolean is_collided_horizontally() override;
+	jboolean is_collided_vertically() override;
+	jboolean is_collided_horizontally() override;
 	jboolean is_on_ground() override;
-    jboolean is_sprinting() override;
+	jboolean is_sprinting() override;
 	jboolean is_visible(jobject) override;
 	jboolean in_water() override;
 
 	jfloat get_width() override;
 	jfloat get_height() override;
-    jfloat get_eye_height() override;
-    jfloat get_health() override;
+	jfloat get_eye_height() override;
+	jfloat get_health() override;
 	jfloat get_max_health() override;
 	jboolean has_armor() override;
 
@@ -76,7 +76,7 @@ public:
 	jobject get_stack(jint) override;
 	jobject get_effects(jobject, jobject) override;
 	jint get_potion_id(jobject) override;
-    jint get_speed_amplifier();
+	jint get_speed_amplifier();
 	jint get_current_slot() override;
 	jboolean send_use_item(jobject) override;
 	jobject get_item(jobject) override;
@@ -85,12 +85,12 @@ public:
 	void set_motion_x(jdouble) override;
 	void set_motion_y(jdouble) override;
 	void set_motion_z(jdouble) override;
-    void set_step_height(jfloat height) override;
+	void set_step_height(jfloat height) override;
 	void set_pitch(jfloat) override;
 	void set_yaw(jfloat) override;
 	void set_velocity(jdouble, jdouble, jdouble) override;
 	void set_sneaking(jboolean) override;
-    void set_sprinting(jboolean) override;
+	void set_sprinting(jboolean) override;
 };
 
 class c_world_1710 : public c_world
