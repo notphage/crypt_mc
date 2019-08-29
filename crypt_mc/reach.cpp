@@ -1,7 +1,7 @@
 #include "context.h"
 #include "reach.h"
 
-void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_reach::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	if (!ctx.m_settings.combat_reach || !valid_keystate(ctx.m_settings.combat_reach_key))
 	    return;
@@ -31,7 +31,7 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	
 	for (const auto& player : world->get_players())
 	{
-	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player) || (ctx.m_settings.combat_reach_visible && !self->is_visible(player->player_instance)))
+	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player) || (!ctx.m_settings.combat_reach_visible && !self->is_visible(player->player_instance)))
 	        continue;
 
 		const vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());

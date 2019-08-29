@@ -892,21 +892,21 @@ namespace UI
 			// plus/minus
 			if (m_min != *m_value)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) + 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f }, xors("-"), text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f), m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) }, xors("-"), text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) - 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f }, xors("-"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) - 2.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) }, xors("-"), text_color);
 			}
 
 			if (m_max != *m_value)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) + 1.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) - 3.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) - 4.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
 
 			char buf[1024];
 			sprintf(buf, xors("%.2f%s"), *m_value, m_suffix);
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow);
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow, TEXT_CENTER);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color, TEXT_CENTER);
 		}
 
 		void handle(c_window_data* data, const char* name, float* setting, float min, float max, float step = 1.f, std::string formatting = xors("%.2f"), std::string suffix = "")
@@ -1083,21 +1083,21 @@ namespace UI
 			// plus/minus
 			if (m_min != *m_value)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) + 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f }, xors("-"), text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f), m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) }, xors("-"), text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) - 1.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) + 1.f }, xors("-"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_minus_pos.x + (m_minus_bounds.x * 0.5f) - 2.f, m_minus_pos.y + 2.f - (m_minus_bounds.y * 0.5f) }, xors("-"), text_color);
 			}
 
 			if (m_max != *m_value)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) + 1.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f), m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) - 3.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) - 4.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
 
 			char buf[1024];
 			sprintf(buf, xors("%i%s"), *m_value, m_suffix);
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow);
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow, TEXT_CENTER);
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color, TEXT_CENTER);
 		}
 
 		void handle(c_window_data* data, const char* name, int* setting, int min, int max, int step = 1, std::string suffix = "")
@@ -1428,6 +1428,12 @@ namespace UI
 			if (m_draw_tick != data->m_draw_counter)
 				return;
 
+			if (data->m_alpha < 255)
+			{
+				m_type_dropdown = false;
+				m_dropdown_end = 0.f;
+			}
+
 			if (m_type_dropdown)
 			{
 				m_dropdown_end += 3.f;
@@ -1629,11 +1635,12 @@ namespace UI
 			if (m_draw_tick != data->m_draw_counter)
 				return;
 
-			// adjust end of dropdown
+			if (data->m_alpha < 255)
+			{
+				m_is_open = false;
+				m_dropdown_end = 0.f;
+			}
 
-			// sorry for ugly code
-			// as soon as m_is_open is false, m_box_end is set to bounding of button, so cant be used to just clamp it in 1 line, it would break close animation
-			// maybe this is reason supremacy also doesnt have close animation :>
 			if (m_is_open)
 			{
 				m_dropdown_end += 3.f;
@@ -1835,11 +1842,12 @@ namespace UI
 			if (m_draw_tick != data->m_draw_counter)
 				return;
 
-			// adjust end of dropdown
+			if (data->m_alpha < 255)
+			{
+				m_is_open = false;
+				m_dropdown_end = 0.f;
+			}
 
-			// sorry for ugly code
-			// as soon as m_is_open is false, m_box_end is set to bounding of button, so cant be used to just clamp it in 1 line, it would break close animation
-			// maybe this is reason supremacy also doesnt have close animation :>
 			if (m_is_open)
 			{
 				m_dropdown_end += 3.f;
@@ -2043,26 +2051,32 @@ namespace UI
 			if (!m_is_open)
 				return;
 
+			if (data->m_alpha < 255)
+			{
+				m_is_open = false;
+				return;
+			}
+
 			if (m_draw_tick != data->m_draw_counter)
 				return;
 
 			ctx.m_renderer->draw_rect({ m_picker_window_start.x - 1.f, m_picker_window_start.y - 1.f, m_picker_window_bounds.x + 2.f, m_picker_window_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_picker_window_start.x, m_picker_window_start.y, m_picker_window_bounds.x, m_picker_window_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), 255), color_t::white(), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), 255));
-			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(0, 0, 0, 0), color_t(0, 0, 0, 0), color_t::black(), color_t::black());
+			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(255, 255, 255, data->m_alpha), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), data->m_alpha));
+			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(0, 0, 0, 0), color_t(0, 0, 0, 0), color_t(0, 0, 0, data->m_alpha), color_t(0, 0, 0, data->m_alpha));
 
 			ctx.m_renderer->draw_rect({ m_picker_start.x + (m_picker_bounds.x * (roundf(100.f * m_picker_val_x) / 100.f)) - 2.5f, m_picker_start.y + (m_picker_bounds.y * (roundf(100.f * (1.f - m_picker_val_y)) / 100.f)) - 2.5f, 5.f, 5.f }, color_t(0, 0, 0, data->m_alpha));
 
-			static color_t hue_col[7] =
+			const color_t hue_col[7] =
 			{
-				{ 255, 0, 0   },
-				{ 255, 255, 0 },
-				{ 0, 255, 0   },
-				{ 0, 255, 255 },
-				{ 0, 0, 255   },
-				{ 255, 0, 255 },
-				{ 255, 0, 0   }
+				{ 255, 0, 0  , data->m_alpha },
+				{ 255, 255, 0, data->m_alpha },
+				{ 0, 255, 0  , data->m_alpha },
+				{ 0, 255, 255, data->m_alpha },
+				{ 0, 0, 255  , data->m_alpha },
+				{ 255, 0, 255, data->m_alpha },
+				{ 255, 0, 0  , data->m_alpha }
 			};
 
 			for (auto i = 0; i < 6; ++i)
@@ -2072,7 +2086,7 @@ namespace UI
 			}
 			ctx.m_renderer->draw_line({ m_hue_picker_start.x - 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (roundf(100.f * m_picker_hue_val) / 100.f)) }, { m_hue_picker_end.x + 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (roundf(100.f * m_picker_hue_val) / 100.f)) }, color_t(0, 0, 0, data->m_alpha));
 
-			ctx.m_renderer->draw_gradient_rect({ m_alpha_picker_start.x, m_alpha_picker_start.y, m_alpha_picker_bounds.x, m_alpha_picker_bounds.y }, color_t::black(), color_t::white(), color_t::black(), color_t::white());
+			ctx.m_renderer->draw_gradient_rect({ m_alpha_picker_start.x, m_alpha_picker_start.y, m_alpha_picker_bounds.x, m_alpha_picker_bounds.y }, color_t(0, 0, 0, data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(0, 0, 0, data->m_alpha), color_t(255, 255, 255, data->m_alpha));
 			ctx.m_renderer->draw_line({ m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (roundf(m_picker_alpha_val) / 255.f)), m_alpha_picker_start.y - 2.f }, { m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (roundf(m_picker_alpha_val) / 255.f)), m_alpha_picker_end.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 		}
 	};

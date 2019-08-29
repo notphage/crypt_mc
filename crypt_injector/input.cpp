@@ -101,8 +101,8 @@ bool c_input_manager::is_key_pressed(int key)
 
 bool c_input_manager::is_key_pressed(keysetting_t key)
 {
-	VirtualKeys_t pressed = (VirtualKeys_t)key.key;
-	keytype_t keytype = (keytype_t)key.type;
+	const VirtualKeys_t pressed = (VirtualKeys_t)key.key;
+	const keytype_t keytype = static_cast<keytype_t>(key.type);
 	bool valid{};
 	static bool toggled[ARRAYSIZE(m_pressed_keys)];
 	static bool pressed_once[ARRAYSIZE(toggled)];

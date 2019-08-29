@@ -86,8 +86,8 @@ void c_gui::tab_combat()
 
 			reach_conditions.handle(menu.data(), xors("conditions"),
 				{
-					{&ctx.m_settings.combat_reach_visible, xors("visible")},
-					{&ctx.m_settings.combat_reach_on_sprint, xors("on sprint")},
+					{&ctx.m_settings.combat_reach_visible, xors("through blocks")},
+					{&ctx.m_settings.combat_reach_on_sprint, xors("require sprint")},
 					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
 					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes") }
 				});
@@ -142,7 +142,7 @@ void c_gui::tab_combat()
 
 			velocity_conditions.handle(menu.data(), xors("conditions"),
 				{
-					{&ctx.m_settings.combat_velocity_on_sprint, xors("on sprint")},
+					{&ctx.m_settings.combat_velocity_on_sprint, xors("require sprint")},
 					//{&ctx.m_settings.combat_velocity_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_velocity_delay, xors("delay")}
 				});

@@ -23,6 +23,8 @@ struct world_fields
 	jclass world = nullptr;
 	jclass entity_renderer = nullptr;
 	jclass cls_list = nullptr;
+
+	jobject obj_world = nullptr;
 };
 
 struct player_fields
@@ -127,7 +129,6 @@ struct game_fields
 	jfieldID fid_entity_renderer_obj;
 	jfieldID fid_timer_obj;
 	jfieldID fid_game_settings;
-	jfieldID fid_render_manager_obj;
 	jfieldID fid_font_renderer_obj;
 	jfieldID fid_the_player = nullptr;
 	jfieldID fid_the_world = nullptr;
@@ -147,10 +148,10 @@ struct game_fields
 	jfieldID fid_entity_hit = nullptr;
 	jfieldID fid_view_bobbing = nullptr;
 	jfieldID fid_mouse_sensitivity = nullptr;
+	jfieldID fid_render_manager_obj;
 
 	jmethodID mid_screen_constructor = nullptr;
 	jmethodID mid_get_string_width = nullptr;
-	jmethodID mid_set_mouse_grabbed = nullptr;
 	jmethodID mid_draw_string_with_shadow = nullptr;
 	jmethodID mid_enabled_light_map = nullptr;
 	jmethodID mid_disable_light_map = nullptr;
@@ -162,9 +163,9 @@ struct game_fields
 	jmethodID mid_set_cursor_pos = nullptr;
 	jmethodID mid_get_width = nullptr;
 	jmethodID mid_get_height = nullptr;
+	jmethodID mid_set_mouse_grabbed = nullptr;
 
 	jobject obj_game = nullptr;
-	jobject obj_world = nullptr;
 	jobject obj_render_manager = nullptr;
 	jobject obj_font_renderer = nullptr;
 	jobject obj_entity_renderer = nullptr;
@@ -230,15 +231,16 @@ void c_world_18X::instantiate(jobject world_object, JNIEnv* _jni = nullptr)
 		if (!class_loader)
 			return;
 
-		worldfields.world = class_loader->find_class(xors("ahb"));
-		worldfields.entity_renderer = class_loader->find_class(xors("blt"));
+		worldfields.world = class_loader->find_class(xors("adm"));
+		worldfields.entity_renderer = class_loader->find_class(xors("bfk"));
 		worldfields.cls_list = class_loader->find_class(xors("java/util/List"));
 
-		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("h"), xors("Ljava/util/List;"));
-		worldfields.mid_get_block = jni->GetMethodID(worldfields.world, xors("a"), xors("(III)Laji;"));
-		worldfields.mid_get_ent = jni->GetMethodID(worldfields.world, xors("a"), xors("(I)Lsa;"));
+		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("j"), xors("Ljava/util/List;"));
+		worldfields.mid_get_ent = jni->GetMethodID(worldfields.world, xors("a"), xors("(I)Lpk;"));
 		worldfields.mid_to_array = jni->GetMethodID(worldfields.cls_list, xors("toArray"), xors("()[Ljava/lang/Object;"));
-		worldfields.mid_render_world = jni->GetMethodID(worldfields.entity_renderer, xors("a"), xors("(FJ)V"));
+		worldfields.mid_render_world = jni->GetMethodID(worldfields.entity_renderer, xors("b"), xors("(FJ)V"));
+
+		worldfields.obj_world = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world));
 
 		init_fields = true;
 	}
@@ -248,11 +250,14 @@ std::vector<std::shared_ptr<c_player>> c_world_18X::get_players()
 {
 	std::vector<std::shared_ptr<c_player>> players;
 
-	jobject obj_player_ents = jni->GetObjectField(world_instance, worldfields.fid_players);
-	jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
+	const jobject obj_player_ents = jni->GetObjectField(world_instance, worldfields.fid_players);
+	const jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
 
 	if (!arr_player_ents)
+	{
+		jni->DeleteLocalRef(obj_player_ents);
 		return players;
+	}
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_player_ents); i++)
 	{
@@ -295,55 +300,55 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		if (!class_loader)
 			return;
 
-		playerfields.entity_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("sa")));
-		playerfields.entity_player_sp_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("blk")));
-		playerfields.cls_entity_living_base = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("sv")));
-		playerfields.entity_player_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yz")));
-		playerfields.item_stack_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("add")));
-		playerfields.item_sword_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aeh")));
-		playerfields.item_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("abf")));
-		playerfields.cls_container = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("zs")));
-		playerfields.cls_slot = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aay")));
-		playerfields.cls_item_potion = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("adp")));
-		playerfields.cls_potion = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("rv")));
-		playerfields.cls_potion_effect = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("rw")));
-		playerfields.cls_player_controller = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bje")));
-		playerfields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yx")));
-		playerfields.cls_aabb = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("azt")));
-		playerfields.item_egg_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("ack")));
-		playerfields.item_snowball_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aed")));
-		playerfields.item_block_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("abh")));
+		playerfields.entity_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("pk")));
+		playerfields.entity_player_sp_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bew")));
+		playerfields.cls_entity_living_base = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("pr")));
+		playerfields.entity_player_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("wn")));
+		playerfields.item_stack_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("zx")));
+		playerfields.item_sword_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aay")));
+		playerfields.item_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yl")));
+		playerfields.cls_container = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("xi")));
+		playerfields.cls_slot = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yg")));
+		playerfields.cls_item_potion = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aai")));
+		playerfields.cls_potion = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("pe")));
+		playerfields.cls_potion_effect = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("pf")));
+		playerfields.cls_player_controller = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bda")));
+		playerfields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("wm")));
+		playerfields.cls_aabb = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aug")));
+		playerfields.item_egg_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("zg")));
+		playerfields.item_snowball_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aaw")));
+		playerfields.item_block_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yo")));
 
-		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("ay"), xors("I"));
-		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("ax"), xors("I"));
+		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("av"), xors("I"));
+		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("au"), xors("I"));
 		playerfields.fid_current_slot = jni->GetFieldID(playerfields.cls_inventory, xors("c"), xors("I"));
 		playerfields.fid_xmotion = jni->GetFieldID(playerfields.entity_class, xors("v"), xors("D"));
 		playerfields.fid_ymotion = jni->GetFieldID(playerfields.entity_class, xors("w"), xors("D"));
 		playerfields.fid_zmotion = jni->GetFieldID(playerfields.entity_class, xors("x"), xors("D"));
-		playerfields.fid_old_xorigin = jni->GetFieldID(playerfields.entity_class, xors("S"), xors("D"));
-		playerfields.fid_old_yorigin = jni->GetFieldID(playerfields.entity_class, xors("T"), xors("D"));
-		playerfields.fid_old_zorigin = jni->GetFieldID(playerfields.entity_class, xors("U"), xors("D"));
-		playerfields.fid_xorigin = jni->GetFieldID(playerfields.entity_class, xors("S"), xors("D"));
-		playerfields.fid_yorigin = jni->GetFieldID(playerfields.entity_class, xors("T"), xors("D"));
-		playerfields.fid_zorigin = jni->GetFieldID(playerfields.entity_class, xors("U"), xors("D"));
-		playerfields.fid_is_dead = jni->GetFieldID(playerfields.entity_class, xors("K"), xors("Z"));
-		playerfields.fid_collided_vertically = jni->GetFieldID(playerfields.entity_class, xors("F"), xors("Z"));
-		playerfields.fid_collided_horizontally = jni->GetFieldID(playerfields.entity_class, xors("E"), xors("Z"));
-		playerfields.fid_on_ground = jni->GetFieldID(playerfields.entity_class, xors("D"), xors("Z"));
-		playerfields.fid_move_strafing = jni->GetFieldID(playerfields.cls_entity_living_base, xors("bd"), xors("F"));
-		playerfields.fid_move_forward = jni->GetFieldID(playerfields.cls_entity_living_base, xors("be"), xors("F"));
+		playerfields.fid_old_xorigin = jni->GetFieldID(playerfields.entity_class, xors("P"), xors("D"));
+		playerfields.fid_old_yorigin = jni->GetFieldID(playerfields.entity_class, xors("Q"), xors("D"));
+		playerfields.fid_old_zorigin = jni->GetFieldID(playerfields.entity_class, xors("R"), xors("D"));
+		playerfields.fid_xorigin = jni->GetFieldID(playerfields.entity_class, xors("s"), xors("D"));
+		playerfields.fid_yorigin = jni->GetFieldID(playerfields.entity_class, xors("t"), xors("D"));
+		playerfields.fid_zorigin = jni->GetFieldID(playerfields.entity_class, xors("u"), xors("D"));
+		playerfields.fid_is_dead = jni->GetFieldID(playerfields.entity_class, xors("I"), xors("Z"));
+		playerfields.fid_collided_vertically = jni->GetFieldID(playerfields.entity_class, xors("E"), xors("Z"));
+		playerfields.fid_collided_horizontally = jni->GetFieldID(playerfields.entity_class, xors("D"), xors("Z"));
+		playerfields.fid_on_ground = jni->GetFieldID(playerfields.entity_class, xors("C"), xors("Z"));
+		playerfields.fid_move_strafing = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aZ"), xors("F"));
+		playerfields.fid_move_forward = jni->GetFieldID(playerfields.cls_entity_living_base, xors("ba"), xors("F"));
 		playerfields.fid_pitch = jni->GetFieldID(playerfields.entity_class, xors("z"), xors("F"));
 		playerfields.fid_yaw = jni->GetFieldID(playerfields.entity_class, xors("y"), xors("F"));
 		playerfields.fid_prev_yaw = jni->GetFieldID(playerfields.entity_class, xors("A"), xors("F"));
-		playerfields.fid_width = jni->GetFieldID(playerfields.entity_class, xors("M"), xors("F"));
-		playerfields.fid_height = jni->GetFieldID(playerfields.entity_class, xors("N"), xors("F"));
-		playerfields.fid_move_speed = jni->GetStaticFieldID(playerfields.cls_potion, xors("c"), xors("Lrv;"));
-		playerfields.fid_step_height = jni->GetFieldID(playerfields.entity_class, xors("W"), xors("F"));
-		playerfields.fid_inventory = jni->GetFieldID(playerfields.entity_player_class, xors("bn"), xors("Lzs;"));
-		playerfields.fid_inventory_player = jni->GetFieldID(playerfields.entity_player_class, xors("bm"), xors("Lyx;"));
-		playerfields.fid_obj_capabilities = jni->GetFieldID(playerfields.entity_player_class, xors("bE"), xors("Lyw;"));
-		playerfields.fid_armor_inventory = jni->GetFieldID(playerfields.cls_inventory, xors("b"), xors("[Ladd;"));
-		playerfields.fid_aabb = jni->GetFieldID(playerfields.entity_class, xors("C"), xors("Lazt;"));
+		playerfields.fid_width = jni->GetFieldID(playerfields.entity_class, xors("J"), xors("F"));
+		playerfields.fid_height = jni->GetFieldID(playerfields.entity_class, xors("K"), xors("F"));
+		playerfields.fid_move_speed = jni->GetStaticFieldID(playerfields.cls_potion, xors("c"), xors("Lpe;"));
+		playerfields.fid_step_height = jni->GetFieldID(playerfields.entity_class, xors("S"), xors("F"));
+		playerfields.fid_inventory = jni->GetFieldID(playerfields.entity_player_class, xors("bj"), xors("Lxi;"));
+		playerfields.fid_inventory_player = jni->GetFieldID(playerfields.entity_player_class, xors("bi"), xors("Lwm;"));
+		playerfields.fid_obj_capabilities = jni->GetFieldID(playerfields.entity_player_class, xors("bA"), xors("Lwl;"));
+		playerfields.fid_armor_inventory = jni->GetFieldID(playerfields.cls_inventory, xors("b"), xors("[Lzx;"));
+		playerfields.fid_aabb = jni->GetFieldID(playerfields.entity_class, xors("f"), xors("Laug;"));
 		playerfields.fid_aabb_min_x = jni->GetFieldID(playerfields.cls_aabb, xors("a"), xors("D"));
 		playerfields.fid_aabb_min_y = jni->GetFieldID(playerfields.cls_aabb, xors("b"), xors("D"));
 		playerfields.fid_aabb_min_z = jni->GetFieldID(playerfields.cls_aabb, xors("c"), xors("D"));
@@ -351,29 +356,29 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
 		playerfields.fid_aabb_max_y = jni->GetFieldID(playerfields.cls_aabb, xors("e"), xors("D"));
 		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("f"), xors("D"));
 
-		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("b"), xors("(Lrv;)Lrw;"));
+		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("b"), xors("(Lpe;)Lpf;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("c"), xors("()I"));
 		playerfields.mid_is_potion_active = jni->GetMethodID(playerfields.cls_entity_living_base, xors("k"), xors("(I)Z"));
-		playerfields.mid_is_invisible = jni->GetMethodID(playerfields.entity_class, xors("ap"), xors("()Z"));
-		playerfields.mid_is_sneaking = jni->GetMethodID(playerfields.entity_class, xors("an"), xors("()Z"));
-		playerfields.mid_is_sprinting = jni->GetMethodID(playerfields.entity_class, xors("ao"), xors("()Z"));
-		playerfields.mid_in_water = jni->GetMethodID(playerfields.entity_class, xors("M"), xors("()Z"));
-		playerfields.mid_set_sprinting = jni->GetMethodID(playerfields.entity_player_sp_class, xors("c"), xors("(Z)V"));
-		playerfields.mid_swing_item = jni->GetMethodID(playerfields.cls_entity_living_base, xors("ba"), xors("()V"));
-		playerfields.mid_set_sneaking = jni->GetMethodID(playerfields.entity_class, xors("b"), xors("(Z)V"));
+		playerfields.mid_is_invisible = jni->GetMethodID(playerfields.entity_class, xors("ax"), xors("()Z"));
+		playerfields.mid_is_sneaking = jni->GetMethodID(playerfields.entity_class, xors("av"), xors("()Z"));
+		playerfields.mid_is_sprinting = jni->GetMethodID(playerfields.entity_class, xors("aw"), xors("()Z"));
+		playerfields.mid_in_water = jni->GetMethodID(playerfields.entity_class, xors("V"), xors("()Z"));
+		playerfields.mid_set_sprinting = jni->GetMethodID(playerfields.entity_player_sp_class, xors("d"), xors("(Z)V"));
+		playerfields.mid_swing_item = jni->GetMethodID(playerfields.cls_entity_living_base, xors("bw"), xors("()V"));
+		playerfields.mid_set_sneaking = jni->GetMethodID(playerfields.entity_class, xors("c"), xors("(Z)V"));
 		playerfields.mid_set_velocity = jni->GetMethodID(playerfields.cls_entity_living_base, xors("i"), xors("(DDD)V"));
-		playerfields.mid_get_health = jni->GetMethodID(playerfields.cls_entity_living_base, xors("aS"), xors("()F"));
-		playerfields.mid_get_max_health = jni->GetMethodID(playerfields.cls_entity_living_base, xors("aY"), xors("()F"));
-		playerfields.mid_get_name = jni->GetMethodID(playerfields.entity_player_class, xors("b_"), xors("()Ljava/lang/String;"));
-		playerfields.mid_get_held_item = jni->GetMethodID(playerfields.entity_player_class, xors("be"), xors("()Ladd;"));
-		playerfields.mid_get_item = jni->GetMethodID(playerfields.item_stack_class, xors("b"), xors("()Ladb;"));
-		playerfields.mid_get_slot = jni->GetMethodID(playerfields.cls_container, xors("a"), xors("(I)Laay;"));
-		playerfields.mid_get_stack = jni->GetMethodID(playerfields.cls_slot, xors("d"), xors("()Ladd;"));
+		playerfields.mid_get_health = jni->GetMethodID(playerfields.cls_entity_living_base, xors("bn"), xors("()F"));
+		playerfields.mid_get_max_health = jni->GetMethodID(playerfields.cls_entity_living_base, xors("bu"), xors("()F"));
+		playerfields.mid_get_name = jni->GetMethodID(playerfields.entity_player_class, xors("e_"), xors("()Ljava/lang/String;"));
+		playerfields.mid_get_held_item = jni->GetMethodID(playerfields.entity_player_class, xors("bA"), xors("()Lzx;"));
+		playerfields.mid_get_item = jni->GetMethodID(playerfields.item_stack_class, xors("b"), xors("()Lzw;"));
+		playerfields.mid_get_slot = jni->GetMethodID(playerfields.cls_container, xors("a"), xors("(I)Lyg;"));
+		playerfields.mid_get_stack = jni->GetMethodID(playerfields.cls_slot, xors("d"), xors("()Lzx;"));
 		playerfields.mid_potion_id = jni->GetMethodID(playerfields.cls_potion_effect, xors("a"), xors("()I"));
-		playerfields.mid_get_effects = jni->GetMethodID(playerfields.cls_item_potion, xors("g"), xors("(Ladd;)Ljava/util/List;"));
-		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("a"), "(Lyz;Lahb;Ladd;)Z");
-		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("g"), xors("()F"));
-		playerfields.mid_is_visible = jni->GetMethodID(playerfields.cls_entity_living_base, xors("p"), xors("(Lsa;)Z"));
+		playerfields.mid_get_effects = jni->GetMethodID(playerfields.cls_item_potion, xors("h"), xors("(Lzx;)Ljava/util/List;"));
+		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("a"), xors("(Lwn;Ladm;Lzx;)Z"));
+		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("aS"), xors("()F"));
+		playerfields.mid_is_visible = jni->GetMethodID(playerfields.cls_entity_living_base, xors("t"), xors("(Lpk;)Z"));
 
 		init_fields = true;
 	}
@@ -486,24 +491,39 @@ jobject c_player_18X::get_item(jobject item_stack)
 
 jboolean c_player_18X::holding_weapon()
 {
-	if (auto held_item = this->get_held_item(); held_item != nullptr)
-		return jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
+	if (const auto held_item = this->get_held_item(); held_item != nullptr)
+	{
+		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
+		jni->DeleteLocalRef(held_item);
+
+		return ret;
+	}
 
 	return false;
 }
 
 jboolean c_player_18X::holding_projectile()
 {
-	if (auto held_item = this->get_held_item(); held_item != nullptr)
-		return jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
+	if (const auto held_item = this->get_held_item(); held_item != nullptr)
+	{
+		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
+		jni->DeleteLocalRef(held_item);
+
+		return ret;
+	}
 
 	return false;
 }
 
 jboolean c_player_18X::holding_block()
 {
-	if (auto held_item = this->get_held_item(); held_item != nullptr)
-		return jni->IsInstanceOf(held_item, playerfields.item_block_class);
+	if (const auto held_item = this->get_held_item(); held_item != nullptr)
+	{
+		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_block_class);
+		jni->DeleteLocalRef(held_item);
+
+		return ret;
+	}
 
 	return false;
 }
@@ -660,7 +680,7 @@ jboolean c_player_18X::send_use_item(jobject item_stack)
 	if (!mc)
 		return false;
 
-	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, gamefields.obj_world, item_stack);
+	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, worldfields.obj_world, item_stack);
 }
 
 void c_player_18X::set_current_slot(jint slot)
@@ -722,53 +742,50 @@ void c_game_18X::instantiate(JNIEnv* _jni = nullptr)
 		if (!class_loader)
 			return;
 
-		gamefields.minecraft = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bao")));
-		gamefields.render_manager = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bnn")));
-		gamefields.font_renderer = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bbu")));
-		gamefields.timer_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bbr")));
-		gamefields.entity_renderer_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("blt")));
-		gamefields.settings_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bbj")));
-		gamefields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bex")));
-		gamefields.cls_chat = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bct")));
-		gamefields.cls_moving_object_position = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("azu")));
+		gamefields.minecraft = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("ave")));
+		gamefields.render_manager = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("biu")));
+		gamefields.font_renderer = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avn")));
+		gamefields.timer_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avl")));
+		gamefields.entity_renderer_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bfk")));
+		gamefields.settings_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avh")));
+		gamefields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("ayl")));
+		gamefields.cls_chat = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("awv")));
+		gamefields.cls_moving_object_position = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("auh")));
 		gamefields.cls_lwjgl_sys_impl = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/WindowsSysImplementation")));
 		gamefields.cls_lwjgl_mouse = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/input/Mouse")));
 		gamefields.cls_lwjgl_display = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/opengl/Display")));
 
-		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("M"), xors("Lbao;"));
-		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("p"), xors("Lblt;"));
-		gamefields.fid_timer_obj = jni->GetFieldID(gamefields.minecraft, xors("Q"), xors("Lbbr;"));
-		gamefields.fid_game_settings = jni->GetFieldID(gamefields.minecraft, xors("u"), xors("Lbbj;"));
-		gamefields.fid_render_manager_obj = jni->GetStaticFieldID(gamefields.render_manager, xors("a"), xors("Lbnn;"));
-		gamefields.fid_font_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("l"), xors("Lbbu;"));
-		gamefields.fid_the_player = jni->GetFieldID(gamefields.minecraft, xors("h"), xors("Lbjk;"));
-		gamefields.fid_the_world = jni->GetFieldID(gamefields.minecraft, xors("f"), xors("Lbjf;"));
-		gamefields.fid_current_screen = jni->GetFieldID(gamefields.minecraft, xors("n"), xors("Lbdw;"));
-		gamefields.fid_in_game_has_focus = jni->GetFieldID(gamefields.minecraft, xors("x"), xors("Z"));
-		gamefields.fid_right_click_delay = jni->GetFieldID(gamefields.minecraft, xors("ad"), xors("I"));
+		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("S"), xors("Lave;"));
+		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("o"), xors("Lbfk;"));
+		gamefields.fid_timer_obj = jni->GetFieldID(gamefields.minecraft, xors("Y"), xors("Lavl;"));
+		gamefields.fid_game_settings = jni->GetFieldID(gamefields.minecraft, xors("t"), xors("Lavh;"));
+		gamefields.fid_font_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("k"), xors("Lavn;"));
+		gamefields.fid_the_player = jni->GetFieldID(gamefields.minecraft, xors("h"), xors("Lbew;"));
+		gamefields.fid_the_world = jni->GetFieldID(gamefields.minecraft, xors("f"), xors("Lbdb;"));
+		gamefields.fid_current_screen = jni->GetFieldID(gamefields.minecraft, xors("m"), xors("Laxu;"));
+		gamefields.fid_in_game_has_focus = jni->GetFieldID(gamefields.minecraft, xors("w"), xors("Z"));
+		gamefields.fid_right_click_delay = jni->GetFieldID(gamefields.minecraft, xors("ap"), xors("I"));
 		gamefields.fid_timer_speed = jni->GetFieldID(gamefields.timer_class, xors("d"), xors("F"));
-		gamefields.fid_player_controller = jni->GetFieldID(gamefields.minecraft, xors("c"), xors("Lbje;"));
+		gamefields.fid_player_controller = jni->GetFieldID(gamefields.minecraft, xors("c"), xors("Lbda;"));
 		gamefields.fid_render_partial_ticks = jni->GetFieldID(gamefields.timer_class, xors("c"), xors("F"));
-		gamefields.fid_render_xpos = jni->GetStaticFieldID(gamefields.render_manager, xors("b"), xors("D"));
-		gamefields.fid_render_ypos = jni->GetStaticFieldID(gamefields.render_manager, xors("c"), xors("D"));
-		gamefields.fid_render_zpos = jni->GetStaticFieldID(gamefields.render_manager, xors("d"), xors("D"));
-		gamefields.fid_player_xview = jni->GetFieldID(gamefields.render_manager, xors("k"), xors("F"));
-		gamefields.fid_player_yview = jni->GetFieldID(gamefields.render_manager, xors("j"), xors("F"));
-		gamefields.fid_pointed_entity = jni->GetFieldID(gamefields.minecraft, xors("j"), xors("Lsa;"));
-		gamefields.fid_object_mouse_over = jni->GetFieldID(gamefields.minecraft, xors("t"), xors("Lazu;"));
-		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("g"), xors("Lsa;"));;
+		gamefields.fid_render_xpos = jni->GetFieldID(gamefields.render_manager, xors("o"), xors("D"));
+		gamefields.fid_render_ypos = jni->GetFieldID(gamefields.render_manager, xors("p"), xors("D"));
+		gamefields.fid_render_zpos = jni->GetFieldID(gamefields.render_manager, xors("q"), xors("D"));
+		gamefields.fid_player_xview = jni->GetFieldID(gamefields.render_manager, xors("f"), xors("F"));
+		gamefields.fid_player_yview = jni->GetFieldID(gamefields.render_manager, xors("e"), xors("F"));
+		gamefields.fid_pointed_entity = jni->GetFieldID(gamefields.minecraft, xors("i"), xors("Lpk;"));
+		gamefields.fid_object_mouse_over = jni->GetFieldID(gamefields.minecraft, xors("s"), xors("Lauh;"));
+		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("d"), xors("Lpk;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
 
-		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lsa;)V"));
+		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));
 		gamefields.mid_get_string_width = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;)I"));
-		gamefields.mid_draw_string_with_shadow = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;IIIZ)I"));
-		gamefields.mid_enabled_light_map = jni->GetMethodID(gamefields.entity_renderer_class, xors("b"), xors("(D)V"));
-		gamefields.mid_disable_light_map = jni->GetMethodID(gamefields.entity_renderer_class, xors("a"), xors("(D)V"));
+		gamefields.mid_draw_string_with_shadow = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;FFIZ)I"));
 		gamefields.mid_setup_camera_transform = jni->GetMethodID(gamefields.entity_renderer_class, xors("a"), xors("(FI)V"));
-		gamefields.mid_get_net_handler = jni->GetMethodID(gamefields.minecraft, xors("v"), xors("()Lbjb;"));
-		gamefields.mid_set_in_focus = jni->GetMethodID(gamefields.minecraft, xors("l"), xors("()V"));
-		gamefields.mid_set_not_in_focus = jni->GetMethodID(gamefields.minecraft, xors("m"), xors("()V"));
+		gamefields.mid_get_net_handler = jni->GetMethodID(gamefields.minecraft, xors("u"), xors("()Lbcy;"));
+		gamefields.mid_set_in_focus = jni->GetMethodID(gamefields.minecraft, xors("n"), xors("()V"));
+		gamefields.mid_set_not_in_focus = jni->GetMethodID(gamefields.minecraft, xors("o"), xors("()V"));
 		gamefields.mid_get_hwnd = jni->GetStaticMethodID(gamefields.cls_lwjgl_sys_impl, xors("getHwnd"), xors("()J"));
 		gamefields.mid_set_cursor_pos = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setCursorPosition"), xors("(II)V"));
 		gamefields.mid_get_width = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getWidth"), xors("()I"));
@@ -776,8 +793,6 @@ void c_game_18X::instantiate(JNIEnv* _jni = nullptr)
 		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
 
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
-		gamefields.obj_world = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world));
-		gamefields.obj_render_manager = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_render_manager_obj));
 		gamefields.obj_font_renderer = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_font_renderer_obj));
 		gamefields.obj_entity_renderer = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_entity_renderer_obj));
 		gamefields.obj_settings = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings));
@@ -786,10 +801,12 @@ void c_game_18X::instantiate(JNIEnv* _jni = nullptr)
 		init_fields = true;
 	}
 
-	if (jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen)
+	if (const jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
+
+		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{
@@ -831,6 +848,11 @@ void c_game_18X::set_timer_speed(jfloat val)
 void c_game_18X::set_right_click_delay(jint val)
 {
 	jni->SetIntField(gamefields.obj_game, gamefields.fid_right_click_delay, val);
+}
+
+void c_game_18X::set_mouse_grabbed(jboolean grabbed)
+{
+	jni->CallStaticVoidMethod(gamefields.cls_lwjgl_mouse, gamefields.mid_set_mouse_grabbed, grabbed);
 }
 
 void c_game_18X::set_in_focus()
@@ -894,11 +916,6 @@ jint c_game_18X::get_string_width(jstring string)
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_get_string_width, string);
 }
 
-void c_game_18X::set_mouse_grabbed(jboolean grabbed)
-{
-	jni->CallStaticVoidMethod(gamefields.cls_lwjgl_mouse, gamefields.mid_set_mouse_grabbed, grabbed);
-}
-
 jint c_game_18X::draw_string_with_shadow(jstring par1, jint par2, jint par3, jint par4)
 {
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_draw_string_with_shadow, par1, par2, par3, par4, false);
@@ -929,9 +946,7 @@ void c_game_18X::set_object_mouse_over(jobject player)
 	if (!player)
 		return;
 
-	jobject obj_new_mouse_over = jni->NewObject(gamefields.cls_moving_object_position, gamefields.mid_screen_constructor, player);
-
-	return jni->SetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over, obj_new_mouse_over);
+	jni->SetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over, jni->NewObject(gamefields.cls_moving_object_position, gamefields.mid_screen_constructor, player));
 }
 
 void c_game_18X::disable_light_map()

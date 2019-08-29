@@ -172,6 +172,7 @@ struct game_fields
 	jmethodID mid_set_mouse_grabbed = nullptr;
 
 	jobject obj_game = nullptr;
+	jobject obj_world = nullptr;
 	jobject obj_render_manager = nullptr;
 	jobject obj_font_renderer = nullptr;
 	jobject obj_entity_renderer = nullptr;
@@ -276,11 +277,14 @@ std::vector<std::shared_ptr<c_player>> c_world_forge_18X::get_players()
 {
 	std::vector<std::shared_ptr<c_player>> players;
 
-	jobject obj_player_ents = jni->GetObjectField(world_instance, worldfields.fid_players);
-	jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
+	const jobject obj_player_ents = jni->GetObjectField(world_instance, worldfields.fid_players);
+	const jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
 
 	if (!arr_player_ents)
+	{
+		jni->DeleteLocalRef(obj_player_ents);
 		return players;
+	}
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_player_ents); i++)
 	{
@@ -514,24 +518,39 @@ jobject c_player_forge_18X::get_item(jobject item_stack)
 
 jboolean c_player_forge_18X::holding_weapon()
 {
-	if (auto held_item = this->get_held_item(); held_item != nullptr)
-		return jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
+	if (const auto held_item = this->get_held_item(); held_item != nullptr)
+	{
+		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
+		jni->DeleteLocalRef(held_item);
+
+		return ret;
+	}
 
 	return false;
 }
 
 jboolean c_player_forge_18X::holding_projectile()
 {
-	if (auto held_item = this->get_held_item(); held_item != nullptr)
-		return jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
+	if (const auto held_item = this->get_held_item(); held_item != nullptr)
+	{
+		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
+		jni->DeleteLocalRef(held_item);
+
+		return ret;
+	}
 
 	return false;
 }
 
 jboolean c_player_forge_18X::holding_block()
 {
-	if (auto held_item = this->get_held_item(); held_item != nullptr)
-		return jni->IsInstanceOf(held_item, playerfields.item_block_class);
+	if (const auto held_item = this->get_held_item(); held_item != nullptr)
+	{
+		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_block_class);
+		jni->DeleteLocalRef(held_item);
+
+		return ret;
+	}
 
 	return false;
 }
@@ -633,14 +652,21 @@ jfloat c_player_forge_18X::get_max_health()
 
 jboolean c_player_forge_18X::has_armor()
 {
-	jobjectArray arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
+	const auto arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
 	if (!arr_item_stack)
 		return false;
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_item_stack); i++)
-		if (auto obj = jni->GetObjectArrayElement(arr_item_stack, i))
+	{
+		if (const auto obj = jni->GetObjectArrayElement(arr_item_stack, i); obj != nullptr)
+		{
+			jni->DeleteLocalRef(arr_item_stack);
+			jni->DeleteLocalRef(obj);
 			return true;
+		}
+	}
 
+	jni->DeleteLocalRef(arr_item_stack);
 	return false;
 }
 
@@ -676,21 +702,12 @@ jint c_player_forge_18X::get_current_slot()
 
 jboolean c_player_forge_18X::send_use_item(jobject item_stack)
 {
-	auto class_loader = ctx.get_class_loader(jni);
 	auto mc = ctx.get_game(jni);
 
-	if (!class_loader || !mc)
+	if (!mc)
 		return false;
-
-	jclass minecraft_class = class_loader->find_class(xors("net.minecraft.client.Minecraft"));
-
-	jfieldID fid_minecraft = jni->GetStaticFieldID(minecraft_class, xors("field_71432_P"), xors("Lnet/minecraft/client/Minecraft;"));
-	jfieldID fid_the_world = jni->GetFieldID(minecraft_class, xors("field_71441_e"), xors("Lnet/minecraft/client/multiplayer/WorldClient;"));
-
-	jobject obj_game = jni->GetStaticObjectField(minecraft_class, fid_minecraft);
-	jobject obj_world = jni->GetObjectField(obj_game, fid_the_world);
-
-	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, obj_world, item_stack);
+	
+	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, gamefields.obj_world, item_stack);
 }
 
 void c_player_forge_18X::set_current_slot(jint slot)
@@ -803,6 +820,7 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni = nullptr)
 		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
 	
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
+		gamefields.obj_world = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world));
 		gamefields.obj_font_renderer = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_font_renderer_obj));
 		gamefields.obj_entity_renderer = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_entity_renderer_obj));
 		gamefields.obj_settings = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings));
@@ -811,10 +829,12 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni = nullptr)
 		init_fields = true;
 	}
 	
-	if (jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen)
+	if (const jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
+
+		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{
@@ -954,9 +974,7 @@ void c_game_forge_18X::set_object_mouse_over(jobject player)
 	if (!player)
 		return;
 
-	jobject obj_new_mouse_over = jni->NewObject(gamefields.cls_moving_object_position, gamefields.mid_screen_constructor, player);
-
-	return jni->SetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over, obj_new_mouse_over);
+	jni->SetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over, jni->NewObject(gamefields.cls_moving_object_position, gamefields.mid_screen_constructor, player));
 }
 
 void c_game_forge_18X::disable_light_map()
