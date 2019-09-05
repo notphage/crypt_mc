@@ -1,5 +1,7 @@
 #include "context.h"
 #include "sdk_1.7.10.h"
+#include <iostream>
+#include <conio.h>
 
 struct block_fields
 {
@@ -10,6 +12,12 @@ struct block_fields
 
 struct class_loader_fields
 {
+	jfieldID fid_class_loader = nullptr;
+
+	jmethodID mid_get_class_loader = nullptr;
+	jmethodID mid_find_class = nullptr;
+	
+	jobject obj_class_loader = nullptr;
 };
 
 struct world_fields
@@ -150,6 +158,7 @@ struct game_fields
 	jfieldID fid_view_bobbing = nullptr;
 	jfieldID fid_mouse_sensitivity = nullptr;
 
+	jmethodID mid_get_minecraft = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
 	jmethodID mid_get_string_width = nullptr;
 	jmethodID mid_set_mouse_grabbed = nullptr;
@@ -182,9 +191,9 @@ static world_fields worldfields;
 static player_fields playerfields;
 static game_fields gamefields;
 
-void c_block_1710::instantiate(jobject block_instance, JNIEnv* _jni = nullptr)
+void c_block_1710::instantiate(jobject block_instance, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -206,19 +215,42 @@ void c_block_1710::instantiate(jobject block_instance, JNIEnv* _jni = nullptr)
 	jni->DeleteLocalRef(block_instance);
 }
 
-void c_class_loader_1710::instantiate(JNIEnv* _jni = nullptr)
+void c_class_loader_1710::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
+
+	static bool init_fields = false;
+	if (!init_fields && ctx.m_client_flavor != VANILLA)
+	{
+		auto launch = (jclass)jni->FindClass(xors("net/minecraft/launchwrapper/Launch"));
+		auto class_loader = (jclass)jni->FindClass(xors("net/minecraft/launchwrapper/LaunchClassLoader"));
+
+		classfields.fid_class_loader = jni->GetStaticFieldID(launch, xors("classLoader"), xors("Lnet/minecraft/launchwrapper/LaunchClassLoader;"));
+
+		classfields.mid_find_class = jni->GetMethodID(class_loader, xors("findClass"), xors("(Ljava/lang/String;)Ljava/lang/Class;"));
+
+		classfields.obj_class_loader = jni->NewGlobalRef(jni->GetStaticObjectField(class_loader, classfields.fid_class_loader));
+
+		init_fields = true;
+	}
 }
 
 jclass c_class_loader_1710::find_class(const char* name)
 {
-	return jni->FindClass(name);
+	std::string class_name(name);
+	if (class_name.find('/') != std::string::npos || ctx.m_client_flavor == VANILLA)
+		return jni->FindClass(name);
+
+	jstring java_name = jni->NewStringUTF(name);
+	jclass clazz = static_cast<jclass>(jni->CallObjectMethod(classfields.obj_class_loader, classfields.mid_find_class, java_name));
+
+	jni->DeleteLocalRef(java_name);
+	return clazz;
 }
 
-void c_world_1710::instantiate(jobject world_object, JNIEnv* _jni = nullptr)
+void c_world_1710::instantiate(jobject world_object, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	world_instance = world_object;
 
@@ -286,9 +318,9 @@ std::shared_ptr<c_block> c_world_1710::get_block(jint x, jint y, jint z)
 	return block_ptr;
 }
 
-void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
+void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	player_instance = player_object;
 
@@ -730,9 +762,9 @@ void c_player_1710::set_sneaking(jboolean sneak)
 	jni->CallVoidMethod(player_instance, playerfields.mid_set_sneaking, sneak);
 }
 
-void c_game_1710::instantiate(JNIEnv* _jni = nullptr)
+void c_game_1710::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -781,6 +813,7 @@ void c_game_1710::instantiate(JNIEnv* _jni = nullptr)
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
 
+		gamefields.mid_get_minecraft = jni->GetStaticMethodID(gamefields.minecraft, xors("B"), xors("()Lbao;"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lsa;)V"));
 		gamefields.mid_get_string_width = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;)I"));
 		gamefields.mid_draw_string_with_shadow = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;IIIZ)I"));
@@ -806,12 +839,10 @@ void c_game_1710::instantiate(JNIEnv* _jni = nullptr)
 		init_fields = true;
 	}
 
-	if (const jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen)
+	if (const jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen != nullptr && ctx.m_ingame)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
-
-		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{
@@ -868,7 +899,6 @@ void c_game_1710::set_not_in_focus()
 std::shared_ptr<c_player> c_game_1710::get_player()
 {
 	auto player_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
-
 	if (!player_class)
 		return nullptr;
 

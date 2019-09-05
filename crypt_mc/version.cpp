@@ -44,7 +44,7 @@ int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 		return 0;
 	}
 	
-	if (title.find(xors("1.8")) != std::string::npos || title.find(xors("1.8.8")) != std::string::npos || title.find(xors("1.8.9")) != std::string::npos)
+	if (title.find(xors("1.8")) != std::string::npos || title.find(xors("1.8.8")) != std::string::npos || title.find(xors("1.8.9")) != std::string::npos || title.find(xors("Hyperium")) != std::string::npos)
 	{
 #ifdef TESTBUILD
 		printf(xors(" $> Version 1.8.X loaded\n"));
@@ -55,10 +55,6 @@ int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 
 		return 0;
 	}
-
-#ifdef TESTBUILD
-	printf(xors(" $> Version failed to be determined\n"));
-#endif
 
 	ctx.m_window = nullptr;
 	ctx.m_version = MC_UNKNOWN;
@@ -72,17 +68,6 @@ void c_context::determine_version()
 
 	// begin hooking
 	{
-        typedef jint(__stdcall *get_created_java_vms_proc)(JavaVM**, jsize, jsize*);
-
-        get_created_java_vms_proc fn_get_created_java_vms = (get_created_java_vms_proc)LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("jvm.dll")), xors("JNI_GetCreatedJavaVMs"));
-        fn_get_created_java_vms(&m_jvm, 1, nullptr);
-
-        jint err = m_jvm->AttachCurrentThread(reinterpret_cast<void**>(&m_jni), nullptr);
-        if (err != JNI_OK)
-            m_jni = nullptr;
-
-		ctx.m_forge = m_jni->FindClass(xors("net/minecraftforge/classloading/FMLForgePlugin")) != nullptr;
-
 		EnumWindows(enum_windows_proc, 0);
 
 #ifdef TESTBUILD
@@ -95,17 +80,13 @@ void c_context::determine_version()
 		MH_CreateHook(SwapBuffers, &hooked::swap_buffers, reinterpret_cast<void**>(&hooked::o_swap_buffers));
 		MH_EnableHook(SwapBuffers);
 
-		auto gl_disable = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
-
-		// glDisable
-		MH_CreateHook(gl_disable, &hooked::gldisable, reinterpret_cast<void**>(&hooked::o_gldisable));
-		MH_EnableHook(gl_disable);
-
-		auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
-
-		// getTime
-		MH_CreateHook(get_time, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));
-		MH_EnableHook(get_time);
+		auto nUpdate = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
+		MH_CreateHook(nUpdate, &hooked::get_update, reinterpret_cast<void**>(&hooked::o_get_update));
+		MH_EnableHook(nUpdate);
+		
+		auto nGetTime = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
+		MH_CreateHook(nGetTime, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));
+		MH_EnableHook(nGetTime);
 
 		hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, -4, (long long)hooked::wnd_proc));
 	}
@@ -116,24 +97,13 @@ void c_context::determine_version()
 	ctx.m_features.push_back(std::make_unique<c_velocity>());
 	ctx.m_features.push_back(std::make_unique<c_fast_place>());
 	ctx.m_features.push_back(std::make_unique<c_speed>());
-	ctx.m_features.push_back(std::make_unique<c_throw>());
+	//ctx.m_features.push_back(std::make_unique<c_throw>());
 	ctx.m_features.push_back(std::make_unique<c_visuals>());
 	ctx.m_features.push_back(std::make_unique<c_reach>());
     ctx.m_features.push_back(std::make_unique<c_flight>());
     ctx.m_features.push_back(std::make_unique<c_sprint>());
     ctx.m_features.push_back(std::make_unique<c_step>());
 	ctx.m_features.push_back(std::make_unique<c_anti_afk>());
-}
-
-jvmtiEnv* c_context::get_jvmti_env()
-{
-	if (!ctx.m_jvm)
-		return nullptr;
-
-	jvmtiEnv* jvmti;
-	ctx.m_jvm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION_1_2);
-
-	return jvmti;
 }
 
 std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)
@@ -144,20 +114,53 @@ std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)
 	{
 		case MC_1710:
 		{
-			if (ctx.m_forge)
-				ptr = std::make_shared<c_class_loader_forge_1710>();
-			else
-				ptr = std::make_shared<c_class_loader_1710>();
-			
+			switch (ctx.m_client_flavor)
+			{
+				case VANILLA:
+				case BADLION:
+				{
+					ptr = std::make_shared<c_class_loader_1710>();
+					break;
+				}
+
+				case FORGE:
+				{
+					ptr = std::make_shared<c_class_loader_forge_1710>();
+					break;
+				}
+
+				default:
+				{
+					return nullptr;
+				}
+			}
+
 			break;
 		}
 
 		case MC_18X:
 		{
-			if (ctx.m_forge)
-				ptr = std::make_shared<c_class_loader_forge_18X>();
-			else
-				ptr = std::make_shared<c_class_loader_18X>();
+			switch (ctx.m_client_flavor)
+			{
+				case VANILLA:
+				case BADLION:
+				case HYPERIUM:
+				{
+					ptr = std::make_shared<c_class_loader_18X>();
+					break;
+				}
+
+				case FORGE:
+				{
+					ptr = std::make_shared<c_class_loader_forge_18X>();
+					break;
+				}
+
+				default:
+				{
+					return nullptr;
+				}
+			}
 			
 			break;
 		}
@@ -169,7 +172,7 @@ std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)
 		}
 	}
 
-	ptr->instantiate(_jni ? _jni : ctx.m_jni);
+	ptr->instantiate(_jni);
 
 	return ptr;
 }
@@ -182,20 +185,53 @@ std::shared_ptr<c_game> c_context::get_game(JNIEnv* _jni)
 	{
 		case MC_1710:
 		{
-			if (ctx.m_forge)
-				ptr = std::make_shared<c_game_forge_1710>();
-			else
-				ptr = std::make_shared<c_game_1710>();
+			switch (ctx.m_client_flavor)
+			{
+				case VANILLA:
+				case BADLION:
+				{
+					ptr = std::make_shared<c_game_1710>();
+					break;
+				}
+
+				case FORGE:
+				{
+					ptr = std::make_shared<c_game_forge_1710>();
+					break;
+				}
+
+				default:
+				{
+					return nullptr;
+				}
+			}
 			
 			break;
 		}
 
 		case MC_18X:
 		{
-			if (ctx.m_forge)
-				ptr = std::make_shared<c_game_forge_18X>();
-			else
-				ptr = std::make_shared<c_game_18X>();
+			switch (ctx.m_client_flavor)
+			{
+				case VANILLA:
+				case BADLION:
+				case HYPERIUM:
+				{
+					ptr = std::make_shared<c_game_18X>();
+					break;
+				}
+
+				case FORGE:
+				{
+					ptr = std::make_shared<c_game_forge_18X>();
+					break;
+				}
+
+				default:
+				{
+					return nullptr;
+				}
+			}
 			
 			break;
 		}
@@ -207,7 +243,7 @@ std::shared_ptr<c_game> c_context::get_game(JNIEnv* _jni)
 		}
 	}
 
-	ptr->instantiate(_jni ? _jni : ctx.m_jni);
+	ptr->instantiate(_jni);
 
 	return ptr;
 }

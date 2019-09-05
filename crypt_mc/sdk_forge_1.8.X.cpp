@@ -189,9 +189,9 @@ static world_fields worldfields;
 static player_fields playerfields;
 static game_fields gamefields;
 
-void c_block_forge_18X::instantiate(jobject block_instance, JNIEnv* _jni = nullptr)
+void c_block_forge_18X::instantiate(jobject block_instance, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -213,9 +213,9 @@ void c_block_forge_18X::instantiate(jobject block_instance, JNIEnv* _jni = nullp
 	jni->DeleteLocalRef(block_instance);
 }
 
-void c_class_loader_forge_18X::instantiate(JNIEnv* _jni = nullptr)
+void c_class_loader_forge_18X::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -244,9 +244,9 @@ jclass c_class_loader_forge_18X::find_class(const char* name)
 	return clazz;
 }
 
-void c_world_forge_18X::instantiate(jobject world_object, JNIEnv* _jni = nullptr)
+void c_world_forge_18X::instantiate(jobject world_object, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	world_instance = world_object;
 
@@ -264,7 +264,7 @@ void c_world_forge_18X::instantiate(jobject world_object, JNIEnv* _jni = nullptr
 		worldfields.cls_list = class_loader->find_class(xors("java.util.List"));
 
 		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("field_73010_i"), xors("Ljava/util/List;"));
-		worldfields.mid_get_block = jni->GetMethodID(worldfields.world, xors("func_151337_f"), xors("(III)Lnet/minecraft/block/Block;"));
+		//worldfields.mid_get_block = jni->GetMethodID(worldfields.world, xors("func_151337_f"), xors("(III)Lnet/minecraft/block/Block;"));
 		worldfields.mid_get_ent = jni->GetMethodID(worldfields.world, xors("func_73045_a"), xors("(I)Lnet/minecraft/entity/Entity;"));
 		worldfields.mid_to_array = jni->GetMethodID(worldfields.cls_list, xors("toArray"), xors("()[Ljava/lang/Object;"));
 		worldfields.mid_render_world = jni->GetMethodID(worldfields.entity_renderer, xors("func_78471_a"), xors("(FJ)V"));
@@ -312,9 +312,9 @@ std::shared_ptr<c_block> c_world_forge_18X::get_block(jint x, jint y, jint z)
 	return block_ptr;
 }
 
-void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
+void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	player_instance = player_object;
 
@@ -756,9 +756,9 @@ void c_player_forge_18X::set_sneaking(jboolean sneak)
 	jni->CallVoidMethod(player_instance, playerfields.mid_set_sneaking, sneak);
 }
 
-void c_game_forge_18X::instantiate(JNIEnv* _jni = nullptr)
+void c_game_forge_18X::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 

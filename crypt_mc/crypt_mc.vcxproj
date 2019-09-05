@@ -213,8 +213,8 @@
     <ClCompile Include="fast_place.cpp" />
     <ClCompile Include="flight.cpp" />
     <ClCompile Include="font.cpp" />
-    <ClCompile Include="gettime.cpp" />
-    <ClCompile Include="gldisable.cpp" />
+    <ClCompile Include="nGetTime.cpp" />
+    <ClCompile Include="nUpdate.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="hde64.cpp" />
     <ClCompile Include="hook.cpp" />

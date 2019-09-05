@@ -138,7 +138,7 @@ void c_gui::tab_combat()
 			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%"));
 
 			if (ctx.m_settings.combat_velocity_delay)
-				velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay_ticks, 0, 9, 1, xors(" ticks"));
+				velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay_ticks, 0, 8, 1, xors(" ticks"));
 
 			velocity_conditions.handle(menu.data(), xors("conditions"),
 				{

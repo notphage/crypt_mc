@@ -64,9 +64,6 @@ public:
 	LONG m_screen_h = 0;
 
 	std::atomic<MC_VERSION> m_version;
-	JavaVM* m_jvm;
-	JNIEnv* m_jni;
-
 	std::vector<std::unique_ptr<c_feature>> m_features;
 
 	std::shared_ptr<c_renderer> m_renderer;
@@ -80,15 +77,14 @@ public:
 	float m_frametime = 0.f;
 	std::atomic_bool m_ingame = false;
 	std::atomic_bool m_in_chat = false;
-	std::atomic_bool m_forge = false;
+
+	std::atomic<client_flavor> m_client_flavor = VANILLA;
 
 public:
 	void determine_version();
 
-	static jvmtiEnv* get_jvmti_env();
-
-	std::shared_ptr<c_class_loader> get_class_loader(JNIEnv* = nullptr);
-	std::shared_ptr<c_game> get_game(JNIEnv* = nullptr);
+	std::shared_ptr<c_class_loader> get_class_loader(JNIEnv*);
+	std::shared_ptr<c_game> get_game(JNIEnv*);
 };
 
 extern c_context ctx;
@@ -96,12 +92,12 @@ extern c_context ctx;
 namespace hooked
 {
 	extern int __stdcall swap_buffers(HDC);
-	extern void __stdcall gldisable(JNIEnv*, jclass, jint, jlong);
+	extern long __stdcall get_update(JNIEnv*, jclass);
 	extern long __stdcall get_time(JNIEnv*, jclass);
 	extern long long __stdcall wnd_proc(HWND, uint32_t, uint64_t, int64_t);
 
 	extern decltype(&swap_buffers) o_swap_buffers;
-	extern decltype(&gldisable) o_gldisable;
+	extern decltype(&get_update) o_get_update;
 	extern decltype(&get_time) o_get_time;
 	extern decltype(&wnd_proc) o_wnd_proc;
 }

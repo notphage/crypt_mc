@@ -21,6 +21,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 
 	const bool in_inventory = mc->is_in_inventory();
 	const bool has_weapon = self->holding_weapon();
+	//const bool has_weapon = false;
 	const bool has_focus = mc->in_game_has_focus();
 
 	if (!in_inventory && !has_focus)

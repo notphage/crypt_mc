@@ -1,7 +1,7 @@
 #include "context.h"
 #include "reach.h"
 
-void c_reach::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	if (!ctx.m_settings.combat_reach || !valid_keystate(ctx.m_settings.combat_reach_key))
 	    return;

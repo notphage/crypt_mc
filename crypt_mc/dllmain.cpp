@@ -14,14 +14,12 @@ static void __cdecl std::_Xlength_error(const char* error) {}
 
 void unload()
 {
-	ctx.m_jvm->DetachCurrentThread();
-	
-	auto gl_disable = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglDisable"));
-    auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
+    auto nGetTime = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
+	auto nUpdate = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
 
 	MH_RemoveHook(SwapBuffers);
-	MH_RemoveHook(gl_disable);
-    MH_RemoveHook(get_time);
+    MH_RemoveHook(nGetTime);
+	MH_RemoveHook(nUpdate);
 
 	SetWindowLongPtrA(ctx.m_window, -4, reinterpret_cast<long long>(hooked::o_wnd_proc));
 
@@ -99,6 +97,16 @@ void hack(HINSTANCE bin)
 	// parse header for user info and some interfaces
 	parse_header(uintptr_t(bin));
 
+	std::string cmd_str(LI_FN(GetCommandLineA).cached()());
+	if (cmd_str.find(xors("forge")) != std::string::npos)
+		ctx.m_client_flavor = FORGE;
+	else if (cmd_str.find(xors("badlion")) != std::string::npos)
+		ctx.m_client_flavor = BADLION;
+	else if (cmd_str.find(xors("Hyperium")) != std::string::npos)
+		ctx.m_client_flavor = HYPERIUM;
+	else
+		ctx.m_client_flavor = VANILLA;
+
 #ifdef TESTBUILD
 	printf(" /$$$$$$$                                     /$$   /$$ /$$                                     /$$   /$$                     /$$      \n");
 	printf("| $$__  $$                                   | $$$ | $$|__/                                    | $$  | $$                    | $$      \n");
@@ -115,6 +123,7 @@ void hack(HINSTANCE bin)
 	printf("\n");
 
 	printf(" $> cheat base: 0x%p \n", bin);
+	printf(" $> client flavor: %i\n", ctx.m_client_flavor.load());
 	SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 #endif
 
@@ -126,53 +135,53 @@ void hack(HINSTANCE bin)
 
 	while (!ctx.m_panic)
 	{
-		using namespace std::chrono_literals;
-		
-		auto mc = ctx.get_game();
-		
-		if (const auto cur_hwnd = reinterpret_cast<HWND>(mc->get_window_handle()); cur_hwnd != ctx.m_window)
-		{
-			ctx.m_window = cur_hwnd;
-			hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, reinterpret_cast<long long>(hooked::wnd_proc)));
-		
-			RECT rect;
-			LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
-		
-			ctx.m_screen_w = rect.right - rect.left;
-			ctx.m_screen_h = rect.bottom - rect.top;
-		}
-		
-		auto self = mc->get_player();
-		auto world = mc->get_world();
-		
-		if (self && world)
-		{
-			ctx.m_ingame = true;
-		
-			if (ctx.m_menu_opening)
-			{
-				//mc->set_not_in_focus();
-				mc->set_mouse_grabbed(false);
-			}
-			else if (ctx.m_menu_closing)
-			{
-				//mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
-				//mc->set_in_focus();
-				mc->set_mouse_grabbed(true);
-			}
-		
-			ctx.m_in_chat = mc->is_in_chat();
-		
-			for (auto&& feature : ctx.m_features)
-				feature->on_tick(mc, self, world);
-		
-			std::this_thread::sleep_for(1ms);
-		}
-		else
-		{
-			ctx.m_ingame = false;
-			std::this_thread::sleep_for(5s);
-		}
+		//using namespace std::chrono_literals;
+		//
+		//auto mc = ctx.get_game();
+		//
+		//if (const auto cur_hwnd = reinterpret_cast<HWND>(mc->get_window_handle()); cur_hwnd != ctx.m_window)
+		//{
+		//	ctx.m_window = cur_hwnd;
+		//	hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, reinterpret_cast<long long>(hooked::wnd_proc)));
+		//
+		//	RECT rect;
+		//	LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
+		//
+		//	ctx.m_screen_w = rect.right - rect.left;
+		//	ctx.m_screen_h = rect.bottom - rect.top;
+		//}
+		//
+		//auto self = mc->get_player();
+		//auto world = mc->get_world();
+		//
+		//if (self && world)
+		//{
+		//	ctx.m_ingame = true;
+		//
+		//	if (ctx.m_menu_opening)
+		//	{
+		//		//mc->set_not_in_focus();
+		//		mc->set_mouse_grabbed(false);
+		//	}
+		//	else if (ctx.m_menu_closing)
+		//	{
+		//		//mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
+		//		//mc->set_in_focus();
+		//		mc->set_mouse_grabbed(true);
+		//	}
+		//
+		//	ctx.m_in_chat = mc->is_in_chat();
+		//
+		//	for (auto&& feature : ctx.m_features)
+		//		feature->on_tick(mc, self, world);
+		//
+		//	std::this_thread::sleep_for(1ms);
+		//}
+		//else
+		//{
+		//	ctx.m_ingame = false;
+		//	std::this_thread::sleep_for(5s);
+		//}
 	}
 
 	unload();
@@ -254,6 +263,7 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 			SetLayeredWindowAttributes(con_hwndw, 0, 230, 2);
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 
+			freopen(xors("CONOUT$"), xors("w"), stderr);
 			freopen(xors("CONOUT$"), xors("w"), stdout);
 		}
 #else 

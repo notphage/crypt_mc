@@ -18,7 +18,7 @@ static stack_trace_fields stacktracefields;
 
 void c_stack_trace::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -62,9 +62,8 @@ void c_stack_trace::get_stack_trace(int index, stack_trace& stack)
 
 	stack.valid = true;
 	stack.method_name = fnvr(str);
+	stack.method_str = str;
 	stack.line_number = line_number;
 
 	jni->ReleaseStringUTFChars(str_method_name, str);
-
-	return;
 }

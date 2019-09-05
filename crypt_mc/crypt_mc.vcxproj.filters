@@ -124,12 +124,6 @@
     <ClCompile Include="font.cpp">
       <Filter>SRC\render\text</Filter>
     </ClCompile>
-    <ClCompile Include="gettime.cpp">
-      <Filter>SRC\hooks</Filter>
-    </ClCompile>
-    <ClCompile Include="gldisable.cpp">
-      <Filter>SRC\hooks</Filter>
-    </ClCompile>
     <ClCompile Include="swapbuffers.cpp">
       <Filter>SRC\hooks</Filter>
     </ClCompile>
@@ -204,6 +198,12 @@
     </ClCompile>
     <ClCompile Include="sdk_1.8.X.cpp">
       <Filter>SRC\SDK\Vanilla 1.8.X</Filter>
+    </ClCompile>
+    <ClCompile Include="nUpdate.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="nGetTime.cpp">
+      <Filter>SRC\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

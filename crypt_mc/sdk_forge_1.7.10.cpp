@@ -189,9 +189,9 @@ static world_fields worldfields;
 static player_fields playerfields;
 static game_fields gamefields;
 
-void c_block_forge_1710::instantiate(jobject block_instance, JNIEnv* _jni = nullptr)
+void c_block_forge_1710::instantiate(jobject block_instance, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -213,9 +213,9 @@ void c_block_forge_1710::instantiate(jobject block_instance, JNIEnv* _jni = null
 	jni->DeleteLocalRef(block_instance);
 }
 
-void c_class_loader_forge_1710::instantiate(JNIEnv* _jni = nullptr)
+void c_class_loader_forge_1710::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 
@@ -244,9 +244,9 @@ jclass c_class_loader_forge_1710::find_class(const char* name)
 	return clazz;
 }
 
-void c_world_forge_1710::instantiate(jobject world_object, JNIEnv* _jni = nullptr)
+void c_world_forge_1710::instantiate(jobject world_object, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	world_instance = world_object;
 
@@ -312,9 +312,9 @@ std::shared_ptr<c_block> c_world_forge_1710::get_block(jint x, jint y, jint z)
 	return block_ptr;
 }
 
-void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni = nullptr)
+void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	player_instance = player_object;
 
@@ -756,9 +756,9 @@ void c_player_forge_1710::set_sneaking(jboolean sneak)
 	jni->CallVoidMethod(player_instance, playerfields.mid_set_sneaking, sneak);
 }
 
-void c_game_forge_1710::instantiate(JNIEnv* _jni = nullptr)
+void c_game_forge_1710::instantiate(JNIEnv* _jni)
 {
-	jni = (_jni) ? _jni : ctx.m_jni;
+	jni = _jni;
 
 	static bool init_fields = false;
 

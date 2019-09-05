@@ -1237,6 +1237,14 @@ struct matrix4x4_t
 	}
 };
 
+enum client_flavor
+{
+	VANILLA,
+	FORGE,
+	BADLION,
+	HYPERIUM
+};
+
 class c_block
 {
 protected:
@@ -1410,6 +1418,7 @@ struct stack_trace
 	bool valid = false;
 	uint64_t method_name = 0;
 	jint line_number = 0;
+	std::string method_str{};
 };
 
 class c_stack_trace

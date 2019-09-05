@@ -15,7 +15,7 @@ void c_velocity::on_time(const std::shared_ptr<c_game>& mc, const std::shared_pt
 	//	return;
 
 	const int chance = util::random(0, 100);
-	const auto delay_amount = ctx.m_settings.combat_velocity_delay ? self->get_max_hurt_time() - ctx.m_settings.combat_velocity_delay_ticks : 10;
+	const auto delay_amount = ctx.m_settings.combat_velocity_delay ? (self->get_max_hurt_time() - 1) - ctx.m_settings.combat_velocity_delay_ticks : 9;
 	const auto hurt_time = self->get_hurt_time();
 
 	if (hurt_time == delay_amount && hurt_time != 0 && chance <= ctx.m_settings.combat_velocity_chance && should_run)
