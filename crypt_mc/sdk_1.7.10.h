@@ -72,6 +72,7 @@ public:
 
 	jint get_hurt_time() override;
 	jint get_max_hurt_time() override;
+	jint get_ticks_existed() override;
 
 	jobject get_stack(jint) override;
 	jobject get_effects(jobject, jobject) override;
@@ -89,6 +90,8 @@ public:
 	void set_pitch(jfloat) override;
 	void set_yaw(jfloat) override;
 	void set_velocity(jdouble, jdouble, jdouble) override;
+	void set_position(jdouble, jdouble, jdouble) override;
+	void set_angles(jfloat, jfloat) override;
 	void set_sneaking(jboolean) override;
 	void set_sprinting(jboolean) override;
 };

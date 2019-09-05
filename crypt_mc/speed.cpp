@@ -1,7 +1,7 @@
 #include "context.h"
 #include "speed.h"
 
-void c_speed::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_speed::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
 
@@ -88,33 +88,20 @@ void c_speed::slowhop(const std::shared_ptr<c_player>& self) const
 
 void c_speed::custom(const std::shared_ptr<c_player>& self) const
 {
-	bool jump_on_ground = true;
-	bool custom_jump_height = false;
-	bool custom_fall_speed = false;
-	bool custom_slow_speed = false;
-	bool slow_down = false;
+	bool slow = ctx.m_settings.movement_speed_custom_slow_down && self->get_ticks_existed() % ctx.m_settings.movement_speed_custom_slow_down_ticks != 0;
 
-	float jump_height = 0.42f;
-	float ground_speed = 0.08f;
-	float air_speed = 0.14f;
-	int slowdown_ticks = 2;
-	float slowdown_speed = 0.2673f;
-	float fall_speed = 0.1f;
+	if (m_on_ground && ctx.m_settings.movement_speed_custom_jump_ground)
+		jump(self, ctx.m_settings.movement_speed_custom_jump_height ? ctx.m_settings.movement_speed_custom_jump_height_val : 0.42f);
 
-	bool slow = false; // do, slowdown ticks
+	if (!m_on_ground && ctx.m_settings.movement_speed_custom_fall)
+		self->set_motion_y(-ctx.m_settings.movement_speed_custom_fall_speed_val);
 
-	if (m_on_ground && jump_on_ground)
-		jump(self, custom_jump_height ? jump_height : 0.42f);
-
-	if (!m_on_ground && custom_fall_speed)
-		self->set_motion_y(-fall_speed);
-
-	if (custom_slow_speed && slow)
-		set_speed(self, slowdown_speed);
+	if (ctx.m_settings.movement_speed_custom_slow && slow)
+		set_speed(self, ctx.m_settings.movement_speed_custom_slow_speed_val);
 	else if (slow)
 		set_speed(self, get_base_speed(self));
 	else
-		set_speed(self, get_base_speed(self) + (m_on_ground ? ground_speed : air_speed));
+		set_speed(self, get_base_speed(self) + (m_on_ground ? ctx.m_settings.movement_speed_custom_ground_speed_val : ctx.m_settings.movement_speed_custom_air_speed_val));
 }
 
 
@@ -169,7 +156,7 @@ void c_speed::jump(const std::shared_ptr<c_player>& self, float height)
 
 float c_speed::get_base_speed(const std::shared_ptr<c_player>& self)
 {
-	return self->is_potion_active(1) ? 0.2673f * 1.f + 0.2f * static_cast<float>((self->get_speed_amplifier()) + 1) : 0.2673f;
+	return self->is_potion_active(1) ? 0.2873f * 1.f + 0.2f * static_cast<float>((self->get_speed_amplifier()) + 1) : 0.2873f;
 }
 
 void c_speed::set_speed(const std::shared_ptr<c_player>& self, float speed) const

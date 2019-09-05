@@ -71,6 +71,7 @@ struct player_fields
 	jfieldID fid_aabb_max_x = nullptr;
 	jfieldID fid_aabb_max_y = nullptr;
 	jfieldID fid_aabb_max_z = nullptr;
+	jfieldID fid_ticks_existed = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -95,6 +96,8 @@ struct player_fields
 	jmethodID mid_send_use_item = nullptr;
 	jmethodID mid_get_eye_height = nullptr;
 	jmethodID mid_is_visible = nullptr;
+	jmethodID mid_set_position = nullptr;
+	jmethodID mid_set_angles = nullptr;
 
 	jclass entity_class = nullptr;
 	jclass entity_player_sp_class = nullptr;
@@ -382,6 +385,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_aabb_max_x = jni->GetFieldID(playerfields.cls_aabb, xors("field_72336_d"), xors("D"));
 		playerfields.fid_aabb_max_y = jni->GetFieldID(playerfields.cls_aabb, xors("field_72337_e"), xors("D"));
 		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("field_72334_f"), xors("D"));
+		playerfields.fid_ticks_existed = jni->GetFieldID(playerfields.entity_player_class, xors("field_70173_aa"), xors("I"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70660_b"), xors("(Lnet/minecraft/potion/Potion;)Lnet/minecraft/potion/PotionEffect;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76458_c"), xors("()I"));
@@ -406,6 +410,8 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("func_78769_a"), "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z");
 		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("func_70047_e"), xors("()F"));
 		playerfields.mid_is_visible = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70685_l"), xors("(Lnet/minecraft/entity/Entity;)Z"));
+		playerfields.mid_set_position = jni->GetMethodID(playerfields.entity_class, xors("func_70107_b"), xors("(DDD)V"));
+		playerfields.mid_set_angles = jni->GetMethodID(playerfields.entity_class, xors("func_70082_c"), xors("(FF)V"));
 
 		init_fields = true;
 	}
@@ -695,6 +701,11 @@ jint c_player_forge_1710::get_max_hurt_time()
 	return jni->GetIntField(player_instance, playerfields.fid_max_hurt_time);
 }
 
+jint c_player_forge_1710::get_ticks_existed()
+{
+	return jni->GetIntField(player_instance, playerfields.fid_ticks_existed);
+}
+
 jint c_player_forge_1710::get_current_slot()
 {
 	return jni->GetIntField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_current_slot);
@@ -749,6 +760,16 @@ void c_player_forge_1710::set_yaw(jfloat yaw)
 void c_player_forge_1710::set_velocity(jdouble x, jdouble y, jdouble z)
 {
 	jni->CallVoidMethod(player_instance, playerfields.mid_set_velocity, x, y, z);
+}
+
+void c_player_forge_1710::set_position(jdouble x, jdouble y, jdouble z)
+{
+	jni->CallVoidMethod(player_instance, playerfields.mid_set_position, x, y, z);
+}
+
+void c_player_forge_1710::set_angles(jfloat yaw, jfloat pitch)
+{
+	jni->CallVoidMethod(player_instance, playerfields.mid_set_angles, yaw, pitch);
 }
 
 void c_player_forge_1710::set_sneaking(jboolean sneak)

@@ -331,6 +331,7 @@ public:
     setting_t<keysetting_t> movement_flight_key{ &m_holder, fnvc("movement_flight_key"), {} };
     setting_t<bool> movement_flight_tight{ &m_holder, fnvc("movement_flight_tight"), true };
     setting_t<bool> movement_flight_glide{ &m_holder, fnvc("movement_flight_glide"), false };
+	setting_t<bool> movement_flight_hypixel{ &m_holder, fnvc("movement_flight_hypixel"), false };
     setting_t<float> movement_flight_hspeed{ &m_holder, fnvc("movement_flight_hspeed"), 0.4f };
     setting_t<float> movement_flight_vspeed{ &m_holder, fnvc("movement_flight_vspeed"), 0.4f };
     setting_t<float> movement_flight_glide_speed{ &m_holder, fnvc("movement_flight_glide_speed"), 0.08f };
@@ -342,6 +343,17 @@ public:
 	setting_t<bool> movement_speed{&m_holder, fnvc("movement_speed"), false};
 	setting_t<keysetting_t> movement_speed_key{&m_holder, fnvc("movement_speed_key"), {}};
     setting_t<int> movement_speed_mode{ &m_holder, fnvc("movement_speed_mode"), 0 };
+	setting_t<bool> movement_speed_custom_jump_ground{ &m_holder, fnvc("movement_speed_custom_jump_ground"), true};
+	setting_t<bool> movement_speed_custom_jump_height{ &m_holder, fnvc("movement_speed_custom_jump_height"), false };
+	setting_t<bool> movement_speed_custom_fall{ &m_holder, fnvc("movement_speed_custom_fall"), false };
+	setting_t<bool> movement_speed_custom_slow{ &m_holder, fnvc("movement_speed_custom_slow"), false };
+	setting_t<bool> movement_speed_custom_slow_down{ &m_holder, fnvc("movement_speed_custom_slow_down"), false };
+	setting_t<float> movement_speed_custom_jump_height_val{ &m_holder, fnvc("movement_speed_custom_jump_height_val"), 0.42f };
+	setting_t<float> movement_speed_custom_ground_speed_val{ &m_holder, fnvc("movement_speed_custom_ground_speed_val"), 0.08f };
+	setting_t<float> movement_speed_custom_air_speed_val{ &m_holder, fnvc("movement_speed_custom_air_speed_val"), 0.14f };
+	setting_t<int> movement_speed_custom_slow_down_ticks{ &m_holder, fnvc("movement_speed_custom_slow_down_ticks"), 2 };
+	setting_t<float> movement_speed_custom_slow_speed_val{ &m_holder, fnvc("movement_speed_custom_slow_speed_val"), 0.2673f };
+	setting_t<float> movement_speed_custom_fall_speed_val{ &m_holder, fnvc("movement_speed_custom_fall_speed_val"), 0.1f };
 
 	setting_t<keysetting_t> movement_longjump_key{ &m_holder, fnvc("movement_longjump_key"), {} };
 	setting_t<float> movement_longjump_boost{ &m_holder, fnvc("movement_longjump_boost"), 0.5f };

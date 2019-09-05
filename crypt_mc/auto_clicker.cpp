@@ -89,7 +89,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 		{
 			g_input.press_mouse(true);
 			left_click = false;
-			multiplier = util::random(0.45, 0.55);
+			multiplier = util::random(0.42, 0.58);
 		}
 		else if (!left_click && clock() - last_click > current_delay)
 		{

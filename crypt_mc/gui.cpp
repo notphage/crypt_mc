@@ -295,6 +295,15 @@ void c_gui::tab_movement()
 	static UI::c_enable_groupbox speed_groupbox;
 	static UI::c_key_bind speed_key;
 	static UI::c_dropdown speed_mode;
+	static UI::c_multi_dropdown speed_custom_options;
+	static UI::c_float_slider speed_slow_down_ticks;
+	static UI::c_float_slider speed_jump_height;
+	static UI::c_float_slider speed_ground_speed;
+	static UI::c_float_slider speed_air_speed;
+	static UI::c_float_slider speed_slow_speed;
+	static UI::c_float_slider speed_fall_speed;
+	static UI::c_slider speed_slow_ticks;
+
 
 	static UI::c_key_bind longjump_key;
 	static UI::c_float_slider longjump_boost;
@@ -316,6 +325,8 @@ void c_gui::tab_movement()
 	static UI::c_float_slider flight_vspeed;
 	static UI::c_float_slider flight_glide_speed;
 	static UI::c_multi_dropdown flight_options;
+
+
 
 	menu.column_left();
 	{
@@ -340,7 +351,8 @@ void c_gui::tab_movement()
 			flight_options.handle(menu.data(), xors("options"),
 				{
 					{&ctx.m_settings.movement_flight_glide, xors("glide")},
-					{&ctx.m_settings.movement_flight_tight, xors("tight")}
+					{&ctx.m_settings.movement_flight_tight, xors("tight")},
+					{&ctx.m_settings.movement_flight_hypixel, xors("hypixel")}
 				});
 		}
 		flight_groupbox.end(menu.data(), &ctx.m_settings.movement_flight);
@@ -370,8 +382,34 @@ void c_gui::tab_movement()
 				speed_key.handle(menu.data(), "", &ctx.m_settings.movement_speed_key, keytype_t::kt_all);
 
 			speed_mode.handle(menu.data(), xors("mode"),
-				{ xors("bhop"), xors("slowhop"), xors("minihop"), xors("yport"), xors("vanilla"), xors("glidehop") }, &ctx.m_settings.movement_speed_mode);
+				{ xors("bhop"), xors("slowhop"), xors("minihop"), xors("yport"), xors("vanilla"), xors("glidehop"), xors("custom") }, &ctx.m_settings.movement_speed_mode);
 
+			if (ctx.m_settings.movement_speed_mode == 6) {
+				speed_custom_options.handle(menu.data(), xors("options"),
+					{
+						{&ctx.m_settings.movement_speed_custom_slow, xors("slow-down")},
+						{&ctx.m_settings.movement_speed_custom_jump_ground, xors("jump")},
+						{&ctx.m_settings.movement_speed_custom_jump_height, xors("custom jump-height")},
+						{&ctx.m_settings.movement_speed_custom_slow_down, xors("custom slow-speed")},
+						{&ctx.m_settings.movement_speed_custom_fall, xors("custom fall-speed")}
+					});
+
+				if (ctx.m_settings.movement_speed_custom_slow)
+					speed_slow_ticks.handle(menu.data(), xors("slow-down ticks"), &ctx.m_settings.movement_speed_custom_slow_down_ticks, 1, 50, 1);
+
+				if (ctx.m_settings.movement_speed_custom_slow_down)
+					speed_slow_speed.handle(menu.data(), xors("slow-down speed"), &ctx.m_settings.movement_speed_custom_slow_speed_val, 0.f, 3.f, 0.01f);
+
+				if (ctx.m_settings.movement_speed_custom_fall)
+					speed_fall_speed.handle(menu.data(), xors("fall speed"), &ctx.m_settings.movement_speed_custom_fall_speed_val, 0.f, 3.f, 0.01f);
+
+				if (ctx.m_settings.movement_speed_custom_jump_ground && ctx.m_settings.movement_speed_custom_jump_height)
+					speed_jump_height.handle(menu.data(), xors("jump height"), &ctx.m_settings.movement_speed_custom_jump_height_val, 0.01f, 3.f, 0.01f);
+
+				speed_ground_speed.handle(menu.data(), xors("ground speed"), &ctx.m_settings.movement_speed_custom_ground_speed_val, 0.01f, 9.f, 0.01f);
+				speed_air_speed.handle(menu.data(), xors("air speed"), &ctx.m_settings.movement_speed_custom_air_speed_val, 0.01f, 9.f, 0.01f);
+			}
+	
 			longjump_key.handle(menu.data(), xors("longjump"), &ctx.m_settings.movement_longjump_key, keytype_t::kt_hold);
 			longjump_boost.handle(menu.data(), xors("boost"), &ctx.m_settings.movement_longjump_boost, 0.f, 3.f, 0.01f);
 		}
@@ -396,6 +434,7 @@ void c_gui::tab_movement()
 		sprint_key.dropdown(menu.data());
 		air_control_key.dropdown(menu.data());
 		speed_mode.dropdown(menu.data());
+		speed_custom_options.dropdown(menu.data());
 	}
 }
 

@@ -1341,6 +1341,7 @@ public:
 	virtual jobject get_effects(jobject, jobject) = 0;
 	virtual jint get_potion_id(jobject) = 0;
 	virtual jint get_current_slot() = 0;
+	virtual jint get_ticks_existed() = 0;
 
 	virtual jboolean send_use_item(jobject) = 0;
 
@@ -1352,6 +1353,8 @@ public:
 	virtual void set_pitch(jfloat) = 0;
 	virtual void set_yaw(jfloat) = 0;
 	virtual void set_velocity(jdouble, jdouble, jdouble) = 0;
+	virtual void set_position(jdouble, jdouble, jdouble) = 0;
+	virtual void set_angles(jfloat, jfloat) = 0;
 	virtual void set_sneaking(jboolean) = 0;
     virtual void set_sprinting(jboolean) = 0;
 };
