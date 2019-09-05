@@ -407,7 +407,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.mid_get_stack = jni->GetMethodID(playerfields.cls_slot, xors("func_75211_c"), xors("()Lnet/minecraft/item/ItemStack;"));
 		playerfields.mid_potion_id = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76456_a"), xors("()I"));
 		playerfields.mid_get_effects = jni->GetMethodID(playerfields.cls_item_potion, xors("func_77832_l"), xors("(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"));
-		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("func_78769_a"), "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z");
+		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("func_78769_a"), xors("(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z"));
 		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("func_70047_e"), xors("()F"));
 		playerfields.mid_is_visible = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70685_l"), xors("(Lnet/minecraft/entity/Entity;)Z"));
 		playerfields.mid_set_position = jni->GetMethodID(playerfields.entity_class, xors("func_70107_b"), xors("(DDD)V"));

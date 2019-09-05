@@ -415,7 +415,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.mid_get_stack = jni->GetMethodID(playerfields.cls_slot, xors("d"), xors("()Ladd;"));
 		playerfields.mid_potion_id = jni->GetMethodID(playerfields.cls_potion_effect, xors("a"), xors("()I"));
 		playerfields.mid_get_effects = jni->GetMethodID(playerfields.cls_item_potion, xors("g"), xors("(Ladd;)Ljava/util/List;"));
-		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("a"), "(Lyz;Lahb;Ladd;)Z");
+		playerfields.mid_send_use_item = jni->GetMethodID(playerfields.cls_player_controller, xors("a"), xors("(Lyz;Lahb;Ladd;)Z"));
 		playerfields.mid_get_eye_height = jni->GetMethodID(playerfields.entity_class, xors("g"), xors("()F"));
 		playerfields.mid_is_visible = jni->GetMethodID(playerfields.cls_entity_living_base, xors("p"), xors("(Lsa;)Z"));
 		playerfields.mid_set_position = jni->GetMethodID(playerfields.entity_class, xors("b"), xors("(DDD)V"));

@@ -9,7 +9,7 @@ void c_speed::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 		longjump(self);
 	else if (ctx.m_settings.movement_speed && valid_keystate(ctx.m_settings.movement_speed_key))
 	{
-		if (self->get_strafing() != 0 || self->get_forward() != 0)
+		if (self->get_strafing() != 0.f || self->get_forward() != 0.f)
 		{
 			switch (ctx.m_settings.movement_speed_mode)
 			{
@@ -88,7 +88,7 @@ void c_speed::slowhop(const std::shared_ptr<c_player>& self) const
 
 void c_speed::custom(const std::shared_ptr<c_player>& self) const
 {
-	bool slow = ctx.m_settings.movement_speed_custom_slow_down && self->get_ticks_existed() % ctx.m_settings.movement_speed_custom_slow_down_ticks != 0;
+	bool slow = ctx.m_settings.movement_speed_custom_slow && self->get_ticks_existed() % ctx.m_settings.movement_speed_custom_slow_down_ticks == 0;
 
 	if (m_on_ground && ctx.m_settings.movement_speed_custom_jump_ground)
 		jump(self, ctx.m_settings.movement_speed_custom_jump_height ? ctx.m_settings.movement_speed_custom_jump_height_val : 0.42f);
@@ -96,10 +96,10 @@ void c_speed::custom(const std::shared_ptr<c_player>& self) const
 	if (!m_on_ground && ctx.m_settings.movement_speed_custom_fall)
 		self->set_motion_y(-ctx.m_settings.movement_speed_custom_fall_speed_val);
 
-	if (ctx.m_settings.movement_speed_custom_slow && slow)
+	if (ctx.m_settings.movement_speed_custom_slow_down && slow)
 		set_speed(self, ctx.m_settings.movement_speed_custom_slow_speed_val);
 	else if (slow)
-		set_speed(self, get_base_speed(self));
+		set_speed(self, get_base_speed(self) - 0.025f);
 	else
 		set_speed(self, get_base_speed(self) + (m_on_ground ? ctx.m_settings.movement_speed_custom_ground_speed_val : ctx.m_settings.movement_speed_custom_air_speed_val));
 }

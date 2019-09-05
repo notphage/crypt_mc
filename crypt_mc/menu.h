@@ -2066,7 +2066,7 @@ namespace UI
 			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(255, 255, 255, data->m_alpha), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), data->m_alpha));
 			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(0, 0, 0, 0), color_t(0, 0, 0, 0), color_t(0, 0, 0, data->m_alpha), color_t(0, 0, 0, data->m_alpha));
 
-			ctx.m_renderer->draw_rect({ m_picker_start.x + (m_picker_bounds.x * (roundf(100.f * m_picker_val_x) / 100.f)) - 2.5f, m_picker_start.y + (m_picker_bounds.y * (roundf(100.f * (1.f - m_picker_val_y)) / 100.f)) - 2.5f, 5.f, 5.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_rect({ m_picker_start.x + (m_picker_bounds.x * (round(100.f * m_picker_val_x) / 100.f)) - 2.5f, m_picker_start.y + (m_picker_bounds.y * (round(100.f * (1.f - m_picker_val_y)) / 100.f)) - 2.5f, 5.f, 5.f }, color_t(0, 0, 0, data->m_alpha));
 
 			const color_t hue_col[7] =
 			{
@@ -2084,10 +2084,10 @@ namespace UI
 				const vec4 v(m_hue_picker_start.x, m_hue_picker_start.y + ((i * m_hue_picker_bounds.y) / 6.f), m_hue_picker_bounds.x, (m_hue_picker_bounds.y / 6.f));
 				ctx.m_renderer->draw_gradient_rect(v, hue_col[i], hue_col[i], hue_col[i + 1], hue_col[i + 1]);
 			}
-			ctx.m_renderer->draw_line({ m_hue_picker_start.x - 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (roundf(100.f * m_picker_hue_val) / 100.f)) }, { m_hue_picker_end.x + 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (roundf(100.f * m_picker_hue_val) / 100.f)) }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_line({ m_hue_picker_start.x - 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (round(100.f * m_picker_hue_val) / 100.f)) }, { m_hue_picker_end.x + 2.f, m_hue_picker_start.y + (m_hue_picker_bounds.y * (round(100.f * m_picker_hue_val) / 100.f)) }, color_t(0, 0, 0, data->m_alpha));
 
 			ctx.m_renderer->draw_gradient_rect({ m_alpha_picker_start.x, m_alpha_picker_start.y, m_alpha_picker_bounds.x, m_alpha_picker_bounds.y }, color_t(0, 0, 0, data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(0, 0, 0, data->m_alpha), color_t(255, 255, 255, data->m_alpha));
-			ctx.m_renderer->draw_line({ m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (roundf(m_picker_alpha_val) / 255.f)), m_alpha_picker_start.y - 2.f }, { m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (roundf(m_picker_alpha_val) / 255.f)), m_alpha_picker_end.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_line({ m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (round(m_picker_alpha_val) / 255.f)), m_alpha_picker_start.y - 2.f }, { m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (round(m_picker_alpha_val) / 255.f)), m_alpha_picker_end.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 		}
 	};
 

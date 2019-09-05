@@ -29,65 +29,65 @@ void unload()
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
-int generate_dump(EXCEPTION_POINTERS* excp_ptr)
-{
-	// Open the file 
-	typedef BOOL(*PDUMPFN)(
-		HANDLE hProcess,
-		DWORD ProcessId,
-		HANDLE hFile,
-		MINIDUMP_TYPE DumpType,
-		PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-		PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-		PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-		);
-	
-	BOOL bMiniDumpSuccessful;
-	WCHAR szPath[MAX_PATH];
-	WCHAR szFileName[MAX_PATH];
-	wchar_t szAppName[] = L"AppName";
-	wchar_t szVersion[] = L"v1.0";
-	DWORD dwBufferSize = MAX_PATH;
-	HANDLE hDumpFile;
-	SYSTEMTIME stLocalTime;
-	MINIDUMP_EXCEPTION_INFORMATION ExpParam;
-
-	GetLocalTime(&stLocalTime);
-	GetTempPathW(dwBufferSize, szPath);
-
-	wsprintfW(szFileName, L"%s%s", szPath, szAppName);
-	CreateDirectoryW(szFileName, NULL);
-
-	wsprintfW(szFileName, L"%s%s\\%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
-		szPath, szAppName, szVersion,
-		stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
-		stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond,
-		GetCurrentProcessId(), GetCurrentThreadId());
-	hDumpFile = CreateFileW(szFileName, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
-
-	ExpParam.ThreadId = GetCurrentThreadId();
-	ExpParam.ExceptionPointers = excp_ptr;
-	ExpParam.ClientPointers = TRUE;
-
-	HMODULE h = ::LoadLibraryW(L"DbgHelp.dll");
-	PDUMPFN pFn = (PDUMPFN)GetProcAddress(h, "MiniDumpWriteDump");
-
-	bMiniDumpSuccessful = (*pFn)(GetCurrentProcess(), GetCurrentProcessId(),
-		hDumpFile, MiniDumpWithDataSegs, &ExpParam, NULL, NULL);
-
-	CloseHandle(hDumpFile);
-
-	return EXCEPTION_EXECUTE_HANDLER;
-}
-
-LONG WINAPI MyUnhandledExceptionFilter(
-	struct _EXCEPTION_POINTERS* ExceptionInfo
-)
-{
-	generate_dump(ExceptionInfo);
-	return EXCEPTION_EXECUTE_HANDLER;
-}
+//int generate_dump(EXCEPTION_POINTERS* excp_ptr)
+//{
+//	// Open the file 
+//	typedef BOOL(*PDUMPFN)(
+//		HANDLE hProcess,
+//		DWORD ProcessId,
+//		HANDLE hFile,
+//		MINIDUMP_TYPE DumpType,
+//		PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+//		PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
+//		PMINIDUMP_CALLBACK_INFORMATION CallbackParam
+//		);
+//	
+//	BOOL bMiniDumpSuccessful;
+//	WCHAR szPath[MAX_PATH];
+//	WCHAR szFileName[MAX_PATH];
+//	wchar_t szAppName[] = L"AppName";
+//	wchar_t szVersion[] = L"v1.0";
+//	DWORD dwBufferSize = MAX_PATH;
+//	HANDLE hDumpFile;
+//	SYSTEMTIME stLocalTime;
+//	MINIDUMP_EXCEPTION_INFORMATION ExpParam;
+//
+//	GetLocalTime(&stLocalTime);
+//	GetTempPathW(dwBufferSize, szPath);
+//
+//	wsprintfW(szFileName, L"%s%s", szPath, szAppName);
+//	CreateDirectoryW(szFileName, NULL);
+//
+//	wsprintfW(szFileName, L"%s%s\\%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
+//		szPath, szAppName, szVersion,
+//		stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
+//		stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond,
+//		GetCurrentProcessId(), GetCurrentThreadId());
+//	hDumpFile = CreateFileW(szFileName, GENERIC_READ | GENERIC_WRITE,
+//		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+//
+//	ExpParam.ThreadId = GetCurrentThreadId();
+//	ExpParam.ExceptionPointers = excp_ptr;
+//	ExpParam.ClientPointers = TRUE;
+//
+//	HMODULE h = ::LoadLibraryW(L"DbgHelp.dll");
+//	PDUMPFN pFn = (PDUMPFN)GetProcAddress(h, "MiniDumpWriteDump");
+//
+//	bMiniDumpSuccessful = (*pFn)(GetCurrentProcess(), GetCurrentProcessId(),
+//		hDumpFile, MiniDumpWithDataSegs, &ExpParam, NULL, NULL);
+//
+//	CloseHandle(hDumpFile);
+//
+//	return EXCEPTION_EXECUTE_HANDLER;
+//}
+//
+//LONG WINAPI MyUnhandledExceptionFilter(
+//	struct _EXCEPTION_POINTERS* ExceptionInfo
+//)
+//{
+//	generate_dump(ExceptionInfo);
+//	return EXCEPTION_EXECUTE_HANDLER;
+//}
 
 void hack(HINSTANCE bin)
 {
@@ -124,7 +124,7 @@ void hack(HINSTANCE bin)
 
 	printf(" $> cheat base: 0x%p \n", bin);
 	printf(" $> client flavor: %i\n", ctx.m_client_flavor.load());
-	SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
+	//SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 #endif
 
 	ctx.determine_version();

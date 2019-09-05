@@ -9,7 +9,7 @@
 //	{
 //		static int stage = 0;
 //		static int old_slot = -1;
-//		static long delay = clock();
+//		static long delay = GetTickCount64();
 //
 //		switch (stage)
 //		{
@@ -19,7 +19,7 @@
 //
 //				self->set_current_slot(slot);
 //
-//				delay = clock();
+//				delay = GetTickCount64();
 //
 //				stage++;
 //				is_running = true;
@@ -28,11 +28,11 @@
 //
 //			case 1:
 //			{
-//				if (clock() - delay > 75 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && self->get_held_item())
+//				if (GetTickCount64() - delay > 75 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && self->get_held_item())
 //				{
 //					self->send_use_item(self->get_held_item());
 //
-//					delay = clock();
+//					delay = GetTickCount64();
 //					stage++;
 //				}
 //				else if (!self->get_held_item())
@@ -48,7 +48,7 @@
 //
 //			case 2:
 //			{
-//				if (clock() - delay > 75 + util::random(-30, 30))
+//				if (GetTickCount64() - delay > 75 + util::random(-30, 30))
 //				{
 //					self->set_current_slot(old_slot);
 //

@@ -11,6 +11,7 @@
 #define STATUS_SUCCESS ((long)0x00000000L)
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
+//#define _NO_CRT_STDIO_INLINE
 
 #include <jni.h>
 #include <jvmti.h>
