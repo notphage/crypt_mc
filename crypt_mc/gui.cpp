@@ -68,7 +68,8 @@ void c_gui::tab_combat()
 				{
 					{&ctx.m_settings.combat_auto_clicker_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
-					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")}
+					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
+					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")}
 				});
 		}
 		auto_clicker_groupbox.end(menu.data(), &ctx.m_settings.combat_auto_clicker);
@@ -173,6 +174,7 @@ void c_gui::tab_player()
 	static UI::c_enable_groupbox fast_place_groupbox;
 	static UI::c_key_bind fast_place_key;
 	static UI::c_multi_dropdown fast_place_items;
+	static UI::c_slider fast_place_delay;
 
 	static UI::c_groupbox afk_groupbox;
 	static UI::c_checkbox afk;
@@ -215,12 +217,14 @@ void c_gui::tab_player()
 		fast_place_groupbox.start(menu.data(), xors("fast place"));
 		{
 			fast_place_key.handle(menu.data(), "", &ctx.m_settings.player_fast_place_key, keytype_t::kt_all);
+
+			fast_place_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 0, 3, 1);
+
 			fast_place_items.handle(menu.data(), xors("items"),
 				{
 					{&ctx.m_settings.player_fast_place_blocks, xors("blocks")},
 					{&ctx.m_settings.player_fast_place_projectiles, xors("projectiles")},
 				});
-
 		}
 		fast_place_groupbox.end(menu.data(), &ctx.m_settings.player_fast_place);
 

@@ -72,6 +72,7 @@ struct player_fields
 	jfieldID fid_aabb_max_y = nullptr;
 	jfieldID fid_aabb_max_z = nullptr;
 	jfieldID fid_ticks_existed = nullptr;
+	jfieldID fid_type_of_hit = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -157,6 +158,7 @@ struct game_fields
 	jfieldID fid_entity_hit = nullptr;
 	jfieldID fid_view_bobbing = nullptr;
 	jfieldID fid_mouse_sensitivity = nullptr;
+	jfieldID fid_type_of_hit = nullptr;
 	jfieldID fid_render_manager_obj;
 
 	jmethodID mid_screen_constructor = nullptr;
@@ -827,6 +829,7 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("d"), xors("Lpk;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
+		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lauh$a;"));;
 
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));
 		gamefields.mid_get_string_width = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;)I"));
@@ -880,6 +883,21 @@ jboolean c_game_18X::is_view_bobbing()
 jboolean c_game_18X::is_in_chat()
 {
 	return gamefields.in_chat;
+}
+
+jboolean c_game_18X::is_hovering_block()
+{
+	auto class_loader = ctx.get_class_loader(jni);
+
+	if (!class_loader)
+		return false;
+
+	auto type_of_hit = jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.fid_type_of_hit);
+
+	jclass cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java.lang.Enum")));
+	jmethodID mid_ordinal = jni->GetMethodID(cls_enum, xors("ordinal"), xors("()I"));
+
+	return jni->CallIntMethod(type_of_hit, mid_ordinal) == 1;
 }
 
 void c_game_18X::set_view_bobbing(jboolean val)

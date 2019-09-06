@@ -36,6 +36,18 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 	if (in_inventory && ctx.m_settings.combat_auto_clicker_inventory && !g_input.is_key_pressed(KEYS_SHIFT))
 		return;
 
+	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block()) 
+	{
+		left_click = true;
+		current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-10, 10), 10, 2000);
+		last_click = GetTickCount64();
+		clicks_skip = 0;
+		clicks_until_skip = util::random(43, 62);
+		g_input.release_mouse(true);
+		return;
+	}
+
+
 	const auto mouse_down = GetAsyncKeyState(VK_LBUTTON) < 0;
 
 	if (mouse_down)

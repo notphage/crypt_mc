@@ -16,6 +16,9 @@ void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 
     bool glide = true;
 
+	if (ctx.m_settings.movement_flight_hypixel && self->is_on_ground())
+		return;
+
 	if (self->get_ticks_existed() % 2 == 0 && ctx.m_settings.movement_flight_hypixel)
 		self->set_position(self->origin_x(), self->aabb_min_y() + util::random(0.00000000000001235423532523523532521, 0.0000000000000123542353252352353252 * 10), self->origin_z());
 

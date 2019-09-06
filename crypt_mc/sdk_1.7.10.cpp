@@ -161,7 +161,7 @@ struct game_fields
 	jfieldID fid_entity_hit = nullptr;
 	jfieldID fid_view_bobbing = nullptr;
 	jfieldID fid_mouse_sensitivity = nullptr;
-
+	jfieldID fid_type_of_hit = nullptr;
 
 	jmethodID mid_get_minecraft = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
@@ -835,6 +835,7 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("g"), xors("Lsa;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
+		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lazv;"));;
 
 		gamefields.mid_get_minecraft = jni->GetStaticMethodID(gamefields.minecraft, xors("B"), xors("()Lbao;"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lsa;)V"));
@@ -892,6 +893,21 @@ jboolean c_game_1710::is_view_bobbing()
 jboolean c_game_1710::is_in_chat()
 {
 	return gamefields.in_chat;
+}
+
+jboolean c_game_1710::is_hovering_block()
+{
+	auto class_loader = ctx.get_class_loader(jni);
+
+	if (!class_loader)
+		return false;
+
+	auto type_of_hit = jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.fid_type_of_hit);
+
+	jclass cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java.lang.Enum")));
+	jmethodID mid_ordinal = jni->GetMethodID(cls_enum, xors("ordinal"), xors("()I"));
+
+	return jni->CallIntMethod(type_of_hit, mid_ordinal) == 1;
 }
 
 void c_game_1710::set_view_bobbing(jboolean val)

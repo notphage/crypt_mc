@@ -1382,6 +1382,7 @@ public:
 	virtual jboolean is_in_inventory() = 0;
 	virtual jboolean is_view_bobbing() = 0;
 	virtual jboolean is_in_chat() = 0;
+	virtual jboolean is_hovering_block() = 0;
 
 	virtual void set_view_bobbing(jboolean) = 0;
 	virtual void set_timer_speed(jfloat) = 0;

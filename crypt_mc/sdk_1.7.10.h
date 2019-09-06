@@ -113,6 +113,7 @@ public:
 	jboolean is_in_inventory() override;
 	jboolean is_view_bobbing() override;
 	jboolean is_in_chat() override;
+	jboolean is_hovering_block() override;
 
 	void set_view_bobbing(jboolean) override;
 	void set_timer_speed(jfloat) override;

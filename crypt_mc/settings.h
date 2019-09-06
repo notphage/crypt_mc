@@ -252,6 +252,7 @@ public:
 
 	setting_t<bool> combat_auto_clicker_weapons_only{&m_holder, fnvc("combat_auto_clicker_weapons_only"), true};
 	setting_t<bool> combat_auto_clicker_inventory{&m_holder, fnvc("combat_auto_clicker_inventory"), true};
+	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), false };
 	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false}; // remove
 
 	setting_t<bool> combat_aim_assist{&m_holder, fnvc("combat_aim_assist"), false};
@@ -312,6 +313,7 @@ public:
 	setting_t<keysetting_t> player_fast_place_key{&m_holder, fnvc("player_fast_place_key"), {}};
 	setting_t<bool> player_fast_place_blocks{ &m_holder, fnvc("player_fast_place_blocks"), true };
 	setting_t<bool> player_fast_place_projectiles{ &m_holder, fnvc("player_fast_place_projectiles"), true };
+	setting_t<int> player_fast_place_delay{ &m_holder, fnvc("player_fast_place_delay"), 0 };
 
 	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
 
