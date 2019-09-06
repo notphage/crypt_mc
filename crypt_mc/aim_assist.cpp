@@ -172,6 +172,7 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	if (!target_data.m_valid)
 		return;
+	 
 	bool vertical = ctx.m_settings.combat_aim_assist_vertical && abs(target_data.m_pitch_change) > m_vec.at(1);
 	bool horizontal = abs(target_data.m_yaw_change) > m_vec.at(1) && (abs(target_data.m_yaw_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint);
 			

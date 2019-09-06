@@ -15,14 +15,26 @@ long __stdcall hooked::get_update(JNIEnv* jni, jclass caller)
 		if (stack.valid)
 		{
 			auto mc = ctx.get_game(jni);
+
+			if (const auto cur_hwnd = reinterpret_cast<HWND>(mc->get_window_handle()); cur_hwnd != ctx.m_window)
+			{
+				ctx.m_window = cur_hwnd;
+				hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, reinterpret_cast<long long>(hooked::wnd_proc)));
+
+				RECT rect;
+				LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
+
+				ctx.m_screen_w = rect.right - rect.left;
+				ctx.m_screen_h = rect.bottom - rect.top;
+			}
 	
 			const auto self = mc->get_player();
 			const auto world = mc->get_world();
-
+			
 			if (self.get() != nullptr && world.get() != nullptr)
 			{
 				ctx.m_ingame = true;
-
+			
 				if (stack.method_name == fnvc("func_71411_J") ||
 					stack.method_name == fnvc("ak") ||
 					stack.method_name == fnvc("av")) // func_71411_J
@@ -38,9 +50,9 @@ long __stdcall hooked::get_update(JNIEnv* jni, jclass caller)
 						//mc->set_in_focus();
 						mc->set_mouse_grabbed(true);
 					}
-	
+			
 					ctx.m_in_chat = mc->is_in_chat();
-	
+			
 					for (auto&& feature : ctx.m_features)
 						feature->on_tick(mc, self, world);
 				}

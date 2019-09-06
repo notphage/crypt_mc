@@ -117,6 +117,10 @@ struct player_fields
 	jclass cls_player_controller = nullptr;
 	jclass cls_inventory = nullptr;
 	jclass cls_aabb = nullptr;
+
+	bool holding_weapon = false;
+	bool holding_projectile = false;
+	bool holding_block = false;
 };
 
 struct game_fields
@@ -416,6 +420,22 @@ void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni)
 
 		init_fields = true;
 	}
+
+	if (const jobject obj_held = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item); obj_held != nullptr && ctx.m_ingame)
+	{
+		if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
+		{
+			playerfields.holding_weapon = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
+			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class);
+			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
+		}
+	}
+	else
+	{
+		playerfields.holding_weapon = false;
+		playerfields.holding_projectile = false;
+		playerfields.holding_block = false;
+	}
 }
 
 bool c_player_forge_18X::is_same(std::shared_ptr<c_player> other)
@@ -525,41 +545,17 @@ jobject c_player_forge_18X::get_item(jobject item_stack)
 
 jboolean c_player_forge_18X::holding_weapon()
 {
-	if (const auto held_item = this->get_held_item(); held_item != nullptr)
-	{
-		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
-		jni->DeleteLocalRef(held_item);
-
-		return ret;
-	}
-
-	return false;
+	return playerfields.holding_weapon;
 }
 
 jboolean c_player_forge_18X::holding_projectile()
 {
-	if (const auto held_item = this->get_held_item(); held_item != nullptr)
-	{
-		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
-		jni->DeleteLocalRef(held_item);
-
-		return ret;
-	}
-
-	return false;
+	return playerfields.holding_projectile;
 }
 
 jboolean c_player_forge_18X::holding_block()
 {
-	if (const auto held_item = this->get_held_item(); held_item != nullptr)
-	{
-		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_block_class);
-		jni->DeleteLocalRef(held_item);
-
-		return ret;
-	}
-
-	return false;
+	return playerfields.holding_block;
 }
 
 jdouble c_player_forge_18X::origin_x()
@@ -852,12 +848,10 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni)
 		init_fields = true;
 	}
 	
-	if (const jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen)
+	if (const jobject obj_screen = jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen); obj_screen != nullptr && ctx.m_ingame)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
-
-		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{

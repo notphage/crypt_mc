@@ -399,7 +399,7 @@ namespace UI
 			ctx.m_renderer->draw_rect({ m_start.x + 5.f, m_start.y + 5.f, m_bounds.x - 10.f, m_bounds.y - 10.f }, color_t(57, 57, 57, m_data.m_alpha));
 
 			// draw main menu background
-			ctx.m_renderer->draw_filled_rect({ m_start.x + 6.f, m_start.y + 6.f, m_bounds.x - 12.f, m_bounds.y - 12.f }, color_t(4, 4, 4, m_data.m_alpha * 0.5f));
+			ctx.m_renderer->draw_filled_rect({ m_start.x + 6.f, m_start.y + 6.f, m_bounds.x - 12.f, m_bounds.y - 11.f }, color_t(4, 4, 4, m_data.m_alpha * 0.5f));
 
 			// draw main box
 			draw_box(m_start.x + 20.f, m_start.y + 40.f, m_window_size.x, m_window_size.y);
@@ -514,17 +514,31 @@ namespace UI
 			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
 
 			// top
-			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
-			ctx.m_renderer->draw_line({ m_start.x + 12.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+			{
+				ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x - 2.f, m_start.y }, { m_start.x + 8.f, m_start.y - 1.f }, shadow_color);
+
+				ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width + 1.f, m_start.y - 1.f }, shadow_color);
+			}
 
 			// left
-			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_end.x, m_end.y }, edge_color);
+			{
+				ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_end.x, m_end.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x - 1.f, m_start.y }, { m_end.x - 1.f, m_end.y + 2.f }, shadow_color);
+			}
+
 			// right
-			ctx.m_renderer->draw_line({ m_start.x + width, m_start.y }, { m_end.x + width, m_end.y + 1.f }, edge_color);
-			ctx.m_renderer->draw_line({ m_start.x + width + 1.f, m_start.y }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			{
+				ctx.m_renderer->draw_line({ m_start.x + width, m_start.y }, { m_end.x + width, m_end.y + 1.f }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x + width + 1.f, m_start.y }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			}
+
 			// bottom
-			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y }, { m_end.x + width, m_end.y }, edge_color);
-			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y + 1.f }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			{
+				ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y }, { m_end.x + width, m_end.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y + 1.f }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			}
 
 			if (strlen(m_text) > 0)
 			{
@@ -588,17 +602,31 @@ namespace UI
 			float text_width = ctx.m_renderer->get_text_extent(ctx.m_renderer->get_font(font_normal), m_text).x;
 
 			// top
-			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
-			ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+			{
+				ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x - 2.f, m_start.y }, { m_start.x + 8.f, m_start.y - 1.f }, shadow_color);
+
+				ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width + 1.f, m_start.y - 1.f }, shadow_color);
+			}
 
 			// left
-			ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_end.x, m_end.y }, edge_color);
+			{
+				ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_end.x, m_end.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x - 1.f, m_start.y }, { m_end.x - 1.f, m_end.y + 2.f }, shadow_color);
+			}
+
 			// right
-			ctx.m_renderer->draw_line({ m_start.x + width, m_start.y }, { m_end.x + width, m_end.y + 1.f }, edge_color);
-			ctx.m_renderer->draw_line({ m_start.x + width + 1.f, m_start.y }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			{
+				ctx.m_renderer->draw_line({ m_start.x + width, m_start.y }, { m_end.x + width, m_end.y + 1.f }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x + width + 1.f, m_start.y }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			}
+
 			// bottom
-			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y }, { m_end.x + width, m_end.y }, edge_color);
-			ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y + 1.f }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			{
+				ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y }, { m_end.x + width, m_end.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_end.x - 1.f, m_end.y + 1.f }, { m_end.x + width + 1.f, m_end.y + 1.f }, shadow_color);
+			}
 
 			// checkbox
 			ctx.m_renderer->draw_filled_rect({ m_start.x + 10.f, m_start.y - 3.f, 8.f, 8.f }, color_t(0, 0, 0, data->m_alpha));
@@ -869,7 +897,7 @@ namespace UI
 			text_color = { 255, 255, 255, data->m_alpha };
 
 			// outer edge
-			ctx.m_renderer->draw_filled_rect({ m_slider_start.x - 1.f, m_slider_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_slider_start.x - 1.f, m_slider_start.y - 1.f, m_bounds.x + 2.f, m_bounds.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 
 			// inner background
 			color_t background_color_top(69, 69, 69, data->m_alpha);
@@ -1060,7 +1088,7 @@ namespace UI
 			text_color = { 255, 255, 255, data->m_alpha };
 
 			// outer edge
-			ctx.m_renderer->draw_filled_rect({ m_slider_start.x - 1.f, m_slider_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_slider_start.x - 1.f, m_slider_start.y - 1.f, m_bounds.x + 2.f, m_bounds.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 
 			// inner background
 			color_t background_color_top(69, 69, 69, data->m_alpha);
@@ -1201,7 +1229,7 @@ namespace UI
 			if (m_is_inside)
 				color = data->m_left_click ? color_t(72, 72, 72, data->m_alpha) : color_t(50, 50, 50, data->m_alpha);
 
-			ctx.m_renderer->draw_filled_rect({ m_start.x - 1.f, m_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_start.x - 1.f, m_start.y - 1.f, m_bounds.x + 2.f, m_bounds.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_start.x, m_start.y, m_bounds.x, m_bounds.y }, color);
 
 			auto text_color = m_is_inside && data->m_left_click ? data->m_color : color_t(153, 153, 153, data->m_alpha);
@@ -1387,7 +1415,7 @@ namespace UI
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
 			}
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 2.f, m_bounds.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
 			//supwemacy does m_box_start.y + 4.f, but it looks off (cuz it is off)
@@ -1453,7 +1481,7 @@ namespace UI
 			if (m_dropdown_end <= 0.f)
 				return;
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 2.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 3.f, (m_box_end.x) - m_box_start.x, m_bounds.y + m_dropdown_end - 23.f }, color_t(36, 36, 36, data->m_alpha));
 
 			for (size_t i = 0; i < m_items.size(); i++)
@@ -1596,7 +1624,7 @@ namespace UI
 			}
 
 			// outer edge
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 2.f, m_bounds.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 
 			// inner background
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
@@ -1660,7 +1688,7 @@ namespace UI
 			if (m_dropdown_end <= 0.f)
 				return;
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 2.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 3.f, (m_box_end.x) - m_box_start.x, m_bounds.y + m_dropdown_end - 23.f }, color_t(36, 36, 36, data->m_alpha));
 
 			size_t start = m_max_items ? m_item_offset : 0;
@@ -1783,7 +1811,7 @@ namespace UI
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
 			}
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 1.f, m_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_bounds.x + 2.f, m_bounds.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
 			std::string items_text;
@@ -1867,7 +1895,7 @@ namespace UI
 			if (m_dropdown_end <= 0.f)
 				return;
 
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 1.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_end.y + 2.f, (m_box_end.x + 2.f) - m_box_start.x, m_bounds.y + m_dropdown_end - 21.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_end.y + 3.f, (m_box_end.x) - m_box_start.x, m_bounds.y + m_dropdown_end - 23.f }, color_t(36, 36, 36, data->m_alpha));
 
 			for (size_t i = 0; i < m_items.size(); i++)
@@ -1934,7 +1962,7 @@ namespace UI
 			}
 
 			// outer edge
-			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_box_bounds.x + 1.f, m_box_bounds.y + 1.f }, color_t(44, 44, 44, data->m_alpha));
+			ctx.m_renderer->draw_filled_rect({ m_box_start.x - 1.f, m_box_start.y - 1.f, m_box_bounds.x + 2.f, m_box_bounds.y + 2.f }, color_t(44, 44, 44, data->m_alpha));
 
 			// inner box
 			color_t box_color_top(m_temp_col.r(), m_temp_col.g(), m_temp_col.b(), data->m_alpha);

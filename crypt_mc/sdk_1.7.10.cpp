@@ -75,7 +75,6 @@ struct player_fields
 	jfieldID fid_aabb_max_z = nullptr;
 	jfieldID fid_ticks_existed = nullptr;
 
-
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
 	jmethodID mid_is_potion_active = nullptr;
@@ -120,6 +119,10 @@ struct player_fields
 	jclass cls_player_controller = nullptr;
 	jclass cls_inventory = nullptr;
 	jclass cls_aabb = nullptr;
+
+	bool holding_weapon = false;
+	bool holding_projectile = false;
+	bool holding_block = false;
 };
 
 struct game_fields
@@ -423,6 +426,22 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 
 		init_fields = true;
 	}
+
+	if (const jobject obj_held = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item); obj_held != nullptr && ctx.m_ingame)
+	{
+		if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
+		{
+			playerfields.holding_weapon = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
+			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class);
+			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
+		}
+	}
+	else
+	{
+		playerfields.holding_weapon = false;
+		playerfields.holding_projectile = false;
+		playerfields.holding_block = false;
+	}
 }
 
 bool c_player_1710::is_same(std::shared_ptr<c_player> other)
@@ -532,41 +551,17 @@ jobject c_player_1710::get_item(jobject item_stack)
 
 jboolean c_player_1710::holding_weapon()
 {
-	if (const auto held_item = this->get_held_item(); held_item != nullptr)
-	{
-		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_sword_class) || jni->IsInstanceOf(held_item, playerfields.item_axe_class);
-		jni->DeleteLocalRef(held_item);
-
-		return ret;
-	}
-
-	return false;
+	return playerfields.holding_weapon;
 }
 
 jboolean c_player_1710::holding_projectile()
 {
-	if (const auto held_item = this->get_held_item(); held_item != nullptr)
-	{
-		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_egg_class) || jni->IsInstanceOf(held_item, playerfields.item_snowball_class);
-		jni->DeleteLocalRef(held_item);
-
-		return ret;
-	}
-
-	return false;
+	return playerfields.holding_projectile;
 }
 
 jboolean c_player_1710::holding_block()
 {
-	if (const auto held_item = this->get_held_item(); held_item != nullptr)
-	{
-		const auto ret = jni->IsInstanceOf(held_item, playerfields.item_block_class);
-		jni->DeleteLocalRef(held_item);
-
-		return ret;
-	}
-
-	return false;
+	return playerfields.holding_block;
 }
 
 jdouble c_player_1710::origin_x()
@@ -835,7 +830,7 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("g"), xors("Lsa;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
-		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lazv;"));;
+		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lazv;"));
 
 		gamefields.mid_get_minecraft = jni->GetStaticMethodID(gamefields.minecraft, xors("B"), xors("()Lbao;"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lsa;)V"));

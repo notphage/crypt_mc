@@ -20,8 +20,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 		return;
 
 	const bool in_inventory = mc->is_in_inventory();
-	//const bool has_weapon = self->holding_weapon();
-	const bool has_weapon = true;
+	const bool has_weapon = self->holding_weapon();
 	const bool has_focus = mc->in_game_has_focus();
 
 	if (!in_inventory && !has_focus)
@@ -36,19 +35,36 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 	if (in_inventory && ctx.m_settings.combat_auto_clicker_inventory && !g_input.is_key_pressed(KEYS_SHIFT))
 		return;
 
-	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block()) 
+	const auto mouse_down = GetAsyncKeyState(VK_LBUTTON) < 0;
+
+	static bool init_block_break = false;
+
+	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block())
 	{
 		left_click = true;
 		current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-10, 10), 10, 2000);
 		last_click = GetTickCount64();
 		clicks_skip = 0;
 		clicks_until_skip = util::random(43, 62);
-		g_input.release_mouse(true);
+
+		if (mouse_down)
+		{
+			if (!init_block_break)
+			{
+				init_block_break = true;
+
+				g_input.press_mouse(true);
+			}
+		}
+		else
+			init_block_break = false;
+
 		return;
 	}
-
-
-	const auto mouse_down = GetAsyncKeyState(VK_LBUTTON) < 0;
+	else
+	{
+		init_block_break = false;
+	}
 
 	if (mouse_down)
 	{
