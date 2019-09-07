@@ -133,6 +133,7 @@ struct game_fields
 	jclass settings_class = nullptr;
 	jclass cls_inventory = nullptr;
 	jclass cls_chat = nullptr;
+	jclass cls_enum = nullptr;
 	jclass cls_moving_object_position = nullptr;
 	jclass cls_lwjgl_sys_impl = nullptr;
 	jclass cls_lwjgl_display = nullptr;
@@ -178,6 +179,7 @@ struct game_fields
 	jmethodID mid_set_cursor_pos = nullptr;
 	jmethodID mid_get_width = nullptr;
 	jmethodID mid_get_height = nullptr;
+	jmethodID mid_ordinal = nullptr;
 
 	jobject obj_game = nullptr;
 	jobject obj_world = nullptr;
@@ -799,6 +801,7 @@ void c_game_forge_1710::instantiate(JNIEnv* _jni)
 		gamefields.cls_lwjgl_sys_impl = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.WindowsSysImplementation")));
 		gamefields.cls_lwjgl_mouse = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.input.Mouse")));
 		gamefields.cls_lwjgl_display = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.opengl.Display")));
+		gamefields.cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java.lang.Enum")));
 
 		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("field_71432_P"), xors("Lnet/minecraft/client/Minecraft;"));
 		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("field_71460_t"), xors("Lnet/minecraft/client/renderer/EntityRenderer;"));
@@ -824,8 +827,9 @@ void c_game_forge_1710::instantiate(JNIEnv* _jni)
 		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("field_72308_g"), xors("Lnet/minecraft/entity/Entity;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("field_74336_f"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("field_74341_c"), xors("F"));
-		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("field_72313_a"), xors("Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;"));;
+		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("field_72313_a"), xors("Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;"));
 
+		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lnet/minecraft/entity/Entity;)V"));
 		gamefields.mid_get_string_width = jni->GetMethodID(gamefields.font_renderer, xors("func_78256_a"), xors("(Ljava/lang/String;)I"));
 		gamefields.mid_draw_string_with_shadow = jni->GetMethodID(gamefields.font_renderer, xors("func_85187_a"), xors("(Ljava/lang/String;IIIZ)I"));
@@ -886,17 +890,9 @@ jboolean c_game_forge_1710::is_in_chat()
 
 jboolean c_game_forge_1710::is_hovering_block()
 {
-	auto class_loader = ctx.get_class_loader(jni);
-
-	if (!class_loader)
-		return false;
-
 	auto type_of_hit = jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.fid_type_of_hit);
-	
-	jclass cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java.lang.Enum")));
-	jmethodID mid_ordinal = jni->GetMethodID(cls_enum, xors("ordinal"), xors("()I"));
 
-	return jni->CallIntMethod(type_of_hit, mid_ordinal) == 1;
+	return jni->CallIntMethod(type_of_hit, gamefields.mid_ordinal) == 1;
 }
 
 void c_game_forge_1710::set_view_bobbing(jboolean val)
