@@ -3,8 +3,14 @@
 
 void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-    if (!ctx.m_settings.movement_flight || !valid_keystate(ctx.m_settings.movement_flight_key))
-        return;
+	if (!ctx.m_settings.movement_flight || !valid_keystate(ctx.m_settings.movement_flight_key)) 
+	{
+		if (mc->get_timer_speed() == 0.149f)
+			mc->set_timer_speed(1.0f);
+
+		return;
+	}
+    
 
     if (ctx.m_settings.movement_flight_tight)
 	{
@@ -12,15 +18,38 @@ void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
         self->set_motion_z(0);
     }
 
-    self->set_motion_y(0);
-
     bool glide = true;
 
-	if (ctx.m_settings.movement_flight_hypixel && self->is_on_ground())
-		return;
+	if (ctx.m_settings.movement_flight_mode != 2)
+		if (mc->get_timer_speed() == 0.149f)
+			mc->set_timer_speed(1.0f);
 
-	if (self->get_ticks_existed() % 2 == 0 && ctx.m_settings.movement_flight_hypixel)
-		self->set_position(self->origin_x(), self->aabb_min_y() + util::random(0.00000000000001235423532523523532521, 0.0000000000000123542353252352353252 * 10), self->origin_z());
+	switch (ctx.m_settings.movement_flight_mode)
+	{
+		case 0:
+			self->set_motion_y(0);
+
+			if (self->is_on_ground())
+				return;
+
+			if (self->get_ticks_existed() % 2 == 0)
+				self->set_position(self->origin_x(), self->aabb_min_y() + util::random(0.00000000000001235423532523523532521, 0.0000000000000123542353252352353252 * 10), self->origin_z());
+			break;
+		case 1:
+			self->set_motion_y(-0.005);
+
+			if (self->get_ticks_existed() % 2 == 0)
+				self->set_motion_y(0);
+			break;
+		case 2:
+			self->set_motion_y(0);
+
+			mc->set_timer_speed(0.149f);
+			break;
+		default:
+			self->set_motion_y(0);
+			break;
+	}
 
     if (g_input.is_key_pressed(KEYS_LEFTSHIFT)) 
     {
@@ -29,7 +58,7 @@ void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
         self->set_motion_y(-ctx.m_settings.movement_flight_vspeed);
     }
 
-    if (g_input.is_key_pressed(KEYS_SPACE) && !ctx.m_settings.movement_flight_hypixel)
+    if (g_input.is_key_pressed(KEYS_SPACE) && ctx.m_settings.movement_flight_mode != 0)
     {
         glide = false;
 
@@ -38,7 +67,7 @@ void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 
     if (g_input.is_key_pressed(KEYS_W) || g_input.is_key_pressed(KEYS_A) || g_input.is_key_pressed(KEYS_S) || g_input.is_key_pressed(KEYS_D))
     {
-        set_speed(self, ctx.m_settings.movement_flight_hypixel ? 0.2873F : ctx.m_settings.movement_flight_hspeed);
+        set_speed(self, (ctx.m_settings.movement_flight_mode == 0) ? 0.2873F : ctx.m_settings.movement_flight_hspeed);
     }
 
     if (glide && ctx.m_settings.movement_flight_glide)

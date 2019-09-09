@@ -22,6 +22,8 @@
 #include "sprint.h"
 #include "step.h"
 #include "anti_afk.h"
+#include "fast_stop.h"
+#include "safe_walk.h"
 
 int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 {
@@ -97,6 +99,8 @@ void c_context::determine_version()
 	ctx.m_features.push_back(std::make_unique<c_velocity>());
 	ctx.m_features.push_back(std::make_unique<c_fast_place>());
 	ctx.m_features.push_back(std::make_unique<c_speed>());
+	ctx.m_features.push_back(std::make_unique<c_fast_stop>());
+	ctx.m_features.push_back(std::make_unique<c_safe_walk>());
 	//ctx.m_features.push_back(std::make_unique<c_throw>());
 	ctx.m_features.push_back(std::make_unique<c_visuals>());
 	ctx.m_features.push_back(std::make_unique<c_reach>());

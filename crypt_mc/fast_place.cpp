@@ -9,6 +9,11 @@ void c_fast_place::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 	if ((!ctx.m_settings.player_fast_place_blocks && self->holding_block()) || (!ctx.m_settings.player_fast_place_projectiles && self->holding_projectile()))
 		return;
 
-	if (mc->get_right_click_delay() > ctx.m_settings.player_fast_place_delay)
-		mc->set_right_click_delay(ctx.m_settings.player_fast_place_delay);
+	bool projectiles = ctx.m_settings.player_fast_place_projectiles && self->holding_projectile();
+	bool blocks = ctx.m_settings.player_fast_place_blocks && self->holding_block();
+
+	int delay = blocks ? ctx.m_settings.player_fast_place_block_delay : projectiles ? ctx.m_settings.player_fast_place_projectiles_delay : 0;
+
+	if (mc->get_right_click_delay() > delay)
+		mc->set_right_click_delay(delay);
 }

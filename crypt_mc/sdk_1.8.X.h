@@ -31,6 +31,11 @@ public:
 	jfloat get_forward() override;
 	jobject get_held_item() override;
 	jboolean holding_weapon() override;
+	jboolean holding_sword() override;
+	jboolean holding_axe() override;
+	jboolean holding_pick_axe() override;
+	jboolean holding_hoe() override;
+	jboolean holding_shovel() override;
 	jboolean holding_projectile() override;
 	jboolean holding_block() override;
 
@@ -73,6 +78,7 @@ public:
 	jint get_hurt_time() override;
 	jint get_max_hurt_time() override;
 	jint get_ticks_existed() override;
+
 
 	jobject get_stack(jint) override;
 	jobject get_effects(jobject, jobject) override;
@@ -120,6 +126,8 @@ public:
 	void set_right_click_delay(jint) override;
 	void set_in_focus() override;
 	void set_not_in_focus() override;
+	void set_key_bind_state(jint key_code, jboolean state) override;
+
 
 	std::shared_ptr<c_player> get_player() override;
 	std::shared_ptr<c_world> get_world() override;
@@ -132,7 +140,7 @@ public:
 
 	jint get_right_click_delay() override;
 	jint get_string_width(jstring) override;
-
+	jint get_sneak_key_code() override;
 	jint draw_string_with_shadow(jstring, jint, jint, jint) override;
 
 	jobject get_net_handler() override;

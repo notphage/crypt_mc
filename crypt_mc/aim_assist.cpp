@@ -8,7 +8,7 @@ void c_aim_assist::find_best_point(const std::shared_ptr<c_player>& self, const 
 
 	const vec3 player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
 	const vec3 player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());
-	
+
 	if (ctx.m_settings.combat_aim_assist_multipoint)
 	{
 		const vec3 head(player->origin_x(), player->origin_y() + 1.2f, player->origin_z());
@@ -79,7 +79,7 @@ void c_aim_assist::find_target(const std::shared_ptr<c_game>& mc, const std::sha
 
 	if (ctx.m_settings.combat_aim_assist_sticky && target_entity != nullptr)
 		find_best_point(self, target_entity, trace_origin, best_target_data);
-	
+
 	float best_distance = ctx.m_settings.combat_aim_assist_distance;
 	if (!best_target_data.m_valid)
 	{
@@ -114,10 +114,10 @@ void c_aim_assist::scan()
 
 	for (auto d = 0; d < 30; d++)
 	{
-		jfloat sens = (ctx.m_settings.combat_aim_assist_scale * 0.5f) * 0.6f + 0.2f;
+		jfloat sens = ctx.m_settings.combat_aim_assist_scale * 0.6f + 0.2f;
 
 		jfloat rsens = sens * sens * sens * 8.0f;
-		jfloat delta = d * rsens;
+		jfloat delta = d * rsens * 0.15f;
 
 		m_vec.push_back(delta);
 	}
@@ -162,8 +162,28 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 	if (ctx.m_settings.combat_aim_assist_require_click && !mouse_down)
 		return;
 
-	if (ctx.m_settings.combat_aim_assist_weapons_only && !self->holding_weapon())
-		return;
+	bool white_list = false;
+
+	if (ctx.m_settings.combat_aim_assist_item_whitelist)
+	{
+		if (ctx.m_settings.combat_aim_assist_axes && self->holding_axe())
+			white_list = true;
+
+		if (ctx.m_settings.combat_aim_assist_swords && self->holding_sword())
+			white_list = true;
+
+		if (ctx.m_settings.combat_aim_assist_hoes && self->holding_hoe())
+			white_list = true;
+
+		if (ctx.m_settings.combat_aim_assist_shovels && self->holding_shovel())
+			white_list = true;
+
+		if (ctx.m_settings.combat_aim_assist_pick_axes && self->holding_pick_axe())
+			white_list = true;
+
+		if (!white_list)
+			return;
+	}
 
 	jfloat yaw = self->get_yaw(), pitch = self->get_pitch();
 
@@ -172,9 +192,31 @@ void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	if (!target_data.m_valid)
 		return;
-	 
-	bool vertical = ctx.m_settings.combat_aim_assist_vertical && abs(target_data.m_pitch_change) > m_vec.at(1);
-	bool horizontal = abs(target_data.m_yaw_change) > m_vec.at(1) && (abs(target_data.m_yaw_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint);
-			
-	self->set_angles(horizontal ? (target_data.m_yaw_change < 0 ? -get_x_speed() : get_x_speed()) : util::random(-m_vec.at(1), m_vec.at(1)), vertical ? (target_data.m_pitch_change < 0 ? get_y_speed() : -get_y_speed()) : util::random(-m_vec.at(1), m_vec.at(1)));
+
+	if (abs(target_data.m_yaw_change) > m_vec.at(1))
+		if (abs(target_data.m_yaw_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint)
+			self->set_yaw(yaw + (target_data.m_yaw_change < 0 ? -get_x_speed() : get_x_speed()));
+
+	if (ctx.m_settings.combat_aim_assist_vertical)
+		if (abs(target_data.m_pitch_change) > m_vec.at(1))
+			if (abs(target_data.m_pitch_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint)
+				self->set_pitch(pitch + (target_data.m_pitch_change < 0 ? -get_y_speed() : get_y_speed()));
+
+	if (util::random(0, 50) <= 3)
+	{
+		auto random = util::random(-1, 1);
+
+		self->set_pitch(self->get_pitch() + std::copysignf(m_vec.at(1), random));
+		self->set_yaw(self->get_yaw() + std::copysignf(m_vec.at(1), random));
+	}
+}
+float c_aim_assist::get_sens_multiplier() {
+	float sens = ctx.m_settings.combat_aim_assist_scale;
+
+	if (sens == 0.5f)
+		sens = 0.49f;
+
+	float f = sens * 0.6F + 0.2F;
+
+	return (float)(pow(f, 3) * 8.0F);
 }

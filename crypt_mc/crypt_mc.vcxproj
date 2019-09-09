@@ -211,6 +211,7 @@
     <ClCompile Include="client.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fast_place.cpp" />
+    <ClCompile Include="fast_stop.cpp" />
     <ClCompile Include="flight.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="nGetTime.cpp" />
@@ -226,6 +227,7 @@
     <ClCompile Include="raytrace.cpp" />
     <ClCompile Include="reach.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="safe_walk.cpp" />
     <ClCompile Include="sdk.cpp" />
     <ClCompile Include="sdk_1.7.10.cpp" />
     <ClCompile Include="sdk_1.8.X.cpp" />
@@ -257,6 +259,7 @@
     <ClInclude Include="client.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="fast_place.h" />
+    <ClInclude Include="fast_stop.h" />
     <ClInclude Include="feature.h" />
     <ClInclude Include="flight.h" />
     <ClInclude Include="font.h" />
@@ -276,6 +279,7 @@
     <ClInclude Include="raytrace.h" />
     <ClInclude Include="reach.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="safe_walk.h" />
     <ClInclude Include="sdk.h" />
     <ClInclude Include="sdk_1.7.10.h" />
     <ClInclude Include="sdk_forge_1.7.10.h" />

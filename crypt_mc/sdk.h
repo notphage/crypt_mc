@@ -1292,6 +1292,11 @@ public:
 	virtual jfloat get_forward() = 0;
 	virtual jobject get_held_item() = 0;
 	virtual jboolean holding_weapon() = 0;
+	virtual jboolean holding_sword() = 0;
+	virtual jboolean holding_axe() = 0;
+	virtual jboolean holding_pick_axe() = 0;
+	virtual jboolean holding_hoe() = 0;
+	virtual jboolean holding_shovel() = 0;
 	virtual jboolean holding_projectile() = 0;
 	virtual jboolean holding_block() = 0;
 
@@ -1392,6 +1397,7 @@ public:
 	virtual void set_in_focus() = 0;
 	virtual void set_mouse_grabbed(jboolean grabbed) = 0;
 	virtual void set_not_in_focus() = 0;
+	virtual void set_key_bind_state(jint key_code, jboolean state) = 0;
 
 	virtual std::shared_ptr<c_player> get_player() = 0;
 	virtual std::shared_ptr<c_world> get_world() = 0;
@@ -1403,6 +1409,7 @@ public:
 	virtual jint get_right_click_delay() = 0;
 	virtual jint get_string_width(jstring) = 0;
 	virtual jint draw_string_with_shadow(jstring, jint, jint, jint) = 0;
+	virtual jint get_sneak_key_code() = 0;
 
 	virtual jobject get_net_handler() = 0;
 	virtual jobject get_player_controller() = 0;

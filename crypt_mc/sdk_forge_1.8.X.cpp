@@ -31,6 +31,7 @@ struct world_fields
 	jclass world = nullptr;
 	jclass entity_renderer = nullptr;
 	jclass cls_list = nullptr;
+	jclass cls_block_air = nullptr;
 };
 
 struct player_fields
@@ -105,6 +106,13 @@ struct player_fields
 	jclass entity_player_class = nullptr;
 	jclass item_stack_class = nullptr;
 	jclass item_sword_class = nullptr;
+	jclass item_shovel_class = nullptr;
+	jclass item_hoe_class = nullptr;
+	jclass item_pick_axe_class = nullptr;
+	jclass item_ender_eye_class = nullptr;
+	jclass item_ender_pearl_class = nullptr;
+	jclass item_fishing_rod_class = nullptr;
+	jclass item_exp_bottle_class = nullptr;
 	jclass item_axe_class = nullptr;
 	jclass item_egg_class = nullptr;
 	jclass item_snowball_class = nullptr;
@@ -119,6 +127,11 @@ struct player_fields
 	jclass cls_aabb = nullptr;
 
 	bool holding_weapon = false;
+	bool holding_sword = false;
+	bool holding_axe = false;
+	bool holding_pick_axe = false;
+	bool holding_shovel = false;
+	bool holding_hoe = false;
 	bool holding_projectile = false;
 	bool holding_block = false;
 };
@@ -133,6 +146,8 @@ struct game_fields
 	jclass settings_class = nullptr;
 	jclass cls_inventory = nullptr;
 	jclass cls_chat = nullptr;
+	jclass cls_keybinding = nullptr; 
+	jclass cls_game_settings = nullptr;
 	jclass cls_enum = nullptr;
 	jclass cls_moving_object_position = nullptr;
 	jclass cls_lwjgl_sys_impl = nullptr;
@@ -164,7 +179,9 @@ struct game_fields
 	jfieldID fid_mouse_sensitivity = nullptr;
 	jfieldID fid_render_manager_obj;
 	jfieldID fid_type_of_hit = nullptr;
+	jfieldID fid_key_bind_sneak = nullptr;
 
+	jmethodID mid_get_key_code = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
 	jmethodID mid_get_string_width = nullptr;
 	jmethodID mid_draw_string_with_shadow = nullptr;
@@ -180,6 +197,7 @@ struct game_fields
 	jmethodID mid_get_height = nullptr;
 	jmethodID mid_set_mouse_grabbed = nullptr;
 	jmethodID mid_ordinal = nullptr;
+	jmethodID mid_set_key_bind_state = nullptr;
 
 	jobject obj_game = nullptr;
 	jobject obj_world = nullptr;
@@ -272,6 +290,7 @@ void c_world_forge_18X::instantiate(jobject world_object, JNIEnv* _jni)
 		worldfields.world = class_loader->find_class(xors("net.minecraft.world.World"));
 		worldfields.entity_renderer = class_loader->find_class(xors("net.minecraft.client.renderer.EntityRenderer"));
 		worldfields.cls_list = class_loader->find_class(xors("java.util.List"));
+		worldfields.cls_block_air = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.block.BlockAir")));
 
 		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("field_73010_i"), xors("Ljava/util/List;"));
 		//worldfields.mid_get_block = jni->GetMethodID(worldfields.world, xors("func_151337_f"), xors("(III)Lnet/minecraft/block/Block;"));
@@ -343,6 +362,13 @@ void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.entity_player_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.entity.player.EntityPlayer")));
 		playerfields.item_stack_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemStack")));
 		playerfields.item_sword_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemSword")));
+		playerfields.item_shovel_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemSpade")));
+		playerfields.item_hoe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemHoe")));
+		playerfields.item_pick_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemPickAxe")));
+		playerfields.item_ender_pearl_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemEnderPearl")));
+		playerfields.item_fishing_rod_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemFishingRod")));
+		playerfields.item_ender_eye_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemEnderEye")));
+		playerfields.item_exp_bottle_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemExpBottle")));
 		playerfields.item_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemAxe")));
 		playerfields.cls_container = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.inventory.Container")));
 		playerfields.cls_slot = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.inventory.Slot")));
@@ -427,14 +453,24 @@ void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni)
 	{
 		if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
 		{
-			playerfields.holding_weapon = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
-			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class);
+			playerfields.holding_sword = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class);
+			playerfields.holding_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
+			playerfields.holding_weapon = playerfields.holding_axe || playerfields.holding_sword;
+			playerfields.holding_hoe = jni->IsInstanceOf(obj_held_item, playerfields.item_hoe_class);
+			playerfields.holding_pick_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_pick_axe_class);
+			playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
+			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
 		}
 	}
 	else
 	{
 		playerfields.holding_weapon = false;
+		playerfields.holding_sword = false;
+		playerfields.holding_axe = false;
+		playerfields.holding_hoe = false;
+		playerfields.holding_pick_axe = false;
+		playerfields.holding_shovel = false;
 		playerfields.holding_projectile = false;
 		playerfields.holding_block = false;
 	}
@@ -548,6 +584,31 @@ jobject c_player_forge_18X::get_item(jobject item_stack)
 jboolean c_player_forge_18X::holding_weapon()
 {
 	return playerfields.holding_weapon;
+}
+
+jboolean c_player_forge_18X::holding_axe()
+{
+	return playerfields.holding_axe;
+}
+
+jboolean c_player_forge_18X::holding_pick_axe()
+{
+	return playerfields.holding_pick_axe;
+}
+
+jboolean c_player_forge_18X::holding_hoe()
+{
+	return playerfields.holding_hoe;
+}
+
+jboolean c_player_forge_18X::holding_shovel()
+{
+	return playerfields.holding_shovel;
+}
+
+jboolean c_player_forge_18X::holding_sword()
+{
+	return playerfields.holding_sword;
 }
 
 jboolean c_player_forge_18X::holding_projectile()
@@ -802,6 +863,8 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni)
 		gamefields.cls_lwjgl_mouse = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.input.Mouse")));
 		gamefields.cls_lwjgl_display = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org.lwjgl.opengl.Display")));
 		gamefields.cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java.lang.Enum")));
+		gamefields.cls_keybinding = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.client.settings.KeyBinding")));
+		gamefields.cls_game_settings = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.client.settings.GameSettings")));
 
 		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("field_71432_P"), xors("Lnet/minecraft/client/Minecraft;"));
 		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("field_71460_t"), xors("Lnet/minecraft/client/renderer/EntityRenderer;"));
@@ -827,6 +890,7 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("field_74336_f"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("field_74341_c"), xors("F"));
 		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("field_72313_a"), xors("Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;"));
+		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("field_74311_E"), xors("Lnet/minecraft/client/settings/KeyBinding;"));
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lnet/minecraft/entity/Entity;)V"));
@@ -841,7 +905,9 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni)
 		gamefields.mid_get_width = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getWidth"), xors("()I"));
 		gamefields.mid_get_height = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getHeight"), xors("()I"));
 		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
-	
+		gamefields.mid_set_key_bind_state = jni->GetStaticMethodID(gamefields.cls_keybinding, xors("func_74510_a"), xors("(IZ)V"));
+		gamefields.mid_get_key_code = jni->GetMethodID(gamefields.cls_keybinding, xors("func_151463_i"), xors("()I"));
+
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
 		gamefields.obj_world = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world));
 		gamefields.obj_font_renderer = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_font_renderer_obj));
@@ -921,6 +987,11 @@ void c_game_forge_18X::set_not_in_focus()
 	jni->CallVoidMethod(gamefields.obj_game, gamefields.mid_set_not_in_focus);
 }
 
+void c_game_forge_18X::set_key_bind_state(jint key_code, jboolean state)
+{
+	jni->CallStaticVoidMethod(gamefields.cls_keybinding, gamefields.mid_set_key_bind_state, key_code, state);
+}
+
 std::shared_ptr<c_player> c_game_forge_18X::get_player()
 {
 	auto player_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
@@ -975,6 +1046,11 @@ jint c_game_forge_18X::get_string_width(jstring string)
 jint c_game_forge_18X::draw_string_with_shadow(jstring par1, jint par2, jint par3, jint par4)
 {
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_draw_string_with_shadow, par1, par2, par3, par4, false);
+}
+
+jint c_game_forge_18X::get_sneak_key_code()
+{
+	return jni->CallIntMethod(jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings), gamefields.fid_key_bind_sneak), gamefields.mid_get_key_code);
 }
 
 jobject c_game_forge_18X::get_net_handler()

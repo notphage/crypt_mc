@@ -31,6 +31,7 @@ struct world_fields
 	jclass world = nullptr;
 	jclass entity_renderer = nullptr;
 	jclass cls_list = nullptr;
+	jclass cls_block_air = nullptr;
 
 	jobject obj_world = nullptr;
 };
@@ -107,6 +108,13 @@ struct player_fields
 	jclass entity_player_class = nullptr;
 	jclass item_stack_class = nullptr;
 	jclass item_sword_class = nullptr;
+	jclass item_shovel_class = nullptr;
+	jclass item_hoe_class = nullptr;
+	jclass item_pick_axe_class = nullptr;
+	jclass item_ender_eye_class = nullptr;
+	jclass item_ender_pearl_class = nullptr;
+	jclass item_fishing_rod_class = nullptr;
+	jclass item_exp_bottle_class = nullptr;
 	jclass item_axe_class = nullptr;
 	jclass item_egg_class = nullptr;
 	jclass item_snowball_class = nullptr;
@@ -121,6 +129,11 @@ struct player_fields
 	jclass cls_aabb = nullptr;
 
 	bool holding_weapon = false;
+	bool holding_sword = false;
+	bool holding_pick_axe = false;
+	bool holding_shovel = false;
+	bool holding_hoe = false;
+	bool holding_axe = false;
 	bool holding_projectile = false;
 	bool holding_block = false;
 };
@@ -135,6 +148,8 @@ struct game_fields
 	jclass settings_class = nullptr;
 	jclass cls_inventory = nullptr;
 	jclass cls_chat = nullptr;
+	jclass cls_keybinding = nullptr;
+	jclass cls_game_settings = nullptr;
 	jclass cls_moving_object_position = nullptr;
 	jclass cls_lwjgl_sys_impl = nullptr;
 	jclass cls_lwjgl_display = nullptr;
@@ -165,7 +180,9 @@ struct game_fields
 	jfieldID fid_view_bobbing = nullptr;
 	jfieldID fid_mouse_sensitivity = nullptr;
 	jfieldID fid_type_of_hit = nullptr;
+	jfieldID fid_key_bind_sneak = nullptr;
 
+	jmethodID mid_get_key_code = nullptr;
 	jmethodID mid_to_string = nullptr;
 	jmethodID mid_get_minecraft = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
@@ -182,6 +199,7 @@ struct game_fields
 	jmethodID mid_set_cursor_pos = nullptr;
 	jmethodID mid_get_width = nullptr;
 	jmethodID mid_get_height = nullptr;
+	jmethodID mid_set_key_bind_state = nullptr;
 
 	jobject obj_game = nullptr;
 	jobject obj_render_manager = nullptr;
@@ -275,6 +293,7 @@ void c_world_1710::instantiate(jobject world_object, JNIEnv* _jni)
 		worldfields.world = class_loader->find_class(xors("ahb"));
 		worldfields.entity_renderer = class_loader->find_class(xors("blt"));
 		worldfields.cls_list = class_loader->find_class(xors("java/util/List"));
+		worldfields.cls_block_air = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aja")));
 
 		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("h"), xors("Ljava/util/List;"));
 		worldfields.mid_get_block = jni->GetMethodID(worldfields.world, xors("a"), xors("(III)Laji;"));
@@ -348,6 +367,13 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.entity_player_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yz")));
 		playerfields.item_stack_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("add")));
 		playerfields.item_sword_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aeh")));
+		playerfields.item_shovel_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("ady")));
+		playerfields.item_hoe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("ada")));
+		playerfields.item_pick_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("adn")));
+		playerfields.item_ender_pearl_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aco")));
+		playerfields.item_fishing_rod_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("acv")));
+		playerfields.item_ender_eye_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("acn")));
+		playerfields.item_exp_bottle_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("acp")));
 		playerfields.item_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("abf")));
 		playerfields.cls_container = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("zs")));
 		playerfields.cls_slot = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aay")));
@@ -432,14 +458,24 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 	{
 		if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
 		{
-			playerfields.holding_weapon = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
-			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class);
+			playerfields.holding_sword = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class);
+			playerfields.holding_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
+			playerfields.holding_weapon = playerfields.holding_axe || playerfields.holding_sword;
+			playerfields.holding_hoe = jni->IsInstanceOf(obj_held_item, playerfields.item_hoe_class);
+			playerfields.holding_pick_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_pick_axe_class);
+			playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
+			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
 		}
 	}
 	else
 	{
 		playerfields.holding_weapon = false;
+		playerfields.holding_sword = false;
+		playerfields.holding_axe = false;
+		playerfields.holding_hoe = false;
+		playerfields.holding_pick_axe = false;
+		playerfields.holding_shovel = false;
 		playerfields.holding_projectile = false;
 		playerfields.holding_block = false;
 	}
@@ -553,6 +589,31 @@ jobject c_player_1710::get_item(jobject item_stack)
 jboolean c_player_1710::holding_weapon()
 {
 	return playerfields.holding_weapon;
+}
+
+jboolean c_player_1710::holding_axe()
+{
+	return playerfields.holding_axe;
+}
+
+jboolean c_player_1710::holding_pick_axe()
+{
+	return playerfields.holding_pick_axe;
+}
+
+jboolean c_player_1710::holding_hoe()
+{
+	return playerfields.holding_hoe;
+}
+
+jboolean c_player_1710::holding_shovel()
+{
+	return playerfields.holding_shovel;
+}
+
+jboolean c_player_1710::holding_sword()
+{
+	return playerfields.holding_sword;
 }
 
 jboolean c_player_1710::holding_projectile()
@@ -757,7 +818,7 @@ void c_player_1710::set_pitch(jfloat pitch)
 
 void c_player_1710::set_yaw(jfloat yaw)
 {
-	jni->SetFloatField(player_instance, playerfields.fid_prev_yaw, yaw);
+	//jni->SetFloatField(player_instance, playerfields.fid_prev_yaw, yaw);
 	jni->SetFloatField(player_instance, playerfields.fid_yaw, yaw);
 }
 
@@ -806,6 +867,8 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.cls_lwjgl_sys_impl = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/WindowsSysImplementation")));
 		gamefields.cls_lwjgl_mouse = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/input/Mouse")));
 		gamefields.cls_lwjgl_display = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/opengl/Display")));
+		gamefields.cls_keybinding = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bal")));
+		gamefields.cls_game_settings = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bbj")));
 
 		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("M"), xors("Lbao;"));
 		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("p"), xors("Lblt;"));
@@ -831,7 +894,8 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("g"), xors("Lsa;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
-	
+		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("Z"), xors("Lbal;"));
+
 		gamefields.mid_to_string = jni->GetMethodID(gamefields.cls_moving_object_position, xors("toString"), xors("()Ljava/lang/String;"));
 		gamefields.mid_get_minecraft = jni->GetStaticMethodID(gamefields.minecraft, xors("B"), xors("()Lbao;"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lsa;)V"));
@@ -848,6 +912,8 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.mid_get_width = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getWidth"), xors("()I"));
 		gamefields.mid_get_height = jni->GetStaticMethodID(gamefields.cls_lwjgl_display, xors("getHeight"), xors("()I"));
 		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
+		gamefields.mid_set_key_bind_state = jni->GetStaticMethodID(gamefields.cls_keybinding, xors("a"), xors("(IZ)V"));
+		gamefields.mid_get_key_code = jni->GetMethodID(gamefields.cls_keybinding, xors("i"), xors("()I"));
 
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
 		gamefields.obj_render_manager = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_render_manager_obj));
@@ -932,6 +998,11 @@ void c_game_1710::set_not_in_focus()
 	jni->CallVoidMethod(gamefields.obj_game, gamefields.mid_set_not_in_focus);
 }
 
+void c_game_1710::set_key_bind_state(jint key_code, jboolean state)
+{
+	jni->CallStaticVoidMethod(gamefields.cls_keybinding, gamefields.mid_set_key_bind_state, key_code, state);
+}
+
 std::shared_ptr<c_player> c_game_1710::get_player()
 {
 	auto player_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
@@ -980,6 +1051,11 @@ jint c_game_1710::get_right_click_delay()
 jint c_game_1710::get_string_width(jstring string)
 {
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_get_string_width, string);
+}
+
+jint c_game_1710::get_sneak_key_code()
+{
+	return jni->CallIntMethod(jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings), gamefields.fid_key_bind_sneak), gamefields.mid_get_key_code);
 }
 
 void c_game_1710::set_mouse_grabbed(jboolean grabbed)

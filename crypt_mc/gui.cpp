@@ -30,6 +30,8 @@ void c_gui::tab_combat()
 	static UI::c_slider auto_clicker_min_cps;
 	static UI::c_slider auto_clicker_max_cps;
 	static UI::c_multi_dropdown auto_clicker_conditions;
+	static UI::c_checkbox auto_clicker_item_whitelist;
+	static UI::c_multi_dropdown auto_clicker_whitelist_items;
 
 	static UI::c_enable_groupbox aim_assist_groupbox;
 	static UI::c_key_bind aim_assist_key;
@@ -39,6 +41,8 @@ void c_gui::tab_combat()
 	static UI::c_float_slider aim_assist_scale;
 	static UI::c_float_slider aim_assist_distance;
 	static UI::c_multi_dropdown aim_assist_conditions;
+	static UI::c_checkbox aim_assist_item_whitelist;
+	static UI::c_multi_dropdown aim_assist_whitelist_items;
 
 	static UI::c_enable_groupbox velocity_groupbox;
 	static UI::c_key_bind velocity_key;;
@@ -62,11 +66,23 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_auto_clicker)
 				auto_clicker_key.handle(menu.data(), "", &ctx.m_settings.combat_auto_clicker_key, keytype_t::kt_all);
 
+		
+			auto_clicker_item_whitelist.handle(menu.data(), xors("item whitelist"), &ctx.m_settings.combat_auto_clicker_item_whitelist);
+		
+			if (ctx.m_settings.combat_auto_clicker_item_whitelist)
+				auto_clicker_whitelist_items.handle(menu.data(), xors(""), 
+					{
+						{&ctx.m_settings.combat_auto_clicker_swords, xors("swords")},
+						{&ctx.m_settings.combat_auto_clicker_axes, xors("axes")},
+						{&ctx.m_settings.combat_auto_clicker_hoes, xors("hoes")},
+						{&ctx.m_settings.combat_auto_clicker_pick_axes, xors("pick axes")},
+						{&ctx.m_settings.combat_auto_clicker_shovels, xors("shovels")}
+					});
+
 			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 0, 24, 1, xors("cps"));
 			auto_clicker_max_cps.handle(menu.data(), xors("max"), &ctx.m_settings.combat_auto_clicker_max_cps, ctx.m_settings.combat_auto_clicker_min_cps, 25, 1, xors("cps"));
 			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
 				{
-					{&ctx.m_settings.combat_auto_clicker_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
 					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
 					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")}
@@ -96,6 +112,7 @@ void c_gui::tab_combat()
 		reach_groupbox.end(menu.data(), &ctx.m_settings.combat_reach);
 
 		auto_clicker_key.dropdown(menu.data());
+		auto_clicker_whitelist_items.dropdown(menu.data());
 		auto_clicker_conditions.dropdown(menu.data());
 		reach_key.dropdown(menu.data());
 		reach_conditions.dropdown(menu.data());
@@ -108,6 +125,18 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_aim_assist)
 				aim_assist_key.handle(menu.data(), "", &ctx.m_settings.combat_aim_assist_key, keytype_t::kt_all);
 
+			aim_assist_item_whitelist.handle(menu.data(), xors("item whitelist"), &ctx.m_settings.combat_aim_assist_item_whitelist);
+
+			if (ctx.m_settings.combat_aim_assist_item_whitelist)
+				aim_assist_whitelist_items.handle(menu.data(), xors(""),
+					{
+						{&ctx.m_settings.combat_aim_assist_swords, xors("swords")},
+						{&ctx.m_settings.combat_aim_assist_axes, xors("axes")},
+						{&ctx.m_settings.combat_aim_assist_hoes, xors("hoes")},
+						{&ctx.m_settings.combat_aim_assist_pick_axes, xors("pick axes")},
+						{&ctx.m_settings.combat_aim_assist_shovels, xors("shovels")}
+					});
+
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
 			aim_assist_scale.handle(menu.data(), xors("scale"), &ctx.m_settings.combat_aim_assist_scale, 0.f, 1.f, 0.01f);
 			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 1.f, 10.f, 0.01f);
@@ -119,7 +148,6 @@ void c_gui::tab_combat()
 			aim_assist_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_aim_assist_require_click, xors("require click")},
-					{&ctx.m_settings.combat_aim_assist_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_aim_assist_multipoint, xors("multipoint")},
 					{&ctx.m_settings.combat_aim_assist_vertical, xors("vertical")},
 					{&ctx.m_settings.combat_aim_assist_sticky, xors("sticky")},
@@ -151,6 +179,7 @@ void c_gui::tab_combat()
 		velocity_groupbox.end(menu.data(), &ctx.m_settings.combat_velocity);
 
 		aim_assist_key.dropdown(menu.data());
+		aim_assist_whitelist_items.dropdown(menu.data());
 		aim_assist_conditions.dropdown(menu.data());
 		velocity_key.dropdown(menu.data());
 		velocity_conditions.dropdown(menu.data());
@@ -174,7 +203,8 @@ void c_gui::tab_player()
 	static UI::c_enable_groupbox fast_place_groupbox;
 	static UI::c_key_bind fast_place_key;
 	static UI::c_multi_dropdown fast_place_items;
-	static UI::c_slider fast_place_delay;
+	static UI::c_slider fast_place_block_delay;
+	static UI::c_slider fast_place_projectiles_delay;
 
 	static UI::c_groupbox afk_groupbox;
 	static UI::c_checkbox afk;
@@ -218,12 +248,13 @@ void c_gui::tab_player()
 		{
 			fast_place_key.handle(menu.data(), "", &ctx.m_settings.player_fast_place_key, keytype_t::kt_all);
 
-			fast_place_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 0, 3, 1);
+			fast_place_block_delay.handle(menu.data(), xors("block delay"), &ctx.m_settings.player_fast_place_block_delay, 0, 4, 1);
+			fast_place_projectiles_delay.handle(menu.data(), xors("projectile delay"), &ctx.m_settings.player_fast_place_projectiles_delay, 0, 4, 1);
 
 			fast_place_items.handle(menu.data(), xors("items"),
 				{
 					{&ctx.m_settings.player_fast_place_blocks, xors("blocks")},
-					{&ctx.m_settings.player_fast_place_projectiles, xors("projectiles")},
+					{&ctx.m_settings.player_fast_place_projectiles, xors("projectiles")}
 				});
 		}
 		fast_place_groupbox.end(menu.data(), &ctx.m_settings.player_fast_place);
@@ -308,6 +339,11 @@ void c_gui::tab_movement()
 	static UI::c_float_slider speed_fall_speed;
 	static UI::c_slider speed_slow_ticks;
 
+	static UI::c_enable_groupbox fast_stop_groupbox;
+	static UI::c_key_bind fast_stop_key;
+
+	static UI::c_enable_groupbox safe_walk_groupbox;
+	static UI::c_key_bind safe_walk_key;
 
 	static UI::c_key_bind longjump_key;
 	static UI::c_float_slider longjump_boost;
@@ -325,6 +361,7 @@ void c_gui::tab_movement()
 
 	static UI::c_enable_groupbox flight_groupbox;
 	static UI::c_key_bind flight_key;
+	static UI::c_dropdown flight_mode;
 	static UI::c_float_slider flight_hspeed;
 	static UI::c_float_slider flight_vspeed;
 	static UI::c_float_slider flight_glide_speed;
@@ -348,15 +385,16 @@ void c_gui::tab_movement()
 			if (ctx.m_settings.movement_flight)
 				flight_key.handle(menu.data(), "", &ctx.m_settings.movement_flight_key, keytype_t::kt_all);
 
+			flight_mode.handle(menu.data(), xors("mode"), { xors("hypixel"), xors("bypass"), xors("slow bypass"), xors("normal") }, &ctx.m_settings.movement_flight_mode);
+
 			flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
 			flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
 			flight_glide_speed.handle(menu.data(), xors("glide speed"), &ctx.m_settings.movement_flight_glide_speed, 0.f, 1.f, 0.01f);
-
+		
 			flight_options.handle(menu.data(), xors("options"),
 				{
 					{&ctx.m_settings.movement_flight_glide, xors("glide")},
-					{&ctx.m_settings.movement_flight_tight, xors("tight")},
-					{&ctx.m_settings.movement_flight_hypixel, xors("hypixel")}
+					{&ctx.m_settings.movement_flight_tight, xors("tight")}
 				});
 		}
 		flight_groupbox.end(menu.data(), &ctx.m_settings.movement_flight);
@@ -370,10 +408,26 @@ void c_gui::tab_movement()
 		}
 		step_groupbox.end(menu.data(), &ctx.m_settings.movement_step);
 
+		fast_stop_groupbox.start(menu.data(), xors("fast stop"));
+		{
+			if (ctx.m_settings.movement_fast_stop)
+				fast_stop_key.handle(menu.data(), "", &ctx.m_settings.movement_fast_stop_key, keytype_t::kt_all);
+		}
+		fast_stop_groupbox.end(menu.data(), &ctx.m_settings.movement_fast_stop);
+
+		safe_walk_groupbox.start(menu.data(), xors("safe walk"));
+		{
+			if (ctx.m_settings.movement_safe_walk)
+				safe_walk_key.handle(menu.data(), "", &ctx.m_settings.movement_safe_walk_key, keytype_t::kt_all);
+		}
+		safe_walk_groupbox.end(menu.data(), &ctx.m_settings.movement_safe_walk);
+
 		timer_key.dropdown(menu.data());
 		flight_key.dropdown(menu.data());
 		step_key.dropdown(menu.data());
-
+		fast_stop_key.dropdown(menu.data());
+		safe_walk_key.dropdown(menu.data());
+		flight_mode.dropdown(menu.data());
 
 		flight_options.dropdown(menu.data());
 	}

@@ -250,7 +250,13 @@ public:
 	setting_t<int> combat_auto_clicker_min_cps{&m_holder, fnvc("combat_auto_clicker_min_cps"), 9};
 	setting_t<int> combat_auto_clicker_max_cps{&m_holder, fnvc("combat_auto_clicker_max_cps"), 13};
 
-	setting_t<bool> combat_auto_clicker_weapons_only{&m_holder, fnvc("combat_auto_clicker_weapons_only"), true};
+	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), true };
+	setting_t<bool> combat_auto_clicker_swords{ &m_holder, fnvc("combat_auto_clicker_swords"), true };
+	setting_t<bool> combat_auto_clicker_axes{ &m_holder, fnvc("combat_auto_clicker_axes"), true };
+	setting_t<bool> combat_auto_clicker_hoes{ &m_holder, fnvc("combat_auto_clicker_hoes"), false };
+	setting_t<bool> combat_auto_clicker_pick_axes{ &m_holder, fnvc("combat_auto_clicker_pick_axes"), false };
+	setting_t<bool> combat_auto_clicker_shovels{ &m_holder, fnvc("combat_auto_clicker_shovels"), false };
+
 	setting_t<bool> combat_auto_clicker_inventory{&m_holder, fnvc("combat_auto_clicker_inventory"), true};
 	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), false };
 	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false}; // remove
@@ -265,10 +271,16 @@ public:
 	setting_t<float> combat_aim_assist_scale{ &m_holder, fnvc("combat_aim_assist_scale"), 0.5f };
 	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.5f};
 
+	setting_t<bool> combat_aim_assist_item_whitelist{ &m_holder, fnvc("combat_aim_assist_item_whitelist"), true };
+	setting_t<bool> combat_aim_assist_swords{ &m_holder, fnvc("combat_aim_assist_swords"), true };
+	setting_t<bool> combat_aim_assist_axes{ &m_holder, fnvc("combat_aim_assist_axes"), true };
+	setting_t<bool> combat_aim_assist_hoes{ &m_holder, fnvc("combat_aim_assist_hoes"), false };
+	setting_t<bool> combat_aim_assist_pick_axes{ &m_holder, fnvc("combat_aim_assist_pick_axes"), false };
+	setting_t<bool> combat_aim_assist_shovels{ &m_holder, fnvc("combat_aim_assist_shovels"), false };
+
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
 	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), true };
 	setting_t<bool> combat_aim_assist_require_click{&m_holder, fnvc("combat_aim_assist_require_click"), true};
-	setting_t<bool> combat_aim_assist_weapons_only{&m_holder, fnvc("combat_aim_assist_weapons_only"), true};
 	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), false };
 	setting_t<bool> combat_aim_assist_nakeds{&m_holder, fnvc("combat_aim_assist_nakeds"), false};
 	setting_t<bool> combat_aim_assist_multipoint{ &m_holder, fnvc("combat_aim_assist_multipoint"), true };
@@ -313,7 +325,8 @@ public:
 	setting_t<keysetting_t> player_fast_place_key{&m_holder, fnvc("player_fast_place_key"), {}};
 	setting_t<bool> player_fast_place_blocks{ &m_holder, fnvc("player_fast_place_blocks"), true };
 	setting_t<bool> player_fast_place_projectiles{ &m_holder, fnvc("player_fast_place_projectiles"), true };
-	setting_t<int> player_fast_place_delay{ &m_holder, fnvc("player_fast_place_delay"), 0 };
+	setting_t<int> player_fast_place_block_delay{ &m_holder, fnvc("player_fast_place_block_delay"), 0 };
+	setting_t<int> player_fast_place_projectiles_delay{ &m_holder, fnvc("player_fast_place_projectiles_delay"), 0 };
 
 	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
 
@@ -329,11 +342,17 @@ public:
     setting_t<keysetting_t> movement_step_key{ &m_holder, fnvc("movement_step_key"), {} };
     setting_t<float> movement_step_height{ &m_holder, fnvc("movement_step_height"), 1.0f };
 
+	setting_t<bool> movement_fast_stop{ &m_holder, fnvc("movement_fast_stop"), false };
+	setting_t<keysetting_t> movement_fast_stop_key{ &m_holder, fnvc("movement_fast_stop_key"), {} };
+
+	setting_t<bool> movement_safe_walk{ &m_holder, fnvc("movement_safe_walk"), false };
+	setting_t<keysetting_t>movement_safe_walk_key{ &m_holder, fnvc("movement_safe_walk_key"), {} };
+
     setting_t<bool> movement_flight{ &m_holder, fnvc("movement_flight"), false };
     setting_t<keysetting_t> movement_flight_key{ &m_holder, fnvc("movement_flight_key"), {} };
+	setting_t<int> movement_flight_mode{ &m_holder, fnvc("movement_flight_mode"), 3 };
     setting_t<bool> movement_flight_tight{ &m_holder, fnvc("movement_flight_tight"), true };
     setting_t<bool> movement_flight_glide{ &m_holder, fnvc("movement_flight_glide"), false };
-	setting_t<bool> movement_flight_hypixel{ &m_holder, fnvc("movement_flight_hypixel"), false };
     setting_t<float> movement_flight_hspeed{ &m_holder, fnvc("movement_flight_hspeed"), 0.4f };
     setting_t<float> movement_flight_vspeed{ &m_holder, fnvc("movement_flight_vspeed"), 0.4f };
     setting_t<float> movement_flight_glide_speed{ &m_holder, fnvc("movement_flight_glide_speed"), 0.08f };

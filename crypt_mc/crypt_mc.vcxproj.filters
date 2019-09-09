@@ -98,6 +98,12 @@
     <Filter Include="SRC\SDK\Vanilla 1.8.X">
       <UniqueIdentifier>{df41ce66-ddcb-49f6-ac07-48ebbf21b1f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\features\fast_stop">
+      <UniqueIdentifier>{a57f4dbd-104a-4acc-ad18-69f00eaed0fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\features\safe_walk">
+      <UniqueIdentifier>{20264eb5-0d0b-4d01-8811-9dd010763d3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aim_assist.cpp">
@@ -204,6 +210,12 @@
     </ClCompile>
     <ClCompile Include="nGetTime.cpp">
       <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="fast_stop.cpp">
+      <Filter>SRC\features\fast_stop</Filter>
+    </ClCompile>
+    <ClCompile Include="safe_walk.cpp">
+      <Filter>SRC\features\safe_walk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -353,6 +365,12 @@
     </ClInclude>
     <ClInclude Include="sdk_forge_1.8.X.h">
       <Filter>SRC\SDK\Forge 1.8.X</Filter>
+    </ClInclude>
+    <ClInclude Include="fast_stop.h">
+      <Filter>SRC\features\fast_stop</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_walk.h">
+      <Filter>SRC\features\safe_walk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
