@@ -328,7 +328,7 @@ std::vector<std::shared_ptr<c_player>> c_world_forge_1710::get_players()
 	return players;
 }
 
-std::shared_ptr<c_block> c_world_forge_1710::get_block(jint x, jint y, jint z)
+std::shared_ptr<c_block> c_world_forge_1710::get_block(jfloat x, jfloat y, jfloat z)
 {
 	auto block_class = jni->CallObjectMethod(world_instance, worldfields.mid_get_block, x, y, z);
 
@@ -364,7 +364,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.item_sword_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemSword")));
 		playerfields.item_shovel_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemSpade")));
 		playerfields.item_hoe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemHoe")));
-		playerfields.item_pick_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemPickAxe")));
+		playerfields.item_pick_axe_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemPickaxe")));
 		playerfields.item_ender_pearl_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemEnderPearl")));
 		playerfields.item_fishing_rod_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemFishingRod")));
 		playerfields.item_ender_eye_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemEnderEye")));

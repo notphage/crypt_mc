@@ -331,7 +331,7 @@ std::vector<std::shared_ptr<c_player>> c_world_18X::get_players()
 	return players;
 }
 
-std::shared_ptr<c_block> c_world_18X::get_block(jint x, jint y, jint z)
+std::shared_ptr<c_block> c_world_18X::get_block(jfloat x, jfloat y, jfloat z)
 {
 	auto block_class = jni->CallObjectMethod(world_instance, worldfields.mid_get_block, x, y, z);
 

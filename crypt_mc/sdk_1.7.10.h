@@ -106,7 +106,7 @@ class c_world_1710 : public c_world
 public:
 	void instantiate(jobject, JNIEnv*) override;
 	std::vector<std::shared_ptr<c_player>> get_players() override;
-	std::shared_ptr<c_block> get_block(jint, jint, jint) override;
+	std::shared_ptr<c_block> get_block(jfloat, jfloat, jfloat) override;
 };
 
 class c_game_1710 : public c_game

@@ -6,6 +6,7 @@
 struct block_fields
 {
 	jmethodID mid_from_block = nullptr;
+	jfieldID fid_block_texture_name = nullptr;
 
 	jclass block = nullptr;
 };
@@ -218,9 +219,10 @@ static world_fields worldfields;
 static player_fields playerfields;
 static game_fields gamefields;
 
-void c_block_1710::instantiate(jobject block_instance, JNIEnv* _jni)
+void c_block_1710::instantiate(jobject block_object, JNIEnv* _jni)
 {
 	jni = _jni;
+	block_instance = block_object;
 
 	static bool init_fields = false;
 
@@ -231,15 +233,20 @@ void c_block_1710::instantiate(jobject block_instance, JNIEnv* _jni)
 		if (!class_loader)
 			return;
 
-		blockfields.block = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.block.Block")));
-		blockfields.mid_from_block = jni->GetStaticMethodID(blockfields.block, xors("func_149682_b"), xors("(Lnet/minecraft/block/Block;)I"));
+		blockfields.block = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aji")));
+		blockfields.mid_from_block = jni->GetStaticMethodID(blockfields.block, xors("b"), xors("(Laji;)I"));//field_149768_d
+		blockfields.fid_block_texture_name = jni->GetFieldID(blockfields.block, xors("b"), xors("Ljava/lang/String;"));
 
 		init_fields = true;
 	}
 
-	id = jni->CallStaticIntMethod(blockfields.block, blockfields.mid_from_block, block_instance);
+	auto block_texture_name = (jstring)jni->GetObjectField(block_instance, blockfields.fid_block_texture_name);
 
-	jni->DeleteLocalRef(block_instance);
+	const char* char_string = jni->GetStringUTFChars(block_texture_name, nullptr);
+	name = std::string(char_string);
+	jni->ReleaseStringUTFChars(block_texture_name, char_string);
+
+	id = jni->CallStaticIntMethod(blockfields.block, blockfields.mid_from_block, block_instance);
 }
 
 void c_class_loader_1710::instantiate(JNIEnv* _jni)
@@ -278,7 +285,6 @@ jclass c_class_loader_1710::find_class(const char* name)
 void c_world_1710::instantiate(jobject world_object, JNIEnv* _jni)
 {
 	jni = _jni;
-
 	world_instance = world_object;
 
 	static bool init_fields = false;
@@ -333,7 +339,7 @@ std::vector<std::shared_ptr<c_player>> c_world_1710::get_players()
 	return players;
 }
 
-std::shared_ptr<c_block> c_world_1710::get_block(jint x, jint y, jint z)
+std::shared_ptr<c_block> c_world_1710::get_block(jfloat x, jfloat y, jfloat z)
 {
 	auto block_class = jni->CallObjectMethod(world_instance, worldfields.mid_get_block, x, y, z);
 

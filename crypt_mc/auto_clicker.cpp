@@ -30,21 +30,21 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 
 	bool white_list = false;
 
-	if (ctx.m_settings.combat_aim_assist_item_whitelist && !in_inventory)
+	if (ctx.m_settings.combat_auto_clicker_item_whitelist && !in_inventory)
 	{
-		if (ctx.m_settings.combat_aim_assist_axes && self->holding_axe())
+		if (ctx.m_settings.combat_auto_clicker_axes && self->holding_axe())
 			white_list = true;
 
-		if (ctx.m_settings.combat_aim_assist_swords && self->holding_sword())
+		if (ctx.m_settings.combat_auto_clicker_swords && self->holding_sword())
 			white_list = true;
 
-		if (ctx.m_settings.combat_aim_assist_hoes && self->holding_hoe())
+		if (ctx.m_settings.combat_auto_clicker_hoes && self->holding_hoe())
 			white_list = true;
 
-		if (ctx.m_settings.combat_aim_assist_shovels && self->holding_shovel())
+		if (ctx.m_settings.combat_auto_clicker_shovels && self->holding_shovel())
 			white_list = true;
 
-		if (ctx.m_settings.combat_aim_assist_pick_axes && self->holding_pick_axe())
+		if (ctx.m_settings.combat_auto_clicker_pick_axes && self->holding_pick_axe())
 			white_list = true;
 
 		if (!white_list)

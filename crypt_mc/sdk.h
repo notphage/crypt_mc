@@ -1251,12 +1251,20 @@ protected:
 	JNIEnv* jni;
 
 	jint id = 0;
+	std::string name{};
 public:
+	jobject block_instance = nullptr;
+
 	virtual void instantiate(jobject, JNIEnv*) = 0;
 
 	__forceinline jint get_id()
 	{
 		return id;
+	}
+
+	__forceinline std::string_view get_name()
+	{
+		return name;
 	}
 };
 
@@ -1373,7 +1381,7 @@ protected:
 public:
 	virtual void instantiate(jobject, JNIEnv*) = 0;
 	virtual std::vector<std::shared_ptr<c_player>> get_players() = 0;
-	virtual std::shared_ptr<c_block> get_block(jint, jint, jint) = 0;
+	virtual std::shared_ptr<c_block> get_block(jfloat, jfloat, jfloat) = 0;
 };
 
 class c_game
