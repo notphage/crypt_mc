@@ -230,8 +230,8 @@ void c_block_18X::instantiate(jobject block_instance, JNIEnv* _jni)
 		if (!class_loader)
 			return;
 
-		blockfields.block = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.block.Block")));
-		blockfields.mid_from_block = jni->GetStaticMethodID(blockfields.block, xors("func_149682_b"), xors("(Lnet/minecraft/block/Block;)I"));
+		blockfields.block = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("afh")));
+		blockfields.mid_from_block = jni->GetStaticMethodID(blockfields.block, xors("a"), xors("(Lafh;)I"));
 
 		init_fields = true;
 	}

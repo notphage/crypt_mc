@@ -11,14 +11,13 @@ void c_velocity::on_time(const std::shared_ptr<c_game>& mc, const std::shared_pt
 	if (ctx.m_settings.combat_velocity_on_sprint && !self->is_sprinting())
 		return;
 
-	//if (ctx.m_settings.combat_velocity_weapons_only && self->holding_weapon())
-	//	return;
-
 	const int chance = util::random(0, 100);
-	const auto delay_amount = ctx.m_settings.combat_velocity_delay ? (self->get_max_hurt_time() - 1) - ctx.m_settings.combat_velocity_delay_ticks : 9;
+	const auto delay_amount = ctx.m_settings.combat_velocity_delay ? (self->get_max_hurt_time()) - ctx.m_settings.combat_velocity_delay_ticks : self->get_max_hurt_time();
 	const auto hurt_time = self->get_hurt_time();
+	static auto last_hurt_time = hurt_time;
+	bool should_run_nine = last_hurt_time != self->get_max_hurt_time() && last_hurt_time != 9 && hurt_time == 9 && should_run;
 
-	if (hurt_time == delay_amount && hurt_time != 0 && chance <= ctx.m_settings.combat_velocity_chance && should_run)
+	if ((hurt_time == delay_amount || should_run_nine) && hurt_time != 0 && chance <= ctx.m_settings.combat_velocity_chance && should_run)
 	{
 		should_run = false;
 
@@ -31,4 +30,6 @@ void c_velocity::on_time(const std::shared_ptr<c_game>& mc, const std::shared_pt
 	}
 	else if (hurt_time < delay_amount)
 		should_run = true;
+
+	last_hurt_time = hurt_time;
 }

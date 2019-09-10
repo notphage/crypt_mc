@@ -66,11 +66,18 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_auto_clicker)
 				auto_clicker_key.handle(menu.data(), "", &ctx.m_settings.combat_auto_clicker_key, keytype_t::kt_all);
 
-		
-			auto_clicker_item_whitelist.handle(menu.data(), xors("item whitelist"), &ctx.m_settings.combat_auto_clicker_item_whitelist);
-		
+			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 0, 24, 1, xors("cps"));
+			auto_clicker_max_cps.handle(menu.data(), xors("max"), &ctx.m_settings.combat_auto_clicker_max_cps, ctx.m_settings.combat_auto_clicker_min_cps, 25, 1, xors("cps"));
+			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
+				{
+					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
+					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
+					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")},
+					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")}
+				});
+
 			if (ctx.m_settings.combat_auto_clicker_item_whitelist)
-				auto_clicker_whitelist_items.handle(menu.data(), xors(""), 
+				auto_clicker_whitelist_items.handle(menu.data(), xors(""),
 					{
 						{&ctx.m_settings.combat_auto_clicker_swords, xors("swords")},
 						{&ctx.m_settings.combat_auto_clicker_axes, xors("axes")},
@@ -78,15 +85,6 @@ void c_gui::tab_combat()
 						{&ctx.m_settings.combat_auto_clicker_pick_axes, xors("pick axes")},
 						{&ctx.m_settings.combat_auto_clicker_shovels, xors("shovels")}
 					});
-
-			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 0, 24, 1, xors("cps"));
-			auto_clicker_max_cps.handle(menu.data(), xors("max"), &ctx.m_settings.combat_auto_clicker_max_cps, ctx.m_settings.combat_auto_clicker_min_cps, 25, 1, xors("cps"));
-			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
-				{
-					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
-					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
-					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")}
-				});
 		}
 		auto_clicker_groupbox.end(menu.data(), &ctx.m_settings.combat_auto_clicker);
 
@@ -103,7 +101,7 @@ void c_gui::tab_combat()
 
 			reach_conditions.handle(menu.data(), xors("conditions"),
 				{
-					{&ctx.m_settings.combat_reach_visible, xors("through blocks")},
+					{&ctx.m_settings.combat_reach_visible, xors("visible only")},
 					{&ctx.m_settings.combat_reach_on_sprint, xors("require sprint")},
 					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
 					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes") }
@@ -125,17 +123,6 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_aim_assist)
 				aim_assist_key.handle(menu.data(), "", &ctx.m_settings.combat_aim_assist_key, keytype_t::kt_all);
 
-			aim_assist_item_whitelist.handle(menu.data(), xors("item whitelist"), &ctx.m_settings.combat_aim_assist_item_whitelist);
-
-			if (ctx.m_settings.combat_aim_assist_item_whitelist)
-				aim_assist_whitelist_items.handle(menu.data(), xors(""),
-					{
-						{&ctx.m_settings.combat_aim_assist_swords, xors("swords")},
-						{&ctx.m_settings.combat_aim_assist_axes, xors("axes")},
-						{&ctx.m_settings.combat_aim_assist_hoes, xors("hoes")},
-						{&ctx.m_settings.combat_aim_assist_pick_axes, xors("pick axes")},
-						{&ctx.m_settings.combat_aim_assist_shovels, xors("shovels")}
-					});
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
 			aim_assist_scale.handle(menu.data(), xors("scale"), &ctx.m_settings.combat_aim_assist_scale, 0.f, 1.f, 0.01f);
@@ -152,8 +139,21 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_aim_assist_vertical, xors("vertical")},
 					{&ctx.m_settings.combat_aim_assist_sticky, xors("sticky")},
 					{&ctx.m_settings.combat_aim_assist_invisibles, xors("invisibles")},
-					{&ctx.m_settings.combat_aim_assist_nakeds, xors("nakeds")}
+					{&ctx.m_settings.combat_aim_assist_nakeds, xors("nakeds")},
+					{&ctx.m_settings.combat_aim_assist_break_blocks, xors("break blocks")},
+					{&ctx.m_settings.combat_aim_assist_visible_only, xors("visible only")},
+					{&ctx.m_settings.combat_aim_assist_item_whitelist, xors("item whitelist")}
 				});
+
+			if (ctx.m_settings.combat_aim_assist_item_whitelist)
+				aim_assist_whitelist_items.handle(menu.data(), xors(""),
+					{
+						{&ctx.m_settings.combat_aim_assist_swords, xors("swords")},
+						{&ctx.m_settings.combat_aim_assist_axes, xors("axes")},
+						{&ctx.m_settings.combat_aim_assist_hoes, xors("hoes")},
+						{&ctx.m_settings.combat_aim_assist_pick_axes, xors("pick axes")},
+						{&ctx.m_settings.combat_aim_assist_shovels, xors("shovels")}
+					});
 		}
 		aim_assist_groupbox.end(menu.data(), &ctx.m_settings.combat_aim_assist);
 
@@ -172,7 +172,6 @@ void c_gui::tab_combat()
 			velocity_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_velocity_on_sprint, xors("require sprint")},
-					//{&ctx.m_settings.combat_velocity_weapons_only, xors("weapons only")},
 					{&ctx.m_settings.combat_velocity_delay, xors("delay")}
 				});
 		}
@@ -180,7 +179,7 @@ void c_gui::tab_combat()
 
 		aim_assist_key.dropdown(menu.data());
 		aim_assist_whitelist_items.dropdown(menu.data());
-		aim_assist_conditions.dropdown(menu.data());
+		aim_assist_conditions.dropdown(menu.data()); 
 		velocity_key.dropdown(menu.data());
 		velocity_conditions.dropdown(menu.data());
 	}
@@ -596,12 +595,6 @@ void c_gui::tab_config()
 						return;
 				
 					CloseClipboard();
-				});
-
-			refresh.handle(menu.data(), xors("refresh"), []
-				{
-					ctx.m_cfg_list.clear();
-					util::get_all_configs(ctx.m_cfg_list, xors("Software\\Spotify"));
 				});
 
 			deletee.handle(menu.data(), xors("delete"), []

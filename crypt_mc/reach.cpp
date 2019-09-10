@@ -31,7 +31,7 @@ void c_reach::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c
 	
 	for (const auto& player : world->get_players())
 	{
-	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player) || (!ctx.m_settings.combat_reach_visible && !self->is_visible(player->player_instance)))
+	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player) || (!self->is_visible(player->player_instance) && ctx.m_settings.combat_reach_visible))
 	        continue;
 
 		const vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());

@@ -10,11 +10,17 @@ void c_anti_afk::on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c
 	
 	static auto delay = util::random(60000, 180000);
 	
+	if (self->get_forward() != 0.f || self->get_strafing() != 0.f)
+	{
+		old = now;
+		delay = util::random(60000, 180000);
+	}
+
 	if (ctx.m_settings.player_anti_afk && delta > delay && self->is_collided_vertically() && self->is_on_ground())
 	{
 		old = now;
 		delay = util::random(60000, 180000);
 
-		self->set_motion_y(0.41999998688697815);
+		self->set_motion_y(0.42f);
 	}
 }

@@ -824,7 +824,7 @@ void c_player_1710::set_pitch(jfloat pitch)
 
 void c_player_1710::set_yaw(jfloat yaw)
 {
-	//jni->SetFloatField(player_instance, playerfields.fid_prev_yaw, yaw);
+	jni->SetFloatField(player_instance, playerfields.fid_prev_yaw, yaw);
 	jni->SetFloatField(player_instance, playerfields.fid_yaw, yaw);
 }
 

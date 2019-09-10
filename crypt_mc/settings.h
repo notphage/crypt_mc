@@ -279,6 +279,8 @@ public:
 	setting_t<bool> combat_aim_assist_shovels{ &m_holder, fnvc("combat_aim_assist_shovels"), false };
 
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
+	setting_t<bool> combat_aim_assist_visible_only{ &m_holder, fnvc("combat_aim_assist_visible_only"), true };
+	setting_t<bool> combat_aim_assist_break_blocks{ &m_holder, fnvc("combat_aim_assist_break_blocks"), true };
 	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), true };
 	setting_t<bool> combat_aim_assist_require_click{&m_holder, fnvc("combat_aim_assist_require_click"), true};
 	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), false };

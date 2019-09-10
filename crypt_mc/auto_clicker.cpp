@@ -61,7 +61,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block() && !mc->is_in_inventory())
 	{
 		left_click = true;
-		current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-10, 10), 10, 2000);
+		current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-20, 20), 10, 2000);
 		last_click = GetTickCount64();
 		clicks_skip = 0;
 		clicks_until_skip = util::random(43, 62);
@@ -124,7 +124,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 			if (GetTickCount64() - last_click > 80)
 			{
 				left_click = true;
-				current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-20, 20), 10, 2000);
+				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-20, 20), 10, 2000);
 				last_click = GetTickCount64();
 				clicks_skip = 0;
 				clicks_until_skip = util::random(43, 62);
@@ -143,7 +143,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 			g_input.release_mouse(true);
 
 			left_click = true;
-			current_delay = std::clamp(util::random_delay(ctx.m_settings.combat_auto_clicker_min_cps, ctx.m_settings.combat_auto_clicker_max_cps + 1) + util::random(-20, 20), 10, 2000);
+			current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-20, 20), 10, 2000);
 			last_click = GetTickCount64();
 			clicks_skip += 1;
 			clicks_change += 1;
