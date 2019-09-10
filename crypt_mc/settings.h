@@ -304,7 +304,7 @@ public:
 	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), true };
 	setting_t<bool> combat_reach_hitboxes{ &m_holder, fnvc("combat_reach_hitboxes"), false };
 	setting_t<float> combat_reach_distance{ &m_holder, fnvc("combat_reach_distance"), 3.1f };
-	setting_t<int> combat_reach_hitchance{ &m_holder, fnvc("combat_reach_hitchance"), 80 };
+	setting_t<int> combat_reach_hitchance{ &m_holder, fnvc("combat_reach_hitchance"), 40 };
 	setting_t<float> combat_reach_hitboxes_scale{ &m_holder, fnvc("combat_reach_hitboxes_scale"), 1.f };
 
 	//Player features
@@ -328,7 +328,7 @@ public:
 	setting_t<bool> player_fast_place_blocks{ &m_holder, fnvc("player_fast_place_blocks"), true };
 	setting_t<bool> player_fast_place_projectiles{ &m_holder, fnvc("player_fast_place_projectiles"), true };
 	setting_t<int> player_fast_place_block_delay{ &m_holder, fnvc("player_fast_place_block_delay"), 0 };
-	setting_t<int> player_fast_place_projectiles_delay{ &m_holder, fnvc("player_fast_place_projectiles_delay"), 0 };
+	setting_t<int> player_fast_place_projectiles_delay{ &m_holder, fnvc("player_fast_place_projectiles_delay"), 2 };
 
 	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
 

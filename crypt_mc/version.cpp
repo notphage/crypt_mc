@@ -90,6 +90,10 @@ void c_context::determine_version()
 		MH_CreateHook(nGetTime, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));
 		MH_EnableHook(nGetTime);
 
+		auto strict_math_atan2 = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("java.dll")), xors("Java_java_lang_StrictMath_atan2"));
+		MH_CreateHook(strict_math_atan2, &hooked::strict_math_atan2, reinterpret_cast<void**>(&hooked::o_strict_math_atan2));
+		MH_EnableHook(strict_math_atan2);
+
 		hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, -4, (long long)hooked::wnd_proc));
 	}
 

@@ -247,8 +247,11 @@ void c_gui::tab_player()
 		{
 			fast_place_key.handle(menu.data(), "", &ctx.m_settings.player_fast_place_key, keytype_t::kt_all);
 
-			fast_place_block_delay.handle(menu.data(), xors("block delay"), &ctx.m_settings.player_fast_place_block_delay, 0, 4, 1);
-			fast_place_projectiles_delay.handle(menu.data(), xors("projectile delay"), &ctx.m_settings.player_fast_place_projectiles_delay, 0, 4, 1);
+			if (ctx.m_settings.player_fast_place_blocks)
+				fast_place_block_delay.handle(menu.data(), xors("block delay"), &ctx.m_settings.player_fast_place_block_delay, 0, 4, 1);
+
+			if (ctx.m_settings.player_fast_place_projectiles)
+				fast_place_projectiles_delay.handle(menu.data(), xors("projectile delay"), &ctx.m_settings.player_fast_place_projectiles_delay, 0, 4, 1);
 
 			fast_place_items.handle(menu.data(), xors("items"),
 				{
@@ -388,7 +391,9 @@ void c_gui::tab_movement()
 
 			flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
 			flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
-			flight_glide_speed.handle(menu.data(), xors("glide speed"), &ctx.m_settings.movement_flight_glide_speed, 0.f, 1.f, 0.01f);
+
+			if (ctx.m_settings.movement_flight_glide)
+				flight_glide_speed.handle(menu.data(), xors("glide speed"), &ctx.m_settings.movement_flight_glide_speed, 0.f, 1.f, 0.01f);
 		
 			flight_options.handle(menu.data(), xors("options"),
 				{
@@ -409,15 +414,13 @@ void c_gui::tab_movement()
 
 		fast_stop_groupbox.start(menu.data(), xors("fast stop"));
 		{
-			if (ctx.m_settings.movement_fast_stop)
-				fast_stop_key.handle(menu.data(), "", &ctx.m_settings.movement_fast_stop_key, keytype_t::kt_all);
+			fast_stop_key.handle(menu.data(), "", &ctx.m_settings.movement_fast_stop_key, keytype_t::kt_all);
 		}
 		fast_stop_groupbox.end(menu.data(), &ctx.m_settings.movement_fast_stop);
 
 		safe_walk_groupbox.start(menu.data(), xors("safe walk"));
 		{
-			if (ctx.m_settings.movement_safe_walk)
-				safe_walk_key.handle(menu.data(), "", &ctx.m_settings.movement_safe_walk_key, keytype_t::kt_all);
+			safe_walk_key.handle(menu.data(), "", &ctx.m_settings.movement_safe_walk_key, keytype_t::kt_all);
 		}
 		safe_walk_groupbox.end(menu.data(), &ctx.m_settings.movement_safe_walk);
 

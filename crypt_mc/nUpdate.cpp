@@ -31,7 +31,7 @@ long __stdcall hooked::get_update(JNIEnv* jni, jclass caller)
 			const auto self = mc->get_player();
 			const auto world = mc->get_world();
 			
-			if (self.get() != nullptr && world.get() != nullptr)
+			if (self && world)
 			{
 				ctx.m_ingame = true;
 			

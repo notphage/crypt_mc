@@ -236,6 +236,7 @@
     <ClCompile Include="speed.cpp" />
     <ClCompile Include="sprint.cpp" />
     <ClCompile Include="step.cpp" />
+    <ClCompile Include="strict_math_atan2.cpp" />
     <ClCompile Include="swapbuffers.cpp" />
     <ClCompile Include="throw.cpp" />
     <ClCompile Include="timer.cpp" />

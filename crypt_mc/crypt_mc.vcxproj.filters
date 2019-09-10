@@ -11,9 +11,6 @@
     <Filter Include="SRC\hack">
       <UniqueIdentifier>{3c129847-825d-4fcc-9b03-2f8a5f76fb2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\render">
-      <UniqueIdentifier>{e8089f30-5f27-443e-be54-381aee185cbd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\SDK">
       <UniqueIdentifier>{ddd79746-fa49-48d3-bb95-76051554e2f0}</UniqueIdentifier>
     </Filter>
@@ -28,9 +25,6 @@
     </Filter>
     <Filter Include="SRC\hack\hookers\hde">
       <UniqueIdentifier>{b1b6fb09-2b4a-4d3a-b93f-83a2cdce964f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRC\render\text">
-      <UniqueIdentifier>{c144c892-05e6-4849-8d7c-ca4533d3c237}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\features\fast_place">
       <UniqueIdentifier>{510f7008-92be-444a-af3e-3802329897f8}</UniqueIdentifier>
@@ -64,9 +58,6 @@
     </Filter>
     <Filter Include="SRC\features\step">
       <UniqueIdentifier>{9bd4cd41-a35e-4302-a2db-f1d5cc07d86b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRC\render\gui">
-      <UniqueIdentifier>{b02a333a-0df3-4241-9482-2c69bf8f1690}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\features\anti_afk">
       <UniqueIdentifier>{f19caee8-8421-40c9-a928-e822248092ac}</UniqueIdentifier>
@@ -103,6 +94,15 @@
     </Filter>
     <Filter Include="SRC\features\safe_walk">
       <UniqueIdentifier>{20264eb5-0d0b-4d01-8811-9dd010763d3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render">
+      <UniqueIdentifier>{e8089f30-5f27-443e-be54-381aee185cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render\text">
+      <UniqueIdentifier>{c144c892-05e6-4849-8d7c-ca4533d3c237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\render\gui">
+      <UniqueIdentifier>{b02a333a-0df3-4241-9482-2c69bf8f1690}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +216,9 @@
     </ClCompile>
     <ClCompile Include="safe_walk.cpp">
       <Filter>SRC\features\safe_walk</Filter>
+    </ClCompile>
+    <ClCompile Include="strict_math_atan2.cpp">
+      <Filter>SRC\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

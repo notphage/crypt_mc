@@ -16,10 +16,12 @@ void unload()
 {
     auto nGetTime = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
 	auto nUpdate = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
+	auto strict_math_atan2 = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("java.dll")), xors("Java_java_lang_StrictMath_atan2"));
 
 	MH_RemoveHook(SwapBuffers);
     MH_RemoveHook(nGetTime);
 	MH_RemoveHook(nUpdate);
+	MH_RemoveHook(strict_math_atan2);
 
 	SetWindowLongPtrA(ctx.m_window, -4, reinterpret_cast<long long>(hooked::o_wnd_proc));
 

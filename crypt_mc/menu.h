@@ -518,8 +518,8 @@ namespace UI
 				ctx.m_renderer->draw_line({ m_start.x, m_start.y }, { m_start.x + 8.f, m_start.y }, edge_color);
 				ctx.m_renderer->draw_line({ m_start.x - 2.f, m_start.y }, { m_start.x + 8.f, m_start.y - 1.f }, shadow_color);
 
-				ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
-				ctx.m_renderer->draw_line({ m_start.x + 26.f + text_width, m_start.y }, { m_start.x + width + 1.f, m_start.y - 1.f }, shadow_color);
+				ctx.m_renderer->draw_line({ m_start.x + 11.f + text_width, m_start.y }, { m_start.x + width, m_start.y }, edge_color);
+				ctx.m_renderer->draw_line({ m_start.x + 11.f + text_width, m_start.y }, { m_start.x + width + 1.f, m_start.y - 1.f }, shadow_color);
 			}
 
 			// left

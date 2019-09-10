@@ -864,7 +864,7 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.cls_lwjgl_sys_impl = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/WindowsSysImplementation")));
 		gamefields.cls_lwjgl_mouse = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/input/Mouse")));
 		gamefields.cls_lwjgl_display = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("org/lwjgl/opengl/Display")));
-		gamefields.cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java.lang.Enum")));
+		gamefields.cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java/lang/Enum")));
 		gamefields.cls_keybinding = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avb")));
 		gamefields.cls_game_settings = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avh")));
 	
@@ -892,7 +892,7 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
 		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lauh$a;"));
-		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("ac"), xors("Lavh;"));
+		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("ac"), xors("Lavb;"));
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));
