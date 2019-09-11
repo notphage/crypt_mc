@@ -418,17 +418,17 @@ void c_gui::tab_movement()
 		}
 		fast_stop_groupbox.end(menu.data(), &ctx.m_settings.movement_fast_stop);
 
-		safe_walk_groupbox.start(menu.data(), xors("safe walk"));
-		{
-			safe_walk_key.handle(menu.data(), "", &ctx.m_settings.movement_safe_walk_key, keytype_t::kt_all);
-		}
-		safe_walk_groupbox.end(menu.data(), &ctx.m_settings.movement_safe_walk);
+		//safe_walk_groupbox.start(menu.data(), xors("safe walk"));
+		//{
+		//	safe_walk_key.handle(menu.data(), "", &ctx.m_settings.movement_safe_walk_key, keytype_t::kt_all);
+		//}
+		//safe_walk_groupbox.end(menu.data(), &ctx.m_settings.movement_safe_walk);
 
 		timer_key.dropdown(menu.data());
 		flight_key.dropdown(menu.data());
 		step_key.dropdown(menu.data());
 		fast_stop_key.dropdown(menu.data());
-		safe_walk_key.dropdown(menu.data());
+		//safe_walk_key.dropdown(menu.data());
 		flight_mode.dropdown(menu.data());
 
 		flight_options.dropdown(menu.data());

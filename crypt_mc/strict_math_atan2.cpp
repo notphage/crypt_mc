@@ -14,7 +14,7 @@ long __stdcall hooked::strict_math_atan2(JNIEnv* jni, jclass caller)
 		if (self && world)
 		{
 			for (auto&& feature : ctx.m_features)
-				feature->on_atan2(mc, self, world);
+				feature->run(mc, self, world, feature_type::FEATURE_ATAN2);
 		}
 	}
 

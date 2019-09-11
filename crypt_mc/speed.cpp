@@ -1,73 +1,51 @@
 #include "context.h"
 #include "speed.h"
 
-void c_speed::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_base_speed::jump(const std::shared_ptr<c_player>& self, float height)
 {
-	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
+	self->set_motion_y(height);
+}
 
-	if (valid_keystate(ctx.m_settings.movement_longjump_key))
-		longjump(self);
-	else if (ctx.m_settings.movement_speed && valid_keystate(ctx.m_settings.movement_speed_key))
-	{
-		if (self->get_strafing() != 0.f || self->get_forward() != 0.f)
-		{
-			switch (ctx.m_settings.movement_speed_mode)
-			{
-				case 0:
-				{
-					bhop(self);
-					break;
-				}
+float c_base_speed::get_base_speed(const std::shared_ptr<c_player>& self)
+{
+	return self->is_potion_active(1) ? 0.2873f * 1.f + 0.2f * static_cast<float>((self->get_speed_amplifier()) + 1) : 0.2873f;
+}
 
-				case 1:
-				{
-					slowhop(self);
-					break;
-				}
+void c_base_speed::set_speed(const std::shared_ptr<c_player>& self, float speed) const
+{
+	self->set_motion_x(-(sin(get_direction(self)) * speed));
+	self->set_motion_z(cos(get_direction(self)) * speed);
+}
 
-				case 2:
-				{
-					minihop(self);
-					break;
-				}
+//Intense fucking math
+float c_base_speed::get_direction(const std::shared_ptr<c_player>& self)
+{
+	auto yaw = self->get_yaw();
 
-				case 3:
-				{
-					yport(self);
-					break;
-				}
+	const auto moving_forward = self->get_forward();
+	const auto moving_strafing = self->get_strafing();
 
-				case 4:
-				{
-					vanilla(self);
-					break;
-				}
+	float forward;
 
-				case 5:
-				{
-					glidehop(self);
-					break;
-				}
+	if (moving_forward < 0.0F)
+		yaw += 180;
 
-				case 6:
-				{
-					custom(self);
-					break;
-				}
-				
-				default:
-					break;
-			}
-		}
-		else
-		{
-			self->set_motion_x(0);
-			self->set_motion_z(0);
-		}
-	}
-	else if (ctx.m_settings.movement_air_control && valid_keystate(ctx.m_settings.movement_air_control_key))
-		if (!m_on_ground)
-			set_speed(self, get_base_speed(self));
+	if (moving_forward < 0)
+		forward = -0.5f;
+	else if (moving_forward > 0)
+		forward = 0.5f;
+	else
+		forward = 1;
+
+	if (moving_strafing > 0.0F)
+		yaw -= 90.0F * forward;
+
+	if (moving_strafing < 0.0F)
+		yaw += 90.0F * forward;
+
+	yaw *= 0.017453292F;
+
+	return yaw;
 }
 
 void c_speed::bhop(const std::shared_ptr<c_player>& self) const
@@ -103,7 +81,6 @@ void c_speed::custom(const std::shared_ptr<c_player>& self) const
 	else
 		set_speed(self, get_base_speed(self) + (m_on_ground ? ctx.m_settings.movement_speed_custom_ground_speed_val : ctx.m_settings.movement_speed_custom_air_speed_val));
 }
-
 
 void c_speed::minihop(const std::shared_ptr<c_player>& self) const
 {
@@ -149,49 +126,74 @@ void c_speed::longjump(const std::shared_ptr<c_player>& self) const
 	}
 }
 
-void c_speed::jump(const std::shared_ptr<c_player>& self, float height)
+void c_speed::on_get_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	self->set_motion_y(height);
-}
+	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
 
-float c_speed::get_base_speed(const std::shared_ptr<c_player>& self)
-{
-	return self->is_potion_active(1) ? 0.2873f * 1.f + 0.2f * static_cast<float>((self->get_speed_amplifier()) + 1) : 0.2873f;
-}
+	if (valid_keystate(ctx.m_settings.movement_longjump_key))
+		longjump(self);
 
-void c_speed::set_speed(const std::shared_ptr<c_player>& self, float speed) const
-{
-	self->set_motion_x(-(sin(get_direction(self)) * speed));
-	self->set_motion_z(cos(get_direction(self)) * speed);
-}
+	if (self->get_strafing() != 0.f || self->get_forward() != 0.f)
+	{
+		switch (ctx.m_settings.movement_speed_mode)
+		{
+			case 0:
+			{
+				bhop(self);
+				break;
+			}
 
-//Intense fucking math
-float c_speed::get_direction(const std::shared_ptr<c_player>& self)
-{
-	auto yaw = self->get_yaw();
+			case 1:
+			{
+				slowhop(self);
+				break;
+			}
 
-	const auto moving_forward = self->get_forward();
-	const auto moving_strafing = self->get_strafing();
+			case 2:
+			{
+				minihop(self);
+				break;
+			}
 
-	float forward;
+			case 3:
+			{
+				yport(self);
+				break;
+			}
 
-	if (moving_forward < 0.0F)
-		yaw += 180;
+			case 4:
+			{
+				vanilla(self);
+				break;
+			}
 
-	if (moving_forward < 0)
-		forward = -0.5f;
-	else if (moving_forward > 0)
-		forward = 0.5f;
+			case 5:
+			{
+				glidehop(self);
+				break;
+			}
+
+			case 6:
+			{
+				custom(self);
+				break;
+			}
+			
+			default:
+				break;
+		}
+	}
 	else
-		forward = 1;
+	{
+		self->set_motion_x(0);
+		self->set_motion_z(0);
+	}
+}
 
-	if (moving_strafing > 0.0F)
-		yaw -= 90.0F * forward;
+void c_air_control::on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>&)
+{
+	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
 
-	if (moving_strafing < 0.0F)
-		yaw += 90.0F * forward;
-
-	yaw *= 0.017453292F;
-
-	return yaw;
+	if (!m_on_ground)
+		set_speed(self, get_base_speed(self));
 }

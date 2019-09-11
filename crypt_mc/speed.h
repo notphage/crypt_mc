@@ -1,9 +1,23 @@
 #pragma once
 
-class c_speed : public c_feature
+class c_base_speed : public c_feature
 {
+protected:
 	bool m_on_ground = false;
 
+	static void jump(const std::shared_ptr<c_player>& self, float height);
+	void set_speed(const std::shared_ptr<c_player>& self, float speed) const;
+	static float get_direction(const std::shared_ptr<c_player>& self);
+	static float get_base_speed(const std::shared_ptr<c_player>& self);
+
+public:
+	c_base_speed(bool* setting, keysetting_t* keybind = nullptr)
+		: c_feature(setting, keybind)
+	{}
+};
+
+class c_speed : public c_base_speed
+{
     void bhop(const std::shared_ptr<c_player>& self) const;
     void slowhop(const std::shared_ptr<c_player>& self) const;
     void custom(const std::shared_ptr<c_player>& self) const;
@@ -13,17 +27,34 @@ class c_speed : public c_feature
     void vanilla(const std::shared_ptr<c_player>& self) const;
 
 	void longjump(const std::shared_ptr<c_player>& self) const;
-
-	static void jump(const std::shared_ptr<c_player>& self, float height);
-
-	void set_speed(const std::shared_ptr<c_player>& self, float speed) const;
-
-	static float get_direction(const std::shared_ptr<c_player>& self);
-    static float get_base_speed(const std::shared_ptr<c_player>& self);
 public:
-	void on_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override;
+	c_speed(bool* setting, keysetting_t* keybind = nullptr)
+		: c_base_speed(setting, keybind)
+	{
+		using namespace std::placeholders;
 
-	void on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
-	void on_render(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
-	void on_atan2(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
+		register_feature(std::bind(&c_speed::on_get_time, this, _1, _2, _3), feature_type::FEATURE_GET_TIME);
+	}
+
+	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+
+	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+};
+
+class c_air_control : public c_base_speed
+{
+public:
+	c_air_control(bool* setting, keysetting_t* keybind = nullptr)
+		: c_base_speed(setting, keybind)
+	{
+		using namespace std::placeholders;
+
+		register_feature(std::bind(&c_air_control::on_get_time, this, _1, _2, _3), feature_type::FEATURE_GET_TIME);
+	}
+
+	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+
+	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 };

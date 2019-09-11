@@ -142,11 +142,8 @@ float c_aim_assist::get_y_speed()
 	return m_vec.at(std::clamp(value, 1.f, 15.f));
 }
 
-void c_aim_assist::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	if (!ctx.m_settings.combat_aim_assist || !valid_keystate(ctx.m_settings.combat_aim_assist_key))
-		return;
-
 	if (m_last_scale == -1.f || ctx.m_settings.combat_aim_assist_scale != m_last_scale)
 	{
 		scan();

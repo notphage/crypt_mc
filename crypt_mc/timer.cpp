@@ -1,13 +1,12 @@
 #include "context.h"
 #include "timer.h"
 
-void c_timer::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_timer::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&)
 {
-    if (!ctx.m_settings.movement_timer || !valid_keystate(ctx.m_settings.movement_timer_key))
-    {
-        mc->set_timer_speed(1.f);
-        return;
-    }
-
 	mc->set_timer_speed(ctx.m_settings.movement_timer_speed);
+}
+
+void c_timer::on_disable(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&)
+{
+	mc->set_timer_speed(1.f);
 }

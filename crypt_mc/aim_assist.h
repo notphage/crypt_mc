@@ -22,9 +22,16 @@ class c_aim_assist : public c_feature
 	float get_x_speed();
 	float get_y_speed();
 public:
-	void on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override;
+	c_aim_assist(bool* setting, keysetting_t* keybind = nullptr)
+		: c_feature(setting, keybind)
+	{
+		using namespace std::placeholders;
 
-	void on_render(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
-	void on_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
-	void on_atan2(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
+		register_feature(std::bind(&c_aim_assist::on_update, this, _1, _2, _3), feature_type::FEATURE_UPDATE);
+	}
+
+	void on_update(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+
+	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 };

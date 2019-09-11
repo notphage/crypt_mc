@@ -14,9 +14,9 @@ float multiplier = 0.5;
 
 uint64_t last_click = 0;
 
-void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	if (!ctx.m_settings.combat_auto_clicker || !valid_keystate(ctx.m_settings.combat_auto_clicker_key) || ctx.m_menu_open)
+	if (ctx.m_menu_open)
 		return;
 
 	const bool in_inventory = mc->is_in_inventory();
@@ -58,7 +58,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 
 	static bool init_block_break = false;
 
-	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block() && !mc->is_in_inventory())
+	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block() && !in_inventory)
 	{
 		left_click = true;
 		current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-20, 20), 10, 2000);
@@ -87,6 +87,23 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 
 	if (mouse_down)
 	{
+		if (in_inventory)
+		{
+			bool ret = true;
+
+			for (auto i = 36; i < 45; ++i)
+				if (!self->get_stack(i))
+					ret = false;
+
+			if (ret)
+			{
+				left_click = true;
+				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-20, 20), 10, 2000);
+				last_click = GetTickCount64();
+				return;
+			}
+		}
+
 		if (last_click == 0)
 			last_click = GetTickCount64();
 
@@ -94,16 +111,16 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 		{
 			if (!set_change)
 			{
-				const float random = util::random(1.4f, 1.5f);
-
-				const float rand_multiplier = util::random(0, 100) > 80 ? -1.f : 1.f;
-
+				const float random = util::random(1.05f, 1.08f);
+		
+				const float rand_multiplier = util::random(0, 100) > 70 ? 1.f : -1.f;
+		
 				min_cps = ctx.m_settings.combat_auto_clicker_min_cps * static_cast<int>(random * rand_multiplier);
 				max_cps = ctx.m_settings.combat_auto_clicker_max_cps * static_cast<int>(random * rand_multiplier);
-
+		
 				set_change = true;
 			}
-
+		
 			if (clicks_change - clicks_until_change > clicks_until_escape)
 			{
 				clicks_change = 0;
@@ -115,7 +132,7 @@ void c_auto_clicker::on_tick(const std::shared_ptr<c_game>& mc, const std::share
 		{
 			min_cps = ctx.m_settings.combat_auto_clicker_min_cps;
 			max_cps = ctx.m_settings.combat_auto_clicker_max_cps + 1;
-
+		
 			set_change = false;
 		}
 

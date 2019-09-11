@@ -3,9 +3,16 @@
 class c_safe_walk : public c_feature
 {
 public:
-	void on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override;
+	c_safe_walk(bool* setting, keysetting_t* keybind = nullptr)
+		: c_feature(setting, keybind)
+	{
+		using namespace std::placeholders;
 
-	void on_render(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
-	void on_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
-	void on_atan2(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { }
+		register_feature(std::bind(&c_safe_walk::on_get_time, this, _1, _2, _3), feature_type::FEATURE_GET_TIME);
+	}
+
+	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+
+	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 };

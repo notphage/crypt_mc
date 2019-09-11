@@ -1,5 +1,5 @@
-#include "context.h"
-#include "visuals.h"
+//#include "context.h"
+//#include "visuals.h"
 //#include <gl/GL.h>
 //
 //void c_visuals::draw_box_3d(const std::shared_ptr<c_player>& player, const vec3& pos)
@@ -289,8 +289,8 @@
 //	LI_FN(glPopMatrix).cached()();
 //}
 //
-void c_visuals::on_render(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
-{
+//void c_visuals::on_render(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+//{
 //	auto players = world->get_players();
 //
 //	for (auto&& player : players)
@@ -329,4 +329,4 @@ void c_visuals::on_render(const std::shared_ptr<c_game>& mc, const std::shared_p
 //		if (ctx.m_settings.visuals_esp_nametags)
 //			draw_name_tags(mc, player, pos);
 //	}
-}
+//}

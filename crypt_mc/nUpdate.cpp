@@ -54,7 +54,7 @@ long __stdcall hooked::get_update(JNIEnv* jni, jclass caller)
 					ctx.m_in_chat = mc->is_in_chat();
 			
 					for (auto&& feature : ctx.m_features)
-						feature->on_tick(mc, self, world);
+						feature->run(mc, self, world, feature_type::FEATURE_UPDATE);
 				}
 			}
 			else

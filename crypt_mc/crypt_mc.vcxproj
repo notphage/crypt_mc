@@ -212,6 +212,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fast_place.cpp" />
     <ClCompile Include="fast_stop.cpp" />
+    <ClCompile Include="feature.cpp" />
     <ClCompile Include="flight.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="nGetTime.cpp" />

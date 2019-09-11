@@ -220,6 +220,9 @@
     <ClCompile Include="strict_math_atan2.cpp">
       <Filter>SRC\hooks</Filter>
     </ClCompile>
+    <ClCompile Include="feature.cpp">
+      <Filter>SRC\features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aim_assist.h">

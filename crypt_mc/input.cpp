@@ -443,7 +443,7 @@ void c_input_manager::press_mouse(bool left)
 	int x, y;
 	get_cursor_pos(x, y);
 
-	LI_FN(PostMessageA).cached()(ctx.m_window, WM_LBUTTONDOWN, left ? MK_LBUTTON : MK_RBUTTON, MAKELPARAM(x, y));
+	LI_FN(PostMessageA).cached()(ctx.m_window, left ? WM_LBUTTONDOWN : WM_RBUTTONDOWN, left ? MK_LBUTTON : MK_RBUTTON, MAKELPARAM(x, y));
 }
 
 void c_input_manager::release_mouse(bool left)
@@ -451,5 +451,5 @@ void c_input_manager::release_mouse(bool left)
 	int x, y;
 	get_cursor_pos(x, y);
 
-	LI_FN(PostMessageA).cached()(ctx.m_window, WM_LBUTTONUP, left ? MK_LBUTTON : MK_RBUTTON, MAKELPARAM(x, y));
+	LI_FN(PostMessageA).cached()(ctx.m_window, left ? WM_LBUTTONUP : WM_RBUTTONUP, left ? MK_LBUTTON : MK_RBUTTON, MAKELPARAM(x, y));
 }

@@ -5,9 +5,6 @@ void c_velocity::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_p
 {
 	static bool should_run = true;
 
-	if (!ctx.m_settings.combat_velocity || !valid_keystate(ctx.m_settings.combat_velocity_key))
-		return;
-
 	if (ctx.m_settings.combat_velocity_on_sprint && !self->is_sprinting())
 		return;
 

@@ -97,21 +97,19 @@ void c_context::determine_version()
 		hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, -4, (long long)hooked::wnd_proc));
 	}
 
-	ctx.m_features.push_back(std::make_unique<c_auto_clicker>());
-	ctx.m_features.push_back(std::make_unique<c_aim_assist>());
-	ctx.m_features.push_back(std::make_unique<c_timer>());
-	ctx.m_features.push_back(std::make_unique<c_velocity>());
-	ctx.m_features.push_back(std::make_unique<c_fast_place>());
-	ctx.m_features.push_back(std::make_unique<c_speed>());
-	ctx.m_features.push_back(std::make_unique<c_fast_stop>());
-	ctx.m_features.push_back(std::make_unique<c_safe_walk>());
-	//ctx.m_features.push_back(std::make_unique<c_throw>());
-	ctx.m_features.push_back(std::make_unique<c_visuals>());
-	ctx.m_features.push_back(std::make_unique<c_reach>());
-    ctx.m_features.push_back(std::make_unique<c_flight>());
-    ctx.m_features.push_back(std::make_unique<c_sprint>());
-    ctx.m_features.push_back(std::make_unique<c_step>());
-	ctx.m_features.push_back(std::make_unique<c_anti_afk>());
+	ctx.m_features.emplace_back(std::make_unique<c_aim_assist>(&ctx.m_settings.combat_aim_assist, &ctx.m_settings.combat_aim_assist_key));
+	ctx.m_features.emplace_back(std::make_unique<c_anti_afk>(&ctx.m_settings.player_anti_afk));
+	ctx.m_features.emplace_back(std::make_unique<c_auto_clicker>(&ctx.m_settings.combat_auto_clicker, &ctx.m_settings.combat_auto_clicker_key));
+	ctx.m_features.emplace_back(std::make_unique<c_fast_place>(&ctx.m_settings.player_fast_place, &ctx.m_settings.player_fast_place_key));
+	ctx.m_features.emplace_back(std::make_unique<c_fast_stop>(&ctx.m_settings.movement_fast_stop, &ctx.m_settings.movement_fast_stop_key));
+	ctx.m_features.emplace_back(std::make_unique<c_flight>(&ctx.m_settings.movement_flight, &ctx.m_settings.movement_flight_key));
+	ctx.m_features.emplace_back(std::make_unique<c_reach>(&ctx.m_settings.combat_reach, &ctx.m_settings.combat_reach_key));
+	ctx.m_features.emplace_back(std::make_unique<c_safe_walk>(&ctx.m_settings.movement_safe_walk, &ctx.m_settings.movement_safe_walk_key));
+	ctx.m_features.emplace_back(std::make_unique<c_speed>(&ctx.m_settings.movement_speed, &ctx.m_settings.movement_speed_key));
+	ctx.m_features.emplace_back(std::make_unique<c_air_control>(&ctx.m_settings.movement_air_control, &ctx.m_settings.movement_air_control_key));
+	ctx.m_features.emplace_back(std::make_unique<c_step>(&ctx.m_settings.movement_step, &ctx.m_settings.movement_step_key));
+	ctx.m_features.emplace_back(std::make_unique<c_timer>(&ctx.m_settings.movement_timer, &ctx.m_settings.movement_timer_key));
+	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));
 }
 
 std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)

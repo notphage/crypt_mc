@@ -1,7 +1,7 @@
 #include "context.h"
 #include "anti_afk.h"
 
-void c_anti_afk::on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>&)
+void c_anti_afk::on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>&)
 {
 	// proper frametime
 	static auto old = std::chrono::high_resolution_clock::now();
@@ -16,7 +16,7 @@ void c_anti_afk::on_tick(const std::shared_ptr<c_game>&, const std::shared_ptr<c
 		delay = util::random(60000, 180000);
 	}
 
-	if (ctx.m_settings.player_anti_afk && delta > delay && self->is_collided_vertically() && self->is_on_ground())
+	if (delta > delay && self->is_collided_vertically() && self->is_on_ground())
 	{
 		old = now;
 		delay = util::random(60000, 180000);

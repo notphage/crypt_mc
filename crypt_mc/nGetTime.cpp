@@ -26,7 +26,7 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 					stack.method_name == fnvc("s")) // func_71407_l
 				{
 					for (auto&& feature : ctx.m_features)
-						feature->on_time(mc, self, world);
+						feature->run(mc, self, world, feature_type::FEATURE_GET_TIME);
 				}
 			}
 		}

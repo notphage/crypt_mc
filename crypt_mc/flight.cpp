@@ -1,16 +1,8 @@
 #include "context.h"
 #include "flight.h"
 
-void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+void c_flight::on_get_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	if (!ctx.m_settings.movement_flight || !valid_keystate(ctx.m_settings.movement_flight_key))
-	{
-		if (mc->get_timer_speed() == 0.149f)
-			mc->set_timer_speed(1.0f);
-
-		return;
-	}
-
 	if (ctx.m_settings.movement_flight_tight)
 	{
 		self->set_motion_x(0);
@@ -83,6 +75,11 @@ void c_flight::on_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 	{
 		self->set_motion_y(-ctx.m_settings.movement_flight_glide_speed);
 	}
+}
+
+void c_flight::on_disable(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&)
+{
+	mc->set_timer_speed(1.f);
 }
 
 void c_flight::set_speed(std::shared_ptr<c_player> self, float speed) const
