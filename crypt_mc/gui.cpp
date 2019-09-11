@@ -479,8 +479,6 @@ void c_gui::tab_movement()
 		{
 			sprint_key.handle(menu.data(), "", &ctx.m_settings.movement_sprint_key, keytype_t::kt_all);
 
-			if (ctx.m_settings.movement_sprint)
-				sprint_omni.handle(menu.data(), xors("omni"), &ctx.m_settings.movement_sprint_omni);
 		}
 		sprint_groupbox.end(menu.data(), &ctx.m_settings.movement_sprint);
 

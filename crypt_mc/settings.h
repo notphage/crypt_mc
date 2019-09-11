@@ -361,7 +361,6 @@ public:
 
     setting_t<bool> movement_sprint{ &m_holder, fnvc("movement_sprint"), false };
     setting_t<keysetting_t> movement_sprint_key{ &m_holder, fnvc("movement_sprint_key"), {} };
-	setting_t<bool> movement_sprint_omni{ &m_holder, fnvc("movement_sprint_omni"), false };
 
 	setting_t<bool> movement_speed{&m_holder, fnvc("movement_speed"), false};
 	setting_t<keysetting_t> movement_speed_key{&m_holder, fnvc("movement_speed_key"), {}};
