@@ -31,7 +31,7 @@ void c_reach::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 	    if (!player || !player->player_instance || player->is_dead()|| self->is_same(player) || (!self->is_visible(player->player_instance) && ctx.m_settings.combat_reach_visible))
 	        continue;
 
-		const vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());
+		const vec3 player_origin(player->origin_x(), player->aabb_min_y(), player->origin_z());
 
 		vec3 player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
 		vec3 player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());

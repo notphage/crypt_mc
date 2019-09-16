@@ -29,9 +29,10 @@ void c_gui::tab_combat()
 	static UI::c_key_bind auto_clicker_key;
 	static UI::c_slider auto_clicker_min_cps;
 	static UI::c_slider auto_clicker_max_cps;
+	static UI::c_slider auto_clicker_jitter_chance;
+	static UI::c_float_slider auto_clicker_jitter_intensity;
 	static UI::c_multi_dropdown auto_clicker_conditions;
 	static UI::c_checkbox auto_clicker_item_whitelist;
-	static UI::c_multi_dropdown auto_clicker_whitelist_items;
 
 	static UI::c_enable_groupbox aim_assist_groupbox;
 	static UI::c_key_bind aim_assist_key;
@@ -42,14 +43,14 @@ void c_gui::tab_combat()
 	static UI::c_float_slider aim_assist_distance;
 	static UI::c_multi_dropdown aim_assist_conditions;
 	static UI::c_checkbox aim_assist_item_whitelist;
-	static UI::c_multi_dropdown aim_assist_whitelist_items;
 
 	static UI::c_enable_groupbox velocity_groupbox;
-	static UI::c_key_bind velocity_key;;
+	static UI::c_key_bind velocity_key;
 	static UI::c_slider velocity_horizontal;
 	static UI::c_slider velocity_vertical;
 	static UI::c_slider velocity_chance;
 	static UI::c_slider velocity_delay;
+	static UI::c_slider velocity_kite;
 	static UI::c_multi_dropdown velocity_conditions;
 
 	static UI::c_enable_groupbox reach_groupbox;
@@ -68,23 +69,21 @@ void c_gui::tab_combat()
 
 			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 0, 24, 1, xors("cps"));
 			auto_clicker_max_cps.handle(menu.data(), xors("max"), &ctx.m_settings.combat_auto_clicker_max_cps, ctx.m_settings.combat_auto_clicker_min_cps, 25, 1, xors("cps"));
+			
+			if (ctx.m_settings.combat_auto_clicker_jitter)
+			{
+				auto_clicker_jitter_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_auto_clicker_jitter_chance, 1, 100, 1, xors("%"));
+				auto_clicker_jitter_intensity.handle(menu.data(), xors("intensity"), &ctx.m_settings.combat_auto_clicker_jitter_intensity, 0.01f, 1.0f, 0.01f);
+			}
+		
 			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
 					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
 					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")},
+					{&ctx.m_settings.combat_auto_clicker_jitter, xors("jitter")},
 					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")}
 				});
-
-			if (ctx.m_settings.combat_auto_clicker_item_whitelist)
-				auto_clicker_whitelist_items.handle(menu.data(), xors(""),
-					{
-						{&ctx.m_settings.combat_auto_clicker_swords, xors("swords")},
-						{&ctx.m_settings.combat_auto_clicker_axes, xors("axes")},
-						{&ctx.m_settings.combat_auto_clicker_hoes, xors("hoes")},
-						{&ctx.m_settings.combat_auto_clicker_pick_axes, xors("pick axes")},
-						{&ctx.m_settings.combat_auto_clicker_shovels, xors("shovels")}
-					});
 		}
 		auto_clicker_groupbox.end(menu.data(), &ctx.m_settings.combat_auto_clicker);
 
@@ -104,13 +103,12 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_reach_visible, xors("visible only")},
 					{&ctx.m_settings.combat_reach_on_sprint, xors("require sprint")},
 					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
-					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes") }
+					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes")}
 				});
 		}
 		reach_groupbox.end(menu.data(), &ctx.m_settings.combat_reach);
 
 		auto_clicker_key.dropdown(menu.data());
-		auto_clicker_whitelist_items.dropdown(menu.data());
 		auto_clicker_conditions.dropdown(menu.data());
 		reach_key.dropdown(menu.data());
 		reach_conditions.dropdown(menu.data());
@@ -125,11 +123,10 @@ void c_gui::tab_combat()
 
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
-			aim_assist_scale.handle(menu.data(), xors("scale"), &ctx.m_settings.combat_aim_assist_scale, 0.f, 1.f, 0.01f);
-			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 1.f, 10.f, 0.01f);
+			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 10.f, 0.01f);
 
 			if (ctx.m_settings.combat_aim_assist_vertical)
-				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 1.f, 10.f, 0.01f);
+				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 10.f, 0.01f);
 
 			aim_assist_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_aim_assist_distance, 3.f, 6.f, 0.01f);
 			aim_assist_conditions.handle(menu.data(), xors("conditions"),
@@ -138,22 +135,12 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_aim_assist_multipoint, xors("multipoint")},
 					{&ctx.m_settings.combat_aim_assist_vertical, xors("vertical")},
 					{&ctx.m_settings.combat_aim_assist_sticky, xors("sticky")},
-					{&ctx.m_settings.combat_aim_assist_invisibles, xors("invisibles")},
-					{&ctx.m_settings.combat_aim_assist_nakeds, xors("nakeds")},
 					{&ctx.m_settings.combat_aim_assist_break_blocks, xors("break blocks")},
 					{&ctx.m_settings.combat_aim_assist_visible_only, xors("visible only")},
-					{&ctx.m_settings.combat_aim_assist_item_whitelist, xors("item whitelist")}
+					{&ctx.m_settings.combat_aim_assist_item_whitelist, xors("item whitelist")},
+					{&ctx.m_settings.combat_aim_assist_invisibles, xors("ignore invisibles")},
+					{&ctx.m_settings.combat_aim_assist_nakeds, xors("ignore nakeds")}
 				});
-
-			if (ctx.m_settings.combat_aim_assist_item_whitelist)
-				aim_assist_whitelist_items.handle(menu.data(), xors(""),
-					{
-						{&ctx.m_settings.combat_aim_assist_swords, xors("swords")},
-						{&ctx.m_settings.combat_aim_assist_axes, xors("axes")},
-						{&ctx.m_settings.combat_aim_assist_hoes, xors("hoes")},
-						{&ctx.m_settings.combat_aim_assist_pick_axes, xors("pick axes")},
-						{&ctx.m_settings.combat_aim_assist_shovels, xors("shovels")}
-					});
 		}
 		aim_assist_groupbox.end(menu.data(), &ctx.m_settings.combat_aim_assist);
 
@@ -164,21 +151,28 @@ void c_gui::tab_combat()
 
 			velocity_horizontal.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_velocity_horizontal, 0, 200, 1, xors("%"));
 			velocity_vertical.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_velocity_vertical, 0, 200, 1, xors("%"));
+
+			if (ctx.m_settings.combat_velocity_kite)
+				velocity_kite.handle(menu.data(), xors("kite horizontal"), &ctx.m_settings.combat_velocity_kite_val, 100, 300, 1, xors("%"));
+
 			velocity_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_velocity_chance, 0, 100, 1, xors("%"));
 
 			if (ctx.m_settings.combat_velocity_delay)
 				velocity_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_velocity_delay_ticks, 0, 8, 1, xors(" ticks"));
 
+		
 			velocity_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_velocity_on_sprint, xors("require sprint")},
+					{&ctx.m_settings.combat_velocity_require_click, xors("require click")},
+					{&ctx.m_settings.combat_velocity_require_target, xors("require target")},
+					{&ctx.m_settings.combat_velocity_kite, xors("kite mode")},
 					{&ctx.m_settings.combat_velocity_delay, xors("delay")}
 				});
 		}
 		velocity_groupbox.end(menu.data(), &ctx.m_settings.combat_velocity);
 
 		aim_assist_key.dropdown(menu.data());
-		aim_assist_whitelist_items.dropdown(menu.data());
 		aim_assist_conditions.dropdown(menu.data()); 
 		velocity_key.dropdown(menu.data());
 		velocity_conditions.dropdown(menu.data());
@@ -325,10 +319,6 @@ void c_gui::tab_visuals()
 
 void c_gui::tab_movement()
 {
-	static UI::c_enable_groupbox timer_groupbox;
-	static UI::c_key_bind timer_key;
-	static UI::c_float_slider timer_speed;
-
 	static UI::c_enable_groupbox speed_groupbox;
 	static UI::c_key_bind speed_key;
 	static UI::c_dropdown speed_mode;
@@ -373,15 +363,6 @@ void c_gui::tab_movement()
 
 	menu.column_left();
 	{
-		timer_groupbox.start(menu.data(), xors("timer"));
-		{
-			if (ctx.m_settings.movement_timer)
-				timer_key.handle(menu.data(), "", &ctx.m_settings.movement_timer_key, keytype_t::kt_all);
-
-			timer_speed.handle(menu.data(), xors("speed"), &ctx.m_settings.movement_timer_speed, .01f, 3.f, 0.01f);
-		}
-		timer_groupbox.end(menu.data(), &ctx.m_settings.movement_timer);
-
 		flight_groupbox.start(menu.data(), xors("flight"));
 		{
 			if (ctx.m_settings.movement_flight)
@@ -424,7 +405,6 @@ void c_gui::tab_movement()
 		//}
 		//safe_walk_groupbox.end(menu.data(), &ctx.m_settings.movement_safe_walk);
 
-		timer_key.dropdown(menu.data());
 		flight_key.dropdown(menu.data());
 		step_key.dropdown(menu.data());
 		fast_stop_key.dropdown(menu.data());
@@ -496,11 +476,19 @@ void c_gui::tab_movement()
 	}
 }
 
-void c_gui::tab_config()
+void c_gui::tab_misc()
 {
 	static UI::c_groupbox menu_setts;
 	static UI::c_groupbox hack;
+	static UI::c_groupbox global_settings;
 
+	static UI::c_enable_groupbox timer_groupbox;
+	static UI::c_key_bind timer_negative_key;
+	static UI::c_key_bind timer_positive_key;
+	static UI::c_float_slider timer_negative_speed;
+	static UI::c_float_slider timer_positive_speed;
+
+	static UI::c_multi_dropdown global_item_whitelist;
 	static UI::c_key_bind menu_key;
 	static UI::c_color_picker menu_color;
 	static UI::c_slider menu_fade_speed;
@@ -536,10 +524,41 @@ void c_gui::tab_config()
 				{
 					ctx.m_panic = true;
 				});
-
-			menu_setts.end(menu.data());
-			restriction.dropdown(menu.data());
 		}
+		menu_setts.end(menu.data());
+
+		global_settings.start(menu.data(), xors("global options"));
+		{
+			global_item_whitelist.handle(menu.data(), xors("item whitelist"),
+				{
+					{&ctx.m_settings.global_setting_swords, xors("swords")},
+					{&ctx.m_settings.global_setting_axes, xors("axes")},
+					{&ctx.m_settings.global_setting_hoes, xors("hoes")},
+					{&ctx.m_settings.global_setting_pick_axes, xors("pickaxes")},
+					{&ctx.m_settings.global_setting_shovels, xors("shovels")},
+					{&ctx.m_settings.global_setting_fishing_rod, xors("fishing rods")}
+				});	
+		}
+		global_settings.end(menu.data());
+
+		timer_groupbox.start(menu.data(), xors("timer"));
+		{
+			if (ctx.m_settings.misc_timer)
+				timer_positive_key.handle(menu.data(), "positive", &ctx.m_settings.misc_positive_timer_key, keytype_t::kt_all);
+			
+			timer_positive_speed.handle(menu.data(), xors("positive speed"), &ctx.m_settings.misc_timer_positive_speed, 1.f, 5.f, 0.01f);
+
+			if (ctx.m_settings.misc_timer)
+				timer_negative_key.handle(menu.data(), "negative", &ctx.m_settings.misc_negative_timer_key, keytype_t::kt_all);
+
+			timer_negative_speed.handle(menu.data(), xors("negative speed"), &ctx.m_settings.misc_timer_negative_speed, .01f, 1.f, 0.01f);
+		}
+		timer_groupbox.end(menu.data(), &ctx.m_settings.misc_timer);
+
+		restriction.dropdown(menu.data());
+		global_item_whitelist.dropdown(menu.data());
+		timer_positive_key.dropdown(menu.data());
+		timer_negative_key.dropdown(menu.data());
 	}
 
 	menu.column_right();
@@ -689,9 +708,9 @@ void c_gui::draw()
 			break;
 		}
 		
-		case TABS_CONFIG:
+		case TABS_MISC:
 		{
-			tab_config();
+			tab_misc();
 			break;
 		}
 		

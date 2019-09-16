@@ -137,6 +137,7 @@ struct player_fields
 	bool holding_axe = false;
 	bool holding_projectile = false;
 	bool holding_block = false;
+	bool holding_fishing_rod = false;
 };
 
 struct game_fields
@@ -472,6 +473,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 			playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
 			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
+			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
 		}
 	}
 	else
@@ -482,6 +484,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.holding_hoe = false;
 		playerfields.holding_pick_axe = false;
 		playerfields.holding_shovel = false;
+		playerfields.holding_fishing_rod = false;
 		playerfields.holding_projectile = false;
 		playerfields.holding_block = false;
 	}
@@ -605,6 +608,11 @@ jboolean c_player_1710::holding_axe()
 jboolean c_player_1710::holding_pick_axe()
 {
 	return playerfields.holding_pick_axe;
+}
+
+jboolean c_player_1710::holding_fishing_rod()
+{
+	return playerfields.holding_fishing_rod;
 }
 
 jboolean c_player_1710::holding_hoe()
@@ -965,7 +973,15 @@ jboolean c_game_1710::is_in_chat()
 
 jboolean c_game_1710::is_hovering_block()
 {
-	jstring to_string = (jstring)jni->CallObjectMethod(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.mid_to_string);
+	auto test = jni->CallObjectMethod(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.mid_to_string);
+
+	if (!test)
+		return false;
+
+	jstring to_string = (jstring) test;
+
+	if (!to_string)
+		return false;
 
 	const char* char_string = jni->GetStringUTFChars(to_string, nullptr);
 

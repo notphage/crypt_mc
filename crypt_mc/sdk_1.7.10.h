@@ -34,6 +34,7 @@ public:
 	jboolean holding_sword() override;
 	jboolean holding_axe() override;
 	jboolean holding_pick_axe() override;
+	jboolean holding_fishing_rod() override;
 	jboolean holding_hoe() override;
 	jboolean holding_shovel() override;
 	jboolean holding_projectile() override;

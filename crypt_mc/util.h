@@ -22,6 +22,16 @@ namespace util
 		return dis(gen);
 	}
 
+	static __forceinline float convert_legit_value(float change, float sensitivity)
+	{
+		auto sens = sensitivity * 0.6f + 0.2f;
+		auto step = (pow(sens, 3) * 8.0f) * 0.03f;
+
+		auto mouse_steps = change < 0.0f ? floorf(change / step) - util::random(1, 3) + 1 : ceilf(change / step) + util::random(1, 3) - 1;
+
+		return mouse_steps * step;
+	}
+
 	static __forceinline int random_delay(int min, int max)
 	{
 		return 1000 / random(min, max);

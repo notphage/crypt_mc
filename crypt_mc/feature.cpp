@@ -3,7 +3,7 @@
 
 void c_feature::run(const std::shared_ptr<c_game>& game, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world, feature_type type)
 {
-	if ((!*m_setting) || !(m_keybind != nullptr && g_input.is_key_pressed(*m_keybind) && (m_keybind->key > KEYS_NONE || m_keybind->type == kt_always) && !ctx.m_in_chat))
+	if ((!*m_setting) || !(m_keybind != nullptr && g_input.is_key_pressed(*m_keybind) && (m_keybind->key > KEYS_NONE || m_keybind->type == kt_always)))
 	{
 		if (m_enabled)
 		{

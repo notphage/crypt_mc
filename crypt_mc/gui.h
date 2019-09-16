@@ -13,7 +13,7 @@ class c_gui
 		TABS_MOVEMENT,
 		TABS_PLAYER,
 		TABS_VISUALS,
-		TABS_CONFIG
+		TABS_MISC
 	};
 
 	std::vector<std::string> m_tabs =
@@ -24,14 +24,14 @@ class c_gui
 		xors("movement"),
 		xors("player"),
 		xors("visuals"),
-		xors("config")
+		xors("misc")
 	};
 
 	void tab_combat();
 	void tab_movement();
 	void tab_player();
 	void tab_visuals();
-	void tab_config();
+	void tab_misc();
 
 public:
 

@@ -134,6 +134,7 @@ struct player_fields
 	bool holding_hoe = false;
 	bool holding_projectile = false;
 	bool holding_block = false;
+	bool holding_fishing_rod = false;
 };
 
 struct game_fields
@@ -461,6 +462,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 			playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
 			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
+			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
 		}
 	}
 	else
@@ -473,6 +475,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.holding_shovel = false;
 		playerfields.holding_projectile = false;
 		playerfields.holding_block = false;
+		playerfields.holding_fishing_rod = false;
 	}
 }
 
@@ -599,6 +602,11 @@ jboolean c_player_forge_1710::holding_pick_axe()
 jboolean c_player_forge_1710::holding_hoe()
 {
 	return playerfields.holding_hoe;
+}
+
+jboolean c_player_forge_1710::holding_fishing_rod()
+{
+	return playerfields.holding_fishing_rod;
 }
 
 jboolean c_player_forge_1710::holding_shovel()

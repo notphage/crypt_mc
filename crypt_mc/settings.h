@@ -244,47 +244,52 @@ public:
 	bool tooltips = false;
 	holder_t m_holder{ "" };
 
+	//Global
+	setting_t<bool> global_setting_swords{ &m_holder, fnvc("global_setting_swords"), true };
+	setting_t<bool> global_setting_axes{ &m_holder, fnvc("global_setting_axes"), true };
+	setting_t<bool> global_setting_hoes{ &m_holder, fnvc("global_setting_hoes"), false };
+	setting_t<bool> global_setting_pick_axes{ &m_holder, fnvc("global_setting_pick_axes"), false };
+	setting_t<bool> global_setting_shovels{ &m_holder, fnvc("global_setting_shovels"), false };
+	setting_t<bool> global_setting_fishing_rod{ &m_holder, fnvc("global_setting_fishing_rod"), false };
+	setting_t<bool> global_setting_sticks{ &m_holder, fnvc("global_setting_sticks"), false };
+
+	//Misc
+	setting_t<bool> misc_timer{ &m_holder, fnvc("misc_timer"), false };
+	setting_t<keysetting_t> misc_positive_timer_key{ &m_holder, fnvc("misc_positive_timer_key"), {} };
+	setting_t<keysetting_t> misc_negative_timer_key{ &m_holder, fnvc("misc_negative_timer_key"), {} };
+
+	setting_t<float> misc_timer_positive_speed{ &m_holder, fnvc("misc_timer_positive_speed"), 1.25f };
+	setting_t<float> misc_timer_negative_speed{ &m_holder, fnvc("misc_timer_negative_speed"), 0.75f };
+
+
 	//Combat features
 	setting_t<bool> combat_auto_clicker{&m_holder, fnvc("combat_auto_clicker"), false};
 	setting_t<keysetting_t> combat_auto_clicker_key{&m_holder, fnvc("combat_auto_clicker_key"), {}};
 	setting_t<int> combat_auto_clicker_min_cps{&m_holder, fnvc("combat_auto_clicker_min_cps"), 9};
 	setting_t<int> combat_auto_clicker_max_cps{&m_holder, fnvc("combat_auto_clicker_max_cps"), 13};
-
+	setting_t<int> combat_auto_clicker_jitter_chance{ &m_holder, fnvc("combat_auto_clicker_jitter_chance"), 10 };
+	setting_t<float> combat_auto_clicker_jitter_intensity{ &m_holder, fnvc("combat_auto_clicker_jitter_intensity"), 0.2f };
 	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), true };
-	setting_t<bool> combat_auto_clicker_swords{ &m_holder, fnvc("combat_auto_clicker_swords"), true };
-	setting_t<bool> combat_auto_clicker_axes{ &m_holder, fnvc("combat_auto_clicker_axes"), true };
-	setting_t<bool> combat_auto_clicker_hoes{ &m_holder, fnvc("combat_auto_clicker_hoes"), false };
-	setting_t<bool> combat_auto_clicker_pick_axes{ &m_holder, fnvc("combat_auto_clicker_pick_axes"), false };
-	setting_t<bool> combat_auto_clicker_shovels{ &m_holder, fnvc("combat_auto_clicker_shovels"), false };
-
 	setting_t<bool> combat_auto_clicker_inventory{&m_holder, fnvc("combat_auto_clicker_inventory"), true};
 	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), false };
-	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false}; // remove
+	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false};
+	setting_t<bool> combat_auto_clicker_jitter{ &m_holder, fnvc("combat_auto_clicker_jitter"), false }; 
 
 	setting_t<bool> combat_aim_assist{&m_holder, fnvc("combat_aim_assist"), false};
 	setting_t<keysetting_t> combat_aim_assist_key{&m_holder, fnvc("combat_aim_assist_key"), {}};
-
+	setting_t<bool> combat_aim_assist_item_whitelist{ &m_holder, fnvc("combat_aim_assist_item_whitelist"), true };
 	setting_t<int> combat_aim_assist_fov{&m_holder, fnvc("combat_aim_assist_fov"), 90};
 	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 5.f};
 	setting_t<float> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 1.f};
 
-	setting_t<float> combat_aim_assist_scale{ &m_holder, fnvc("combat_aim_assist_scale"), 0.5f };
 	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.5f};
-
-	setting_t<bool> combat_aim_assist_item_whitelist{ &m_holder, fnvc("combat_aim_assist_item_whitelist"), true };
-	setting_t<bool> combat_aim_assist_swords{ &m_holder, fnvc("combat_aim_assist_swords"), true };
-	setting_t<bool> combat_aim_assist_axes{ &m_holder, fnvc("combat_aim_assist_axes"), true };
-	setting_t<bool> combat_aim_assist_hoes{ &m_holder, fnvc("combat_aim_assist_hoes"), false };
-	setting_t<bool> combat_aim_assist_pick_axes{ &m_holder, fnvc("combat_aim_assist_pick_axes"), false };
-	setting_t<bool> combat_aim_assist_shovels{ &m_holder, fnvc("combat_aim_assist_shovels"), false };
-
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
 	setting_t<bool> combat_aim_assist_visible_only{ &m_holder, fnvc("combat_aim_assist_visible_only"), true };
 	setting_t<bool> combat_aim_assist_break_blocks{ &m_holder, fnvc("combat_aim_assist_break_blocks"), true };
 	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), true };
 	setting_t<bool> combat_aim_assist_require_click{&m_holder, fnvc("combat_aim_assist_require_click"), true};
-	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), false };
-	setting_t<bool> combat_aim_assist_nakeds{&m_holder, fnvc("combat_aim_assist_nakeds"), false};
+	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), true };
+	setting_t<bool> combat_aim_assist_nakeds{&m_holder, fnvc("combat_aim_assist_nakeds"), true};
 	setting_t<bool> combat_aim_assist_multipoint{ &m_holder, fnvc("combat_aim_assist_multipoint"), true };
 
 	setting_t<bool> combat_velocity{&m_holder, fnvc("combat_velocity"), false};
@@ -292,10 +297,14 @@ public:
 	setting_t<bool> combat_velocity_on_sprint{ &m_holder, fnvc("combat_velocity_on_sprint"), true };
 	setting_t<bool> combat_velocity_weapons_only{ &m_holder, fnvc("combat_velocity_weapons_only"), true };
 	setting_t<bool> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), true };
+	setting_t<bool> combat_velocity_require_click{ &m_holder, fnvc("combat_velocity_require_click"), true };
+	setting_t<bool> combat_velocity_require_target{ &m_holder, fnvc("combat_velocity_require_target"), true };
+	setting_t<bool> combat_velocity_kite{ &m_holder, fnvc("combat_velocity_kite"), true };
 	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 4 };
 	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 60 };
 	setting_t<int> combat_velocity_vertical{&m_holder, fnvc("combat_velocity_vertical"), 100};
 	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 90};
+	setting_t<int> combat_velocity_kite_val{ &m_holder, fnvc("combat_velocity_kite_val"), 150 };
 
 	setting_t<bool> combat_reach{&m_holder, fnvc("combat_reach"), false};
 	setting_t<keysetting_t> combat_reach_key{&m_holder, fnvc("combat_reach_key"), {}};
@@ -333,10 +342,6 @@ public:
 	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
 
 	//Movement features
-	setting_t<bool> movement_timer{&m_holder, fnvc("movement_timer"), false};
-	setting_t<keysetting_t> movement_timer_key{&m_holder, fnvc("movement_timer_key"), {}};
-	setting_t<float> movement_timer_speed{&m_holder, fnvc("movement_timer_speed"), 1.25f};
-
     setting_t<bool> movement_air_control{ &m_holder, fnvc("movement_air_control"), false };
     setting_t<keysetting_t> movement_air_control_key{ &m_holder, fnvc("movement_air_control_key"), {} };
 

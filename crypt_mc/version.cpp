@@ -108,7 +108,7 @@ void c_context::determine_version()
 	ctx.m_features.emplace_back(std::make_unique<c_speed>(&ctx.m_settings.movement_speed, &ctx.m_settings.movement_speed_key));
 	ctx.m_features.emplace_back(std::make_unique<c_air_control>(&ctx.m_settings.movement_air_control, &ctx.m_settings.movement_air_control_key));
 	ctx.m_features.emplace_back(std::make_unique<c_step>(&ctx.m_settings.movement_step, &ctx.m_settings.movement_step_key));
-	ctx.m_features.emplace_back(std::make_unique<c_timer>(&ctx.m_settings.movement_timer, &ctx.m_settings.movement_timer_key));
+	ctx.m_features.emplace_back(std::make_unique<c_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));
 }
 

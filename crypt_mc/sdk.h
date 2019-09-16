@@ -1307,6 +1307,7 @@ public:
 	virtual jboolean holding_shovel() = 0;
 	virtual jboolean holding_projectile() = 0;
 	virtual jboolean holding_block() = 0;
+	virtual jboolean holding_fishing_rod() = 0;
 
 	virtual jdouble origin_x() = 0;
 	virtual jdouble origin_y() = 0;
