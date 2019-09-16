@@ -9,28 +9,6 @@
 
 c_context ctx;
 
-// to get rid of a string in microsoft crt
-static void __cdecl std::_Xlength_error(const char* error) {}
-
-void unload()
-{
-    auto nGetTime = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
-	auto nUpdate = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
-	auto strict_math_atan2 = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("java.dll")), xors("Java_java_lang_StrictMath_atan2"));
-
-	MH_RemoveHook(SwapBuffers);
-    MH_RemoveHook(nGetTime);
-	MH_RemoveHook(nUpdate);
-	MH_RemoveHook(strict_math_atan2);
-
-	SetWindowLongPtrA(ctx.m_window, -4, reinterpret_cast<long long>(hooked::o_wnd_proc));
-
-	MH_Uninitialize();
-
-	//ctx.m_client.set_shared_mem_stage(shared_mem_stage::STAGE_CLOSE);
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-}
-
 //int generate_dump(EXCEPTION_POINTERS* excp_ptr)
 //{
 //	// Open the file 
@@ -129,83 +107,11 @@ void hack(HINSTANCE bin)
 	//SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 #endif
 
-	ctx.determine_version();
+	ctx.load();
 
 	ctx.m_settings.save(xors("default.crypt"));
 	util::get_all_configs(ctx.m_cfg_list, xors("Software\\Spotify"));
 	ctx.m_settings.load(xors("default.crypt"));
-
-	while (!ctx.m_panic)
-	{
-		//using namespace std::chrono_literals;
-		//
-		//auto mc = ctx.get_game();
-		//
-		//if (const auto cur_hwnd = reinterpret_cast<HWND>(mc->get_window_handle()); cur_hwnd != ctx.m_window)
-		//{
-		//	ctx.m_window = cur_hwnd;
-		//	hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, GWLP_WNDPROC, reinterpret_cast<long long>(hooked::wnd_proc)));
-		//
-		//	RECT rect;
-		//	LI_FN(GetClientRect).cached()(ctx.m_window, &rect);
-		//
-		//	ctx.m_screen_w = rect.right - rect.left;
-		//	ctx.m_screen_h = rect.bottom - rect.top;
-		//}
-		//
-		//auto self = mc->get_player();
-		//auto world = mc->get_world();
-		//
-		//if (self && world)
-		//{
-		//	ctx.m_ingame = true;
-		//
-		//	if (ctx.m_menu_opening)
-		//	{
-		//		//mc->set_not_in_focus();
-		//		mc->set_mouse_grabbed(false);
-		//	}
-		//	else if (ctx.m_menu_closing)
-		//	{
-		//		//mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
-		//		//mc->set_in_focus();
-		//		mc->set_mouse_grabbed(true);
-		//	}
-		//
-		//	ctx.m_in_chat = mc->is_in_chat();
-		//
-		//	for (auto&& feature : ctx.m_features)
-		//		feature->on_tick(mc, self, world);
-		//
-		//	std::this_thread::sleep_for(1ms);
-		//}
-		//else
-		//{
-		//	ctx.m_ingame = false;
-		//	std::this_thread::sleep_for(5s);
-		//}
-	}
-
-	unload();
-
-#ifdef TESTBUILD
-	DWORD unload_time = GetTickCount() + 2000;
-	while (true)
-	{
-		if (GetTickCount() > unload_time)
-		{
-			// need to call fclose on win10
-			fclose(stdout);
-			FreeConsole();
-
-			// cant use FreeLibrary with manual map
-			FreeLibraryAndExitThread(ctx.m_instance, 0);
-		}
-
-		Sleep(100);
-	}
-#else
-#endif
 }
 
 void fuck_skids(void* bin)
@@ -273,7 +179,7 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 		// take username and sub days left out of custom header
 #endif
 
-		LI_FN(CreateThread).cached()(nullptr, 0, LPTHREAD_START_ROUTINE(hack), instance, 0, nullptr);
+		hack(instance);
 
 		return true;
 	}

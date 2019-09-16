@@ -4,8 +4,11 @@
 decltype(hooked::o_swap_buffers) hooked::o_swap_buffers;
 
 static HGLRC crypt_ctx = nullptr;
-int __stdcall hooked::swap_buffers(HDC hdc)
+long __stdcall hooked::swap_buffers(JNIEnv* jni, jclass caller, jobject a3)
 {
+	void* buf = jni->GetDirectBufferAddress(a3);
+	HDC hdc = *(HDC*)((uintptr_t)buf + 8);
+
 	HGLRC old_ctx = wglGetCurrentContext();
 	if (!ctx.m_init)
 	{
@@ -48,5 +51,5 @@ int __stdcall hooked::swap_buffers(HDC hdc)
 
 	wglMakeCurrent(hdc, old_ctx);
 
-	return o_swap_buffers(hdc);
+	return o_swap_buffers(jni, caller, a3);
 }

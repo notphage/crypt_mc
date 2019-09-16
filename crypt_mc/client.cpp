@@ -71,6 +71,8 @@ void c_client::run_shared_mem()
 
 			case shared_mem_stage::STAGE_CLOSE:
 			{
+				ctx.unload();
+
 				auto ping_packet = m_mem_handler.create_ping_mem_packet(0);
 
 				const mem_message_t msg(reinterpret_cast<uint8_t*>(&ping_packet), sizeof ping_packet);

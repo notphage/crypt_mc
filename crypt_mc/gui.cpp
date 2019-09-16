@@ -67,7 +67,7 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_auto_clicker)
 				auto_clicker_key.handle(menu.data(), "", &ctx.m_settings.combat_auto_clicker_key, keytype_t::kt_all);
 
-			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 0, 24, 1, xors("cps"));
+			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 1, 24, 1, xors("cps"));
 			auto_clicker_max_cps.handle(menu.data(), xors("max"), &ctx.m_settings.combat_auto_clicker_max_cps, ctx.m_settings.combat_auto_clicker_min_cps, 25, 1, xors("cps"));
 			
 			if (ctx.m_settings.combat_auto_clicker_jitter)

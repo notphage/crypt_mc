@@ -81,7 +81,8 @@ public:
 	std::atomic<client_flavor> m_client_flavor = VANILLA;
 
 public:
-	void determine_version();
+	void load();
+	void unload();
 
 	std::shared_ptr<c_class_loader> get_class_loader(JNIEnv*);
 	std::shared_ptr<c_game> get_game(JNIEnv*);
@@ -91,7 +92,7 @@ extern c_context ctx;
 
 namespace hooked
 {
-	extern int __stdcall swap_buffers(HDC);
+	extern long __stdcall swap_buffers(JNIEnv*, jclass, jobject);
 	extern long __stdcall get_update(JNIEnv*, jclass);
 	extern long __stdcall get_time(JNIEnv*, jclass);
 	extern long __stdcall strict_math_atan2(JNIEnv*, jclass);

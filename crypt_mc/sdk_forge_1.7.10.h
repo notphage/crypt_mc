@@ -82,11 +82,13 @@ public:
 
 	jobject get_stack(jint) override;
 	jobject get_effects(jobject, jobject) override;
+	jint get_effects_id(jobject) override;
 	jint get_potion_id(jobject) override;
     jint get_speed_amplifier();
 	jint get_current_slot() override;
 	jboolean send_use_item(jobject) override;
 	jobject get_item(jobject) override;
+	std::vector<int> find_item(int min, int max, find_item_type item_type) override;
 
 	void set_current_slot(jint) override;
 	void set_motion_x(jdouble) override;

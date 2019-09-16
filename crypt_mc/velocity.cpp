@@ -20,10 +20,10 @@ void c_velocity::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_p
 	{
 		should_run = false;
 
-		bool is_player_in_front = is_player_infront(mc, self, world);
-		bool should_kite = ctx.m_settings.combat_velocity_kite && !is_player_in_front && is_player_behind(mc, self, world);
+		const auto player_relative = check_player_pos(mc, self, world);
+		const bool should_kite = ctx.m_settings.combat_velocity_kite && !player_relative.first && player_relative.second;
 
-		if (ctx.m_settings.combat_velocity_require_target && !is_player_in_front && !should_kite)
+		if (ctx.m_settings.combat_velocity_require_target && !player_relative.first && !should_kite)
 			return;
 
 		auto horizontal = should_kite ? ctx.m_settings.combat_velocity_kite_val : ctx.m_settings.combat_velocity_horizontal;
@@ -42,21 +42,31 @@ void c_velocity::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_p
 	last_hurt_time = hurt_time;
 }
 
-bool c_velocity::is_player_infront(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
+std::pair<bool, bool> c_velocity::check_player_pos(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
+	bool player_infront = false;
+	bool player_behind = false;
+
 	const vec3 self_origin(self->origin_x(), self->origin_y(), self->origin_z());
 	const vec3 self_prev_origin(self->old_origin_x(), self->old_origin_y(), self->old_origin_z());
 	vec3 trace_origin = self_prev_origin + ((self_origin - self_prev_origin) * mc->get_render_partial_ticks());
 	trace_origin.y += self->get_eye_height();
 
-	const vec3 self_angle(self->get_pitch(), self->get_yaw(), 0.f);
+	const vec3 self_forward_angle(self->get_pitch(), self->get_yaw(), 0.f);
 	vec3 self_forward;
-	math::angle_vectors(self_angle, &self_forward);
+	math::angle_vectors(self_forward_angle, &self_forward);
+
+	const vec3 self_backward_angle(self->get_pitch(), self->get_yaw() - 180.f, 0.f);
+	vec3 self_backward;
+	math::angle_vectors(self_backward_angle, &self_backward);
 
 	for (const auto& player : world->get_players())
 	{
 		if (!player || !player->player_instance || player->is_dead() || self->is_same(player) || !self->is_visible(player->player_instance))
 			continue;
+
+		if (player_behind && player_infront)
+			break;
 
 		const vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());
 
@@ -69,69 +79,40 @@ bool c_velocity::is_player_infront(const std::shared_ptr<c_game>& mc, const std:
 		player_mins -= player_origin;
 		player_maxs -= player_origin;
 
-		player_mins *= 2;
-		player_maxs *= 2;
-		player_maxs.y = std::copysignf(1.5f, player_maxs.y) + (.3f * 2);
+		player_mins *= 2.f;
+		player_maxs *= 2.f;
+		player_maxs.y = std::copysignf(1.5f, player_maxs.y) + (.3f * 2.f);
 
 		player_mins += player_origin;
 		player_maxs += player_origin;
 
-		ray_trace_t ray_trace(trace_origin, self_forward);
+		if (!player_infront)
+		{
+			ray_trace_t forward_ray_trace(trace_origin, self_forward);
 
-		float distance = 0.f;
+			float foward_distance = 0.f;
+			if (!forward_ray_trace.trace(player_mins, player_maxs, foward_distance))
+				continue;
 
-		if (!ray_trace.trace(player_mins, player_maxs, distance))
-			continue;
+			if (foward_distance < 6.0f)
+			{
+				player_infront = true;
+				continue;
+			}
+		}
 
-		if (distance < 6.0f)
-			return true;
+		if (!player_behind)
+		{
+			ray_trace_t backward_ray_trace(trace_origin, self_backward);
+
+			float backward_distance = 0.f;
+			if (!backward_ray_trace.trace(player_mins, player_maxs, backward_distance))
+				continue;
+
+			if (backward_distance < 6.0f)
+				player_behind = true;
+		}
 	}
-	return false;
-}
 
-bool c_velocity::is_player_behind(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
-{
-	const vec3 self_origin(self->origin_x(), self->origin_y(), self->origin_z());
-	const vec3 self_prev_origin(self->old_origin_x(), self->old_origin_y(), self->old_origin_z());
-	vec3 trace_origin = self_prev_origin + ((self_origin - self_prev_origin) * mc->get_render_partial_ticks());
-	trace_origin.y += self->get_eye_height();
-
-	const vec3 self_angle(self->get_pitch(), self->get_yaw() - 180.f, 0.f);
-	vec3 self_forward;
-	math::angle_vectors(self_angle, &self_forward);
-
-	for (const auto& player : world->get_players())
-	{
-		if (!player || !player->player_instance || player->is_dead() || self->is_same(player) || !self->is_visible(player->player_instance))
-			continue;
-
-		const vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());
-
-		if ((self_origin - player_origin).length() > 8.0f)
-			continue;
-
-		vec3 player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
-		vec3 player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());
-
-		player_mins -= player_origin;
-		player_maxs -= player_origin;
-
-		player_mins *= 2.3;
-		player_maxs *= 2.3;
-		player_maxs.y = std::copysignf(1.5f, player_maxs.y) + (.3f * 2.3);
-
-		player_mins += player_origin;
-		player_maxs += player_origin;
-
-		ray_trace_t ray_trace(trace_origin, self_forward);
-
-		float distance = 0.f;
-
-		if (!ray_trace.trace(player_mins, player_maxs, distance))
-			continue;
-
-		if (distance < 6.0f)
-			return true;
-	}
-	return false;
+	return { player_infront, player_behind };
 }

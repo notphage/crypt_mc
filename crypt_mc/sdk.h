@@ -1245,6 +1245,14 @@ enum client_flavor
 	HYPERIUM
 };
 
+enum find_item_type
+{
+	POTION,
+	SOUP,
+	PEARL,
+	ROD
+};
+
 class c_block
 {
 protected:
@@ -1353,9 +1361,11 @@ public:
 	virtual jobject get_stack(jint) = 0;
 	virtual jobject get_item(jobject) = 0;
 	virtual jobject get_effects(jobject, jobject) = 0;
+	virtual jint get_effects_id(jobject) = 0;
 	virtual jint get_potion_id(jobject) = 0;
 	virtual jint get_current_slot() = 0;
 	virtual jint get_ticks_existed() = 0;
+	virtual std::vector<int> find_item(int min, int max, find_item_type item_type) = 0;
 
 	virtual jboolean send_use_item(jobject) = 0;
 

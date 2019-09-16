@@ -24,6 +24,7 @@ struct world_fields
 	jmethodID mid_get_block = nullptr;
 	jmethodID mid_get_ent = nullptr;
 	jmethodID mid_to_array = nullptr;
+	jmethodID mid_get = nullptr;
 	jmethodID mid_render_world = nullptr;
 
 	jclass world = nullptr;
@@ -126,6 +127,7 @@ struct player_fields
 	jclass cls_player_controller = nullptr;
 	jclass cls_inventory = nullptr;
 	jclass cls_aabb = nullptr;
+	jclass cls_item_soup = nullptr;
 
 	bool holding_weapon = false;
 	bool holding_sword = false;
@@ -298,6 +300,7 @@ void c_world_18X::instantiate(jobject world_object, JNIEnv* _jni)
 		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("j"), xors("Ljava/util/List;"));
 		worldfields.mid_get_ent = jni->GetMethodID(worldfields.world, xors("a"), xors("(I)Lpk;"));
 		worldfields.mid_to_array = jni->GetMethodID(worldfields.cls_list, xors("toArray"), xors("()[Ljava/lang/Object;"));
+		worldfields.mid_get = jni->GetMethodID(worldfields.cls_list, xors("get"), xors("(I)Ljava/lang/Object;"));
 		worldfields.mid_render_world = jni->GetMethodID(worldfields.entity_renderer, xors("b"), xors("(FJ)V"));
 
 		worldfields.obj_world = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world));
@@ -379,6 +382,7 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.cls_item_potion = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aai")));
 		playerfields.cls_potion = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("pe")));
 		playerfields.cls_potion_effect = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("pf")));
+		playerfields.cls_item_soup = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yu")));
 		playerfields.cls_player_controller = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("bda")));
 		playerfields.cls_inventory = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("wm")));
 		playerfields.cls_aabb = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aug")));
@@ -496,6 +500,23 @@ jobject c_player_18X::get_effects(jobject potion, jobject item_stack)
 	return jni->CallObjectMethod(potion, playerfields.mid_get_effects, item_stack);
 }
 
+jint c_player_18X::get_effects_id(jobject effects)
+{
+	auto arr_effects = static_cast<jobjectArray>(jni->CallObjectMethod(effects, worldfields.mid_to_array));
+
+	for (jint x = 0; x < jni->GetArrayLength(arr_effects); x++)
+	{
+		auto effect = jni->CallObjectMethod(effects, worldfields.mid_get, x);
+
+		if (!effect)
+			continue;
+
+		return get_potion_id(effect);
+	}
+
+	return -1;
+}
+
 jint c_player_18X::get_potion_id(jobject effect)
 {
 	return jni->CallIntMethod(effect, playerfields.mid_potion_id);
@@ -584,6 +605,59 @@ jobject c_player_18X::get_held_item()
 jobject c_player_18X::get_item(jobject item_stack)
 {
 	return jni->CallObjectMethod(item_stack, playerfields.mid_get_item);
+}
+
+std::vector<int> c_player_18X::find_item(int min, int max, find_item_type item_type)
+{
+	std::vector<int> items;
+
+	for (auto i = min; i < max; ++i)
+	{
+		auto item_stack = get_stack(i);
+		if (item_stack)
+		{
+			auto item = get_item(item_stack);
+
+			if (item)
+			{
+				jclass clazz = nullptr;
+				switch (item_type)
+				{
+				case POTION:
+				{
+					clazz = playerfields.cls_item_potion;
+					break;
+				}
+
+				case SOUP:
+				{
+					clazz = playerfields.cls_item_soup;
+					break;
+				}
+
+				case PEARL:
+				{
+					clazz = playerfields.item_ender_pearl_class;
+					break;
+				}
+
+				case ROD:
+				{
+					break;
+				}
+
+				default:
+					return items;
+				}
+
+				if (clazz)
+					if (jni->IsInstanceOf(item, clazz))
+						items.push_back(i);
+			}
+		}
+	}
+
+	return items;
 }
 
 jboolean c_player_18X::holding_weapon()

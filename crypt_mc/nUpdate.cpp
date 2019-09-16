@@ -4,6 +4,9 @@ decltype(hooked::o_get_update) hooked::o_get_update;
 
 long __stdcall hooked::get_update(JNIEnv* jni, jclass caller)
 {	
+	//if (ctx.m_panic)
+	//	ctx.m_client.set_shared_mem_stage(shared_mem_stage::STAGE_CLOSE);
+
 	if (jni != nullptr && caller != nullptr && ctx.m_init)
 	{
 		std::shared_ptr<c_stack_trace> stack_class = std::make_shared<c_stack_trace>();

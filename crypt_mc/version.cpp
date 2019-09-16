@@ -64,7 +64,7 @@ int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 	return 1;
 }
 
-void c_context::determine_version()
+void c_context::load()
 {
 	ctx.m_renderer = std::make_unique<c_renderer>();
 
@@ -78,17 +78,17 @@ void c_context::determine_version()
 
 		MH_Initialize();
 
-		// Swap Buffers
-		MH_CreateHook(SwapBuffers, &hooked::swap_buffers, reinterpret_cast<void**>(&hooked::o_swap_buffers));
-		MH_EnableHook(SwapBuffers);
+		auto swap_buffers = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsContextImplementation_nSwapBuffers"));
+		MH_CreateHook(swap_buffers, &hooked::swap_buffers, reinterpret_cast<void**>(&hooked::o_swap_buffers));
+		MH_EnableHook(swap_buffers);
 
-		auto nUpdate = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
-		MH_CreateHook(nUpdate, &hooked::get_update, reinterpret_cast<void**>(&hooked::o_get_update));
-		MH_EnableHook(nUpdate);
+		auto update = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
+		MH_CreateHook(update, &hooked::get_update, reinterpret_cast<void**>(&hooked::o_get_update));
+		MH_EnableHook(update);
 		
-		auto nGetTime = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
-		MH_CreateHook(nGetTime, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));
-		MH_EnableHook(nGetTime);
+		auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
+		MH_CreateHook(get_time, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));
+		MH_EnableHook(get_time);
 
 		auto strict_math_atan2 = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("java.dll")), xors("Java_java_lang_StrictMath_atan2"));
 		MH_CreateHook(strict_math_atan2, &hooked::strict_math_atan2, reinterpret_cast<void**>(&hooked::o_strict_math_atan2));
@@ -108,8 +108,27 @@ void c_context::determine_version()
 	ctx.m_features.emplace_back(std::make_unique<c_speed>(&ctx.m_settings.movement_speed, &ctx.m_settings.movement_speed_key));
 	ctx.m_features.emplace_back(std::make_unique<c_air_control>(&ctx.m_settings.movement_air_control, &ctx.m_settings.movement_air_control_key));
 	ctx.m_features.emplace_back(std::make_unique<c_step>(&ctx.m_settings.movement_step, &ctx.m_settings.movement_step_key));
-	ctx.m_features.emplace_back(std::make_unique<c_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
+	ctx.m_features.emplace_back(std::make_unique<c_throw>(&ctx.m_settings.player_throw));
+	ctx.m_features.emplace_back(std::make_unique<c_positive_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
+	ctx.m_features.emplace_back(std::make_unique<c_negative_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_negative_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));
+}
+
+void c_context::unload()
+{
+	auto swap_buffers = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsContextImplementation_nSwapBuffers"));
+	auto get_time = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_WindowsSysImplementation_nGetTime"));
+	auto update = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_WindowsDisplay_nUpdate"));
+	auto strict_math_atan2 = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("java.dll")), xors("Java_java_lang_StrictMath_atan2"));
+
+	MH_RemoveHook(swap_buffers);
+	MH_RemoveHook(get_time);
+	MH_RemoveHook(update);
+	MH_RemoveHook(strict_math_atan2);
+
+	SetWindowLongPtrA(ctx.m_window, -4, reinterpret_cast<long long>(hooked::o_wnd_proc));
+
+	MH_Uninitialize();
 }
 
 std::shared_ptr<c_class_loader> c_context::get_class_loader(JNIEnv* _jni)
