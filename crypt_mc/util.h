@@ -24,7 +24,9 @@ namespace util
 
 	static __forceinline float convert_legit_value(float change, float sensitivity)
 	{
-		auto sens = sensitivity * 0.6f + 0.2f;
+		auto real_sens = sensitivity == 0.5f ? 0.49f : sensitivity;
+
+		auto sens = real_sens * 0.6f + 0.2f;
 		auto step = (pow(sens, 3) * 8.0f) * 0.03f;
 
 		auto mouse_steps = change < 0.0f ? floorf(change / step) - util::random(1, 3) + 1 : ceilf(change / step) + util::random(1, 3) - 1;

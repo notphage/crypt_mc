@@ -123,10 +123,10 @@ void c_gui::tab_combat()
 
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
-			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 10.f, 0.01f);
+			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 20.f, 0.01f);
 
 			if (ctx.m_settings.combat_aim_assist_vertical)
-				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 10.f, 0.01f);
+				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 20.f, 0.01f);
 
 			aim_assist_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_aim_assist_distance, 3.f, 6.f, 0.01f);
 			aim_assist_conditions.handle(menu.data(), xors("conditions"),

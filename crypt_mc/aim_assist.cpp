@@ -177,25 +177,39 @@ void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::share
 	if (!target_data.m_valid)
 		return;
 
-	auto random_h_scale = std::clamp(0.1f * ctx.m_settings.combat_aim_assist_h_speed, 0.02f, 0.6f);
-	auto random_v_scale = std::clamp(0.1f * ctx.m_settings.combat_aim_assist_v_speed, 0.02f, 0.6f);
-	if (util::random(0, 100) <= 10)
-	{
-		auto random_h = util::random(-random_h_scale, random_h_scale);
-		auto random_v = util::random(-random_v_scale, random_v_scale);
+	auto random_h_scale = std::clamp(0.1f * ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 0.5f);
+	auto random_v_scale = std::clamp(0.1f * ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 0.5f);
 
-		if (abs(target_data.m_yaw_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint)
-			yaw += util::convert_legit_value(random_h, mc->get_mouse_sensitivity());
-		if (abs(target_data.m_pitch_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint)
-			pitch += util::convert_legit_value(random_v, mc->get_mouse_sensitivity());
+	auto random_h = 0.f;
+	auto random_v = 0.f;
+
+	if (util::random(0, 100) < 45)
+	{
+		random_h = util::random(-random_h_scale, random_h_scale);
+		random_v = util::random(-random_v_scale, random_v_scale);
 	}
 
-	float yaw_change = util::convert_legit_value(target_data.m_yaw_change / 400.0f * ctx.m_settings.combat_aim_assist_h_speed * 3.0f, mc->get_mouse_sensitivity());
-	float pitch_change = util::convert_legit_value(target_data.m_pitch_change / 400.0f * ctx.m_settings.combat_aim_assist_v_speed * 3.0f, mc->get_mouse_sensitivity());
+	float yaw_change = (target_data.m_yaw_change / util::random(375.f, 425.f) * ctx.m_settings.combat_aim_assist_h_speed * 5.f) + random_h;
+	float pitch_change = (target_data.m_pitch_change / util::random(375.f, 425.f) * ctx.m_settings.combat_aim_assist_v_speed * 5.f) + random_v;
 
-	if (abs(target_data.m_yaw_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_yaw_change) >= util::convert_legit_value(random_h_scale, mc->get_mouse_sensitivity())))
-		self->set_yaw(yaw + yaw_change);
+	float sens = mc->get_mouse_sensitivity() * 0.6f + 0.2f;
+	float step = pow(sens, 3) * 8.0f;
 
-	if (ctx.m_settings.combat_aim_assist_vertical && (abs(target_data.m_pitch_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_pitch_change) >= util::convert_legit_value(random_v_scale, mc->get_mouse_sensitivity()))))
-		self->set_pitch(pitch + pitch_change);
+	auto smooth = [&](auto angle, auto speed) {
+		angle *= 0.15f;
+
+		float steps = angle < 0.0f ? floorf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 3.f) * angle * 5.0f) : ceilf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 5.f) * angle * 5.0f);
+
+		return steps * step * 0.15f;
+	};
+
+	auto final_yaw_change = smooth(yaw_change, ctx.m_settings.combat_aim_assist_h_speed);
+	auto final_pitch_change = smooth(pitch_change, ctx.m_settings.combat_aim_assist_v_speed);
+
+	if (abs(target_data.m_yaw_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint) && final_yaw_change > 0.00001)
+		self->set_yaw(yaw + final_yaw_change);
+
+	if (ctx.m_settings.combat_aim_assist_vertical && (abs(target_data.m_pitch_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint) && final_pitch_change > 0.00001)
+		self->set_pitch(pitch + final_pitch_change);
+	
 }

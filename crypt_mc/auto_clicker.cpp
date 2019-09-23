@@ -65,10 +65,10 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 	if (ctx.m_settings.combat_auto_clicker_break_blocks && mc->is_hovering_block() && !in_inventory)
 	{
 		left_click = true;
-		current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(3, 8)) * 3), ((max_cps - min_cps) + util::random(3, 8)) * 3), 40, 2000);
+		current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(-20, 20))), ((max_cps - min_cps) + util::random(-20, 20))), 25, 2000);
 		last_click = GetTickCount64();
 		clicks_skip = 0;
-		clicks_until_skip = util::random(62, 81);
+		clicks_until_skip = util::random(62, 81) + ctx.m_settings.combat_auto_clicker_max_cps;
 
 		if (mouse_down)
 		{
@@ -109,7 +109,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 			if (ret)
 			{
 				left_click = true;
-				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(3, 8)) * 3), ((max_cps - min_cps) + util::random(3, 8)) * 3), 40, 2000);
+				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(-20, 20))), ((max_cps - min_cps) + util::random(-20, 20))), 25, 2000);
 				last_click = GetTickCount64();
 				return;
 			}
@@ -156,13 +156,13 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 				if (skip_click_count >= skip_click_amt)
 				{
 					clicks_skip = 0;
-					clicks_until_skip = util::random(62, 81);
+					clicks_until_skip = util::random(62, 81) + ctx.m_settings.combat_auto_clicker_max_cps;
 					skip_click_amt = util::random(1, 2);
 					skip_click_count = 0;
 				}
 
 				left_click = true;
-				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(3, 8)) * 3), ((max_cps - min_cps) + util::random(3, 8)) * 3), 40, 2000);
+				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(-20, 20))), ((max_cps - min_cps) + util::random(-20, 20))), 25, 2000);
 				last_click = GetTickCount64();
 			}
 			return;
@@ -200,7 +200,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 		{
 			g_input.release_mouse(true);
 			left_click = true;
-			current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(3, 8)) * 3), ((max_cps - min_cps) + util::random(3, 8)) * 3), 40, 2000);
+			current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(-20, 20))), ((max_cps - min_cps) + util::random(-20, 20))), 25, 2000);
 			last_click = GetTickCount64();
 			clicks_skip += 1;
 			clicks_change += 1;
