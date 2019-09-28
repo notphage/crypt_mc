@@ -42,6 +42,18 @@ enum protection_status_t
 	STATUS_DRIVER_WINPCAP,
 	STATUS_DRIVER_PROCESS_HACKER,
 	STATUS_DRIVER_CHEAT_ENGINE,
+
+	STATUS_MAC_NOADAPTER,
+	STATUS_MAC_PARALLELS,
+	STATUS_MAC_XEN,
+	STATUS_MAC_VBOX,
+	STATUS_MAC_HYBRID_ANALYSIS,
+
+	STATUS_TABLE_IDT,
+	STATUS_TABLE_GDT,
+
+	STATUS_CPUID_BIT,
+	STATUS_TIMING_CPUID,
 };
 
 typedef struct _KSYSTEM_TIME
@@ -140,6 +152,9 @@ class c_protection
 	
 	bool is_running_forbidden_program();
 	bool is_running_forbidden_driver();
+	bool has_forbidden_mac_address();
+	bool tables_remapped();
+	bool hypervisor_present();
 
 	KUSER_SHARED_DATA* m_kuser_shared_data = reinterpret_cast<KUSER_SHARED_DATA*>(KUSER_SHARED_DATA_PTR);
 public:
@@ -158,10 +173,30 @@ public:
 			}
 		}
 
-		if (!is_running_warning_program())
+		if (is_running_warning_program())
 			return false;
 
-		if (!is_running_warning_driver())
+		if (is_running_warning_driver())
+			return false;
+
+		return true;
+	}
+
+	__declspec(noinline) bool safety_check()
+	{
+		if (is_running_forbidden_program())
+			return false;
+
+		if (is_running_forbidden_program())
+			return false;
+
+		if (has_forbidden_mac_address())
+			return false;
+
+		if (tables_remapped())
+			return false;
+
+		if (hypervisor_present())
 			return false;
 
 		return true;

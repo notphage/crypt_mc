@@ -56,5 +56,8 @@
     <ClInclude Include="key.h">
       <Filter>SRC\server\cert</Filter>
     </ClInclude>
+    <ClInclude Include="safe_cout.h">
+      <Filter>SRC\utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

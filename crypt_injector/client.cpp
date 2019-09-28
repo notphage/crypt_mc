@@ -1,4 +1,6 @@
 #include "context.h"
+#include "process.hpp"
+#include "manualmapper.hpp"
 #include <chrono>
 
 void c_client::run_socket()
@@ -32,7 +34,7 @@ void c_client::run_socket()
 				if (!m_connection.connect())
 				{
 					m_conn_stage = connection_stage::STAGE_INVALID;
-					ctx.m_loader_window.get_gui().insert_text(xors("Couldn't establish a connection."), color_t(255, 0, 0));
+					ctx.m_loader_window.get_gui().insert_text(xors("Couldn't establish a connection"), color_t(255, 0, 0));
 					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
 
 					std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -44,7 +46,7 @@ void c_client::run_socket()
 				if (!m_connection.tls_connect())
 				{
 					m_conn_stage = connection_stage::STAGE_INVALID;
-					ctx.m_loader_window.get_gui().insert_text(xors("Couldn't establish a secure connection."), color_t(255, 0, 0));
+					ctx.m_loader_window.get_gui().insert_text(xors("Couldn't establish a secure connection"), color_t(255, 0, 0));
 					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Closing in 5 seconds...")), color_t(255, 255, 255));
 				
 					std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -53,7 +55,7 @@ void c_client::run_socket()
 					return;
 				}
 
-				ctx.m_loader_window.get_gui().insert_text(xors("Success."), color_t(255, 255, 255));
+				ctx.m_loader_window.get_gui().insert_text(xors("Success"), color_t(255, 255, 255));
 
 				// Version Packet
 				{
@@ -82,7 +84,7 @@ void c_client::run_socket()
 
 				// Login Packet
 				{
-					c_login_packet login_packet = m_packet_handler.create_login_packet(m_username, m_password, m_hwid);
+					c_login_packet login_packet = m_packet_handler.create_login_packet(m_username, m_password, m_hwid, login_packet_status_t::LOGIN_DUMMY);
 
 					m_connection.set_buffer(&login_packet, sizeof login_packet);
 					if (m_connection.send() == SOCKET_ERROR)
@@ -90,6 +92,47 @@ void c_client::run_socket()
 						m_conn_stage = connection_stage::STAGE_CLOSE;
 						break;
 					}
+
+					login_packet = {};
+					if (!receive_packet<c_login_packet>(login_packet))
+					{
+						m_conn_stage = connection_stage::STAGE_CLOSE;
+						break;
+					}
+
+					switch (login_packet.m_status)
+					{
+						case login_packet_status_t::LOGIN_INVALID:
+						{
+							ctx.m_loader_window.get_gui().insert_text(std::string(xors("Incorrect username/password")), color_t(255, 0, 0));
+							m_conn_stage = connection_stage::STAGE_CLOSE;
+							break;
+						}
+
+						case login_packet_status_t::LOGIN_MISMATCH:
+						{
+							ctx.m_loader_window.get_gui().insert_text(std::string(xors("Connection error #2")), color_t(255, 0, 0));
+							m_conn_stage = connection_stage::STAGE_CLOSE;
+							break;
+						}
+
+						case login_packet_status_t::LOGIN_VALID:
+						{
+							ctx.m_loader_window.get_gui().insert_text(std::string(xors("Logged in successfully")), color_t(255, 255, 255));
+							break;
+						}
+
+						case login_packet_status_t::LOGIN_DUMMY:
+						default:
+						{
+							ctx.m_loader_window.get_gui().insert_text(std::string(xors("Connection error #1")), color_t(255, 0, 0));
+							m_conn_stage = connection_stage::STAGE_CLOSE;
+							break;
+						}
+					}
+
+					if (login_packet.m_status != login_packet_status_t::LOGIN_VALID)
+						break;
 				}
 
 				// Games Packets
@@ -148,15 +191,22 @@ void c_client::run_socket()
 					std::copy(m_connection.get_buffer().data(), m_connection.get_buffer().data() + m_connection.get_buffer().size(), std::back_inserter(ctx.m_buffer));
 				}
 
-				if (ctx.m_injector.inject_from_memory(ctx.m_buffer.data()))
 				{
-					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Injection successful")), color_t(255, 255, 255));
-					m_conn_stage = connection_stage::STAGE_WATCHDOG;
-				}
-				else
-				{
-					ctx.m_loader_window.get_gui().insert_text(std::string(xors("Injection failed")), color_t(255, 255, 255));
-					m_conn_stage = connection_stage::STAGE_CLOSE;
+					m_process = new native::process(ctx.m_window_class, {}, PROCESS_ALL_ACCESS);
+					m_mapper = new injection::manualmapper(*m_process);
+
+					const auto address = m_mapper->inject(ctx.m_buffer, injection::executor::mode::CREATE_THREAD);
+
+					if (address)
+					{
+						ctx.m_loader_window.get_gui().insert_text(std::string(xors("Injection successful")), color_t(255, 255, 255));
+						m_conn_stage = connection_stage::STAGE_WATCHDOG;
+					}
+					else
+					{
+						ctx.m_loader_window.get_gui().insert_text(std::string(xors("Injection failed")), color_t(255, 255, 255));
+						m_conn_stage = connection_stage::STAGE_CLOSE;
+					}
 				}
 
 				ctx.m_buffer.clear();
@@ -193,18 +243,28 @@ void c_client::run_socket()
 
 				auto status = watchdog_packet_status_t::WATCHDOG_KEEPALIVE;
 
-				// Run detections
+				c_watchdog_packet watchdog_packet{};
 
 				if (!ctx.m_watchdog)
 					status = watchdog_packet_status_t::WATCHDOG_CLOSE;
 
-				auto watchdog_packet = m_packet_handler.create_watchdog_packet(status);
+				// Run detections
+				//if (!m_protection.safety_check())
+				//{
+				//	m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
+				//	watchdog_packet = m_packet_handler.create_watchdog_packet(watchdog_packet_status_t::WATCHDOG_BAN, m_protection.m_err_str);
+				//}
+				//else
+				{
+					watchdog_packet = m_packet_handler.create_watchdog_packet(status);
+				}
 				
 				m_connection.set_buffer(&watchdog_packet, sizeof watchdog_packet);
-				if (m_connection.send() == SOCKET_ERROR || status == watchdog_packet_status_t::WATCHDOG_CLOSE)
+				if (m_connection.send() == SOCKET_ERROR || status != watchdog_packet_status_t::WATCHDOG_KEEPALIVE)
 				{
 					m_connection.disconnect();
 					ctx.m_panic = true;
+					ctx.m_watchdog = false;
 					
 					return;
 				}
@@ -323,7 +383,7 @@ void c_client::run_shared_mem()
 			{
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 
-				if (!ctx.m_injector.unload())
+				if (!m_mapper->uninject(injection::executor::mode::CREATE_THREAD))
 				{
 					system(xors("taskkill /F /T /IM javaw.exe"));
 				}
@@ -335,7 +395,10 @@ void c_client::run_shared_mem()
 
 			case shared_mem_stage::STAGE_FORCECLOSE:
 			{
-				if (!ctx.m_injector.unload())
+				auto proc = native::process(ctx.m_window_class, {}, PROCESS_ALL_ACCESS);
+				auto mapper = injection::manualmapper(proc);
+
+				if (!mapper.uninject(injection::executor::mode::CREATE_THREAD))
 				{
 					system(xors("taskkill /F /T /IM javaw.exe"));
 				}

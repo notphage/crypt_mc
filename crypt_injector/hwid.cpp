@@ -91,43 +91,37 @@ uint64_t c_hwid::disk_serials()
 		return buf;
 	};
 
-	for (auto i = 0; i < 9; i++)
+	const auto device = LI_FN(CreateFileA).cached()(xors("\\\\.\\PhysicalDrive0"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+
+	if (device != INVALID_HANDLE_VALUE)
 	{
-		wchar_t disk_name[22];
+		size_t command_size = sizeof(SENDCMDINPARAMS) + IDENTIFY_BUFFER_SIZE;
+		PSENDCMDINPARAMS cmd = static_cast<PSENDCMDINPARAMS>(malloc(command_size));
+		cmd->irDriveRegs.bCommandReg = 0xEC;
+		DWORD bytes_ret = 0;
 
-		wsprintfW(disk_name, xors(L"\\\\.\\PhysicalDrive%i"), i);
-
-		const auto device = LI_FN(CreateFileW).cached()(disk_name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-
-		if (device != INVALID_HANDLE_VALUE)
+		if (!LI_FN(DeviceIoControl).cached()(device, SMART_RCV_DRIVE_DATA, cmd, sizeof(SENDCMDINPARAMS), cmd, command_size, &bytes_ret, nullptr))
 		{
-			size_t command_size = sizeof(SENDCMDINPARAMS) + IDENTIFY_BUFFER_SIZE;
-			PSENDCMDINPARAMS cmd = static_cast<PSENDCMDINPARAMS>(malloc(command_size));
-			cmd->irDriveRegs.bCommandReg = 0xEC;
-			DWORD bytes_ret = 0;
+			LI_FN(CloseHandle).cached()(device);
+		}
+		else
+		{
+			DWORD diskdata[256];
+			USHORT* pIdSector = (USHORT*)(PIDENTIFY_DATA)((PSENDCMDOUTPARAMS)cmd)->bBuffer;
 
-			if (!LI_FN(DeviceIoControl).cached()(device, SMART_RCV_DRIVE_DATA, cmd, sizeof(SENDCMDINPARAMS), cmd, command_size, &bytes_ret, nullptr))
-			{
-				LI_FN(CloseHandle).cached()(device);
-			}
-			else
-			{
-				DWORD diskdata[256];
-				USHORT* pIdSector = (USHORT*)(PIDENTIFY_DATA)((PSENDCMDOUTPARAMS)cmd)->bBuffer;
+			for (int ijk = 0; ijk < 256; ijk++)
+				diskdata[ijk] = pIdSector[ijk];
 
-				for (int ijk = 0; ijk < 256; ijk++)
-					diskdata[ijk] = pIdSector[ijk];
+			char serial[1024];
+			convert_to_str(diskdata, 10, 19, serial);
+			convert_to_str(diskdata, 27, 46, serial);
 
-				char serial[1024];
-				convert_to_str(diskdata, 10, 19, serial);
-				convert_to_str(diskdata, 27, 46, serial);
+			hwid_disk ^= fnvr(serial);
 
-				hwid_disk ^= fnvr(serial);
-
-				LI_FN(CloseHandle).cached()(device);
-			}
+			LI_FN(CloseHandle).cached()(device);
 		}
 	}
+	
 
 	return hwid_disk;
 }
@@ -157,11 +151,44 @@ uint64_t c_hwid::boot_uuid()
 	return fnvr(serial);
 }
 
+uint64_t c_hwid::cpu_regs()
+{
+	volatile int      registers[4];
+	volatile uint8_t* registers_bytes;
+	std::string       hash_string;
+
+	__cpuid((int*)registers, 0x80000000);
+
+	if (registers[0] < 0x80000002)
+		return 0;
+
+	__cpuid((int*)registers, 0);
+
+	registers_bytes = (uint8_t*)(&registers[1]);
+
+	for (uint8_t b = 0; b < (sizeof(int) * 3); ++b)
+		hash_string += (registers_bytes[b] ^ (0x2F * (b % 4)));
+
+	for (int i = 0; i < 4; i++)
+	{
+		__cpuid((int*)registers, (0x80000002 + i));
+
+		registers_bytes = (uint8_t*)registers;
+
+		for (uint8_t b = 0; b < (sizeof(int) * 4); ++b)
+			hash_string += (registers_bytes[b] ^ (0x2F * (b % 4)));
+	}
+
+	return fnvr(hash_string.c_str());
+}
+
 uint64_t c_hwid::get_hwid()
 {
 	uint64_t ret = 0;
+
 	ret ^= disk_serials();
 	ret ^= boot_uuid();
+	ret ^= cpu_regs();
 
 	return ret;
 }

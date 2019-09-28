@@ -149,21 +149,37 @@
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateMapFile>true</GenerateMapFile>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="api_set.cpp" />
+    <ClCompile Include="binary_file.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="connection.cpp" />
+    <ClCompile Include="executor.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="hwid.cpp" />
-    <ClCompile Include="inject.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="loadlibrary.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="manualmapper.cpp" />
+    <ClCompile Include="map_context.cpp" />
     <ClCompile Include="memory.cpp" />
+    <ClCompile Include="memory_section.cpp" />
+    <ClCompile Include="ntdll.cpp" />
+    <ClCompile Include="portable_executable.cpp" />
+    <ClCompile Include="process.cpp" />
     <ClCompile Include="protection.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="shellcode.cpp" />
+    <None Include="dllmain_call_64_exit.asm">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="syscall.cpp" />
+    <ClCompile Include="thread.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,28 +190,52 @@
     <ClInclude Include="..\shared_mutex.h" />
     <ClInclude Include="..\shared_queue.h" />
     <ClInclude Include="..\shared_signal.h" />
+    <ClInclude Include="api_set.hpp" />
+    <ClInclude Include="binary_file.hpp" />
+    <ClInclude Include="cast.hpp" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="compiler.hpp" />
     <ClInclude Include="connection.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="executor.hpp" />
     <ClInclude Include="font.h" />
     <ClInclude Include="game_list.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="hwid.h" />
-    <ClInclude Include="inject.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="lazy_import.h" />
+    <ClInclude Include="loadlibrary.hpp" />
+    <ClInclude Include="logger.hpp" />
+    <ClInclude Include="maker.hpp" />
+    <ClInclude Include="manualmapper.hpp" />
+    <ClInclude Include="map_context.hpp" />
     <ClInclude Include="memory.h" />
+    <ClInclude Include="memory_section.hpp" />
     <ClInclude Include="menu.h" />
+    <ClInclude Include="ntdll.hpp" />
+    <ClInclude Include="portable_executable.hpp" />
+    <ClInclude Include="process.hpp" />
     <ClInclude Include="protection.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="safe_handle.hpp" />
+    <ClInclude Include="safe_memory.hpp" />
     <ClInclude Include="sdk.h" />
+    <ClInclude Include="shellcode.hpp" />
     <ClInclude Include="string.h" />
     <ClInclude Include="syscall.h" />
+    <ClInclude Include="thread.hpp" />
+    <ClInclude Include="transformer.hpp" />
     <ClInclude Include="util.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dllmain_call_x64_entry.asm">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="dllmain_hijack_x64_entry.asm">
+      <FileType>Document</FileType>
+    </None>
     <MASM Include="syscall_stub.asm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

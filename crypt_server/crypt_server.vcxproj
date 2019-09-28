@@ -101,6 +101,7 @@
     <ClInclude Include="context.h" />
     <ClInclude Include="game_list.h" />
     <ClInclude Include="key.h" />
+    <ClInclude Include="safe_cout.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="thread_pool.h" />
   </ItemGroup>

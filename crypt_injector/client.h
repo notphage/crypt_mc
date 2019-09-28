@@ -5,6 +5,9 @@
 #include "game_list.h"
 #include "../shared_queue.h"
 
+#include "process.hpp"
+#include "manualmapper.hpp"
+
 class c_client
 {
 	std::atomic<connection_stage> m_conn_stage;
@@ -21,6 +24,8 @@ class c_client
 	c_shared_mem_queue m_mem_queue;
 	c_mem_handler m_mem_handler;
 	c_protection m_protection;
+	native::process* m_process;
+	injection::manualmapper* m_mapper;
 
 	template <typename T>
 	bool receive_packet(T& packet)
@@ -45,9 +50,15 @@ public:
 		: m_conn_stage(connection_stage::STAGE_WAITING), m_socket_thread(std::thread(&c_client::run_socket, this)),
 		  m_shared_mem_stage(shared_mem_stage::STAGE_CREATE), m_shared_mem_thread(std::thread(&c_client::run_shared_mem, this)),
 		  m_mem_queue(xors("Spotify"), 0x100000, c_shared_mem_queue::mode::server)
+	{ }
+
+	~c_client()
 	{
-		m_socket_thread.detach();
-		m_shared_mem_thread.detach();
+		m_socket_thread.join();
+		m_shared_mem_thread.join();
+
+		delete m_process;
+		delete m_mapper;
 	}
 
 	void set_conn_stage(connection_stage stage)

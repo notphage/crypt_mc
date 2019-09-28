@@ -69,7 +69,7 @@ public:
 	std::shared_ptr<c_renderer> m_renderer;
 	std::shared_ptr<c_gui> m_gui;
 	c_settings m_settings;
-	//c_client m_client;
+	c_client m_client;
 
 	std::vector<std::string> m_cfg_list;
 	int m_current_cfg{};

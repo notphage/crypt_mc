@@ -2,6 +2,7 @@
 #include "cheat.h"
 #include "cert.h"
 #include "key.h"
+#include "safe_cout.h"
 
 #include <sys/socket.h>
 #include <unistd.h>    //write
@@ -12,7 +13,7 @@
 c_server::c_server(int16_t port)
 	: m_port(port)
 {
-	printf("> Server | Threads: %i Port: %i\n", std::thread::hardware_concurrency(), m_port);
+	safe_cout << "> Server | Threads: " << std::thread::hardware_concurrency() << " Port: " << m_port << "\n";
 }
 
 void c_server::init_tls()
@@ -45,7 +46,7 @@ void c_server::init_tls()
 	if (key_check_code != 1)
 		throw std::runtime_error("Couldn't verify private key\n");
 
-	printf("> SSL | Access granted\n");
+	safe_cout << "> SSL | Access granted\n";
 }
 
 void c_server::bind_socket()
@@ -69,7 +70,7 @@ void c_server::bind_socket()
 	//Listen
 	listen(m_socket_desc, 3);
 
-	printf("> Server | Initialized sucessfully\n");
+	safe_cout << "> Server | Initialized successfully\n";
 }
 
 bool c_server::add_infraction(const std::shared_ptr<c_client_handler>& client)
@@ -104,7 +105,7 @@ bool c_server::add_infraction(const std::shared_ptr<c_client_handler>& client)
 			{
 				// ip ban for 24 hours
 
-				printf("> Server | Banned IP blocked\n");
+				safe_cout << "> Server | Banned IP blocked\n";
 				return false;
 			}
 		}
@@ -113,12 +114,12 @@ bool c_server::add_infraction(const std::shared_ptr<c_client_handler>& client)
 	if (new_infrac)
 	{
 		m_ip_infractions.push_back({ client_ip,  1, cur_time });
-		printf("> Server | Infraction added\n");
+		safe_cout << "> Server | Infraction added\n";
 
 		return true;
 	}
 
-	printf("> Server | Infraction modified\n");
+	safe_cout << "> Server | Infraction modified\n";
 	return true;
 }
 
@@ -138,7 +139,7 @@ bool c_server::is_ip_banned(const sockaddr_in& client)
 			// reset the infraction time
 			ip_infrac.m_infraction_time = cur_time;
 
-			printf("> Server | Banned ip tried to connect\n");
+			safe_cout << "> Server | Banned ip tried to connect\n";
 			return true;
 		}
 	}
@@ -180,11 +181,11 @@ void c_server::run()
 			m_clients.push_back(std::move(client_handler));
 			m_clients.back()->run();
 
-			printf("> Server | Client %s accepted\n", ip_str);
+			safe_cout << "> Server | Client " << ip_str << " accepted\n";
 		}
 		else
 		{
-			printf("> Server | Client %s rejected for %i\n", ip_str, ret);
+			safe_cout << "> Server | Client " << ip_str << " rejected for " << ret << "\n";
 			add_infraction(client_handler);
 		}
 
@@ -239,7 +240,7 @@ void c_client_handler::handle_client()
 
 		if (ctx.m_required_version > version_packet.m_version)
 		{
-			printf("> Client %s | Outdated version (%llu)\n", m_client_ip.c_str(), version_packet.m_version);
+			safe_cout << "> Client " << m_client_ip << " | Outdated version (" << version_packet.m_version << ")\n";
 
 			version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, true);
 			m_connection.set_buffer(&version_packet, sizeof version_packet);
@@ -248,7 +249,7 @@ void c_client_handler::handle_client()
 			return;
 		}
 
-		printf("> Client %s | Updated version\n", m_client_ip.c_str());
+		safe_cout << "> Client " << m_client_ip << " | Updated version\n";
 
 		version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, false);
 		m_connection.set_buffer(&version_packet, sizeof version_packet);
@@ -260,10 +261,10 @@ void c_client_handler::handle_client()
 		m_stage = CHS_LOGIN;
 		
 		static std::vector<std::tuple<std::string, uint64_t, uint64_t>> m_users{
-			{ "phage", 10382422081949954444, 5434901453752155978 },
-			{ "mexican", 2489908105208420549, 15950463431215380529 },
-			{ "Ciaran", 10447304709281239008, 4538760847905949811 },
-			{ "uzi", 13694325770137587408, 5988022699623831536 },
+			{ "phage", 10382422081949954444, 18005380739928406968 },
+			{ "mexican", 2489908105208420549, 17383418848068447227 },
+			{ "Ciaran", 10447304709281239008, 9093044100942767960 },
+			{ "uzi", 13694325770137587408, 10889602171640250617 },
 			{ "gangsta", 5358537683607507742, 16595086355998634058 },
 			{ "hacs", 14393557407244641642, 10371841605793258569 },
 			{ "denzo", 7646908165282335792, 4134658753895949041 },
@@ -271,20 +272,21 @@ void c_client_handler::handle_client()
 			{ "_Rtinox", 1308268265119556128, 6138202367498348673 },
 			{ "nomo", 17123985505359595210, 4670644444049306433 },
 			{ "Nash", 15055877905642066443, 15876347534175914011 },
-			{ "emprah", 3592560568222008525, 12684092619770610821 },
+			{ "emprah", 17995296015186350121, 12684092619770610821 },
 			{ "Skilled", 6993857605014467185, 12131543493270600539 },
 			{ "alexandru", 3620744427807918383, 5154951702442138794 },
 			{ "NefariousUser", 16915402360579880554, 9729003570243262152 },
 			{ "Zach", 1836054350097038111, 6503586793295444129 },
 			{ "1300s", 8471790438192775144, 17327406942188991615 },
-			{ "aris", 14781963634558499306, 14823737086275288244 },
-			{ "Rust", 3392171804832091563, 17042463584064179697 },
+			{ "aris", 14781963634558499306, 10141932124092029056 },
+			{ "Rust", 3392171804832091563, 13144256587507604925 },
 			{ "Scompey", 239235789231852688, 9386242540668891877 },
-			{ "Yersi", 6266182343525247170, 17005347296732021575 },
+			{ "Yersi", 6266182343525247170, 13751237738621815046 },
 			//{ "mishtavishta", 524839665675923563, 18383812991739346673 },
 			{ "SR", 12920697777794270736, 17559757935203518501 },
 			{ "kyle", 11367569745228157569, 10402789832664191440 },
-			{ "toby", 5380418998039192649, 1374052520093222915 }
+			{ "toby", 5380418998039192649, 1374052520093222915 },
+			{ "Mango",  12638153115695167455, 11498898546036171723 }
 		};
 
 		c_login_packet login_packet;
@@ -296,20 +298,43 @@ void c_client_handler::handle_client()
 			return;
 		}
 
-		const auto logged_in = std::any_of(m_users.begin(), m_users.end(), [&login_packet](const std::tuple<std::string, uint64_t, uint64_t>& user)
-			{
-				auto [username, password, hwid] = user;
-				return (strcmp(username.c_str(), login_packet.m_username) == 0 && password == login_packet.m_password && hwid == login_packet.m_hwid);
-			});
-
-		if (!logged_in)
+		login_packet.m_status = login_packet_status_t::LOGIN_INVALID;
+		for (auto&& user : m_users)
 		{
-			printf("> Client %s | Attempted user: %s pass: %llu hwid: %llu\n", m_client_ip.c_str(), login_packet.m_username, login_packet.m_password, login_packet.m_hwid);
+			auto [username, password, hwid] = user;
+
+			if (strcmp(username.c_str(), login_packet.m_username) != 0)
+				continue;
+
+			if (password != login_packet.m_password)
+				continue;
+
+			if (hwid != login_packet.m_hwid)
+			{
+				login_packet.m_status = login_packet_status_t::LOGIN_MISMATCH;
+				continue;
+			}
+
+			login_packet.m_status = login_packet_status_t::LOGIN_VALID;
+			break;
+		}
+
+		if (login_packet.m_status != login_packet_status_t::LOGIN_VALID)
+		{
+			safe_cout << "> Client " << m_client_ip << " | Attempted user: " << login_packet.m_username << " pass: " << login_packet.m_password << " hwid: " << login_packet.m_hwid << "\n";
+
+			m_packet_handler.xor_packet(login_packet);
+			m_connection.set_buffer(&login_packet, sizeof login_packet);
+			m_connection.send();
 
 			return;
 		}
 
-		printf("> Client %s | Logged into user %s\n", m_client_ip.c_str(), login_packet.m_username);
+		safe_cout << "> Client " << m_client_ip << " | Logged into user " << login_packet.m_username << "\n";
+
+		m_packet_handler.xor_packet(login_packet);
+		m_connection.set_buffer(&login_packet, sizeof login_packet);
+		m_connection.send();
 	}
 
 	// Game Packets
@@ -325,8 +350,6 @@ void c_client_handler::handle_client()
 			m_connection.send();
 		}
 	}
-
-	//size_t num_packets = (size_t)std::ceil((float)crypt_mc_dll_size / (float)max_data_len);
 
 	// Game Selection
 	c_cheat_packet cheat_packet;
@@ -352,54 +375,54 @@ void c_client_handler::handle_client()
 		m_connection.send();
 	}
 
-	//m_stage = CHS_WATCHDOG;
-	//bool connected = true;
-	//while (connected)
-	//{
-	//	c_watchdog_packet watchdog_packet;
-	//	if (const auto ret = handle_packet<c_watchdog_packet>(watchdog_packet); ret != CHPS_VALID)
-	//	{
-	//		if (ret == CHPS_INVALID)
-	//			ctx.m_server->add_infraction(shared_from_this());
-	//
-	//		break;
-	//	}
-	//
-	//	switch (watchdog_packet.m_status)
-	//	{
-	//		case watchdog_packet_status_t::WATCHDOG_KEEPALIVE:
-	//		{
-	//			break;
-	//		}
-	//		
-	//		case watchdog_packet_status_t::WATCHDOG_CLOSE:
-	//		{
-	//			connected = false;
-	//			break;
-	//		}
-	//		
-	//		case watchdog_packet_status_t::WATCHDOG_WARN:
-	//		{
-	//			ctx.m_server->add_infraction(shared_from_this());
-	//			connected = false;
-	//			break;
-	//		}
-	//		
-	//		case watchdog_packet_status_t::WATCHDOG_BAN:
-	//		{
-	//			// TODO: Add REST API communication to ban player
-	//			connected = false;
-	//			break;
-	//		}
-	//		
-	//		default:
-	//		{
-	//			connected = false;
-	//			break;
-	//		}
-	//	}
-	//	
-	//}
+	m_stage = CHS_WATCHDOG;
+	bool connected = true;
+	while (connected)
+	{
+		c_watchdog_packet watchdog_packet;
+		if (const auto ret = handle_packet<c_watchdog_packet>(watchdog_packet); ret != CHPS_VALID)
+		{
+			if (ret == CHPS_INVALID)
+				ctx.m_server->add_infraction(shared_from_this());
+	
+			break;
+		}
+	
+		switch (watchdog_packet.m_status)
+		{
+			case watchdog_packet_status_t::WATCHDOG_KEEPALIVE:
+			{
+				break;
+			}
+			
+			case watchdog_packet_status_t::WATCHDOG_CLOSE:
+			{
+				connected = false;
+				break;
+			}
+			
+			case watchdog_packet_status_t::WATCHDOG_WARN:
+			{
+				ctx.m_server->add_infraction(shared_from_this());
+				connected = false;
+				break;
+			}
+			
+			case watchdog_packet_status_t::WATCHDOG_BAN:
+			{
+				// TODO: Add REST API communication to ban player
+				connected = false;
+				break;
+			}
+			
+			default:
+			{
+				connected = false;
+				break;
+			}
+		}
+		
+	}
 
 	m_connection.disconnect();
 	m_disconnected = true;

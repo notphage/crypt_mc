@@ -15,6 +15,8 @@ ConstructorFn __xc_z[] = { NULL };
 #pragma data_seg()
 #pragma comment(linker, "/MERGE:.CRT=.rdata")
 
+extern "C" int _fltused{ 0x9875 };
+
 // Calls each constructor/destructor from first to last.
 __declspec(noinline) void __cdecl _initterm(ConstructorFn* first, ConstructorFn* last)
 {

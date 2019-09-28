@@ -1,4 +1,5 @@
 #include "context.h"
+#include "ntdll.hpp"
 #include <Windows.h>
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
@@ -9,6 +10,8 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 {
 	if (!ctx.m_syscall.init())
 		return 0;
+
+	ntdll::initialise();
 
 	ctx.m_instance = instance;
 	ctx.m_loader_window.create();
@@ -46,7 +49,7 @@ int32_t __stdcall WinMain(HINSTANCE instance, HINSTANCE, char*, int32_t)
 		}
 	}
 
-	std::this_thread::sleep_for(std::chrono::seconds(3));
+	std::this_thread::sleep_for(std::chrono::seconds(5));
 
 	return 0;
 }

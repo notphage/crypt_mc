@@ -28,14 +28,16 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 
 			case 1:
 			{
-				if (GetTickCount64() - delay > 75 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && self->get_held_item())
+				const auto held_item = self->get_held_item();
+
+				if (GetTickCount64() - delay > 75 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && held_item)
 				{
-					self->send_use_item(self->get_held_item());
+					self->send_use_item(held_item);
 
 					delay = GetTickCount64();
 					stage++;
 				}
-				else if (!self->get_held_item())
+				else if (!held_item)
 				{
 					self->set_current_slot(old_slot);
 					old_slot = -1;
@@ -43,6 +45,7 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 					stage = 0;
 					is_running = false;
 				}
+
 				break;
 			}
 
@@ -178,6 +181,8 @@ int c_throw::find_debuff(const std::shared_ptr<c_player>& self) const
 			}
 		}
 	}
+
+	return -1;
 }
 
 int c_throw::find_pearl(const std::shared_ptr<c_player>& self) const

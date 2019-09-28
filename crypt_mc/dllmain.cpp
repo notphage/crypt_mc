@@ -180,9 +180,7 @@ bool __stdcall DllMain(HINSTANCE instance, ulong32_t reason, void* reserved)
 #endif
 
 		hack(instance);
-
-		return true;
 	}
 
-	return false;
+	return true;
 }

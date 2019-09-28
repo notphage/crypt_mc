@@ -13,6 +13,16 @@ namespace std
 	{
 		__debugbreak();
 	}
+
+	void __cdecl _Xbad_function_call(void)
+	{
+		__debugbreak();
+	}
+
+	void __cdecl _Xout_of_range(const char*)
+	{
+		__debugbreak();
+	}
 }
 
 extern "C" __declspec(noreturn) void __cdecl _invalid_parameter_noinfo_noreturn()
@@ -25,6 +35,10 @@ extern "C" __declspec(noreturn) void __stdcall _CxxThrowException(void*, _ThrowI
 	__debugbreak();
 }
 
+extern "C" int __cdecl _purecall()
+{
+	ExitProcess(0);
+}
 
 //
 // Below lays an interesting case, this one is more alike the SEH handlers.

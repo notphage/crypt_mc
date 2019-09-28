@@ -38,7 +38,6 @@ if ( init ) \
 #include "gui.h"
 #include "window.h"
 #include "memory.h"
-#include "inject.h"
 #include "connection.h"
 #include "protection.h"
 #include "client.h"
@@ -51,7 +50,7 @@ public:
 	uint64_t m_version = 2;
 	int32_t m_selected_cheat = -1;
 	bool m_block_keyinput = false;
-	std::vector<uint8_t> m_buffer;
+	std::vector<std::byte> m_buffer;
 	std::string m_window_class;
 	std::string m_username;
 
@@ -64,7 +63,6 @@ public:
 	uint32_t m_screen_h = 240;
 
 	c_syscall m_syscall;
-	c_inject m_injector;
 	c_window m_loader_window;
 	c_hwid m_hwid;
 	c_client m_client;

@@ -38,22 +38,37 @@
     <Filter Include="SRC\client\injection">
       <UniqueIdentifier>{80e20270-2880-4410-a757-3fa3b960a402}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\client\injection\memory">
-      <UniqueIdentifier>{bd5a6159-3141-441d-a15b-7b09d8cb8ca3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\syscall">
       <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\client\shared_memory">
       <UniqueIdentifier>{bf76b426-306a-4dfb-9c83-83582a944777}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\syscall\memory">
+      <UniqueIdentifier>{bd5a6159-3141-441d-a15b-7b09d8cb8ca3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\engines">
+      <UniqueIdentifier>{691f4114-de62-44bb-b1b3-53cf9e119be7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\helpers">
+      <UniqueIdentifier>{152c794d-fd5e-4312-bb9b-a149f7357d1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\mappers">
+      <UniqueIdentifier>{2266de68-6213-485d-8649-3cbf84fc4cc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\interop">
+      <UniqueIdentifier>{462daaa8-65e2-4fd4-9e10-c169b4dea794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\wrappers">
+      <UniqueIdentifier>{ee4f5123-d91a-4f9a-b495-685a219e1e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRC\client\injection\shellcode">
+      <UniqueIdentifier>{45e309a9-4568-403f-b674-567093841592}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>SRC</Filter>
-    </ClCompile>
-    <ClCompile Include="inject.cpp">
-      <Filter>SRC\client\injection</Filter>
     </ClCompile>
     <ClCompile Include="connection.cpp">
       <Filter>SRC\client\connection</Filter>
@@ -83,10 +98,49 @@
       <Filter>SRC\client\hwid</Filter>
     </ClCompile>
     <ClCompile Include="memory.cpp">
-      <Filter>SRC\client\injection\memory</Filter>
+      <Filter>SRC\syscall\memory</Filter>
     </ClCompile>
     <ClCompile Include="protection.cpp">
       <Filter>SRC\client\protection</Filter>
+    </ClCompile>
+    <ClCompile Include="executor.cpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClCompile>
+    <ClCompile Include="shellcode.cpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ntdll.cpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="manualmapper.cpp">
+      <Filter>SRC\client\injection\mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="loadlibrary.cpp">
+      <Filter>SRC\client\injection\mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="map_context.cpp">
+      <Filter>SRC\client\injection\mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_section.cpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="process.cpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="thread.cpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="api_set.cpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="binary_file.cpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="portable_executable.cpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -98,9 +152,6 @@
     </ClInclude>
     <ClInclude Include="context.h">
       <Filter>SRC</Filter>
-    </ClInclude>
-    <ClInclude Include="inject.h">
-      <Filter>SRC\client\injection</Filter>
     </ClInclude>
     <ClInclude Include="syscall.h">
       <Filter>SRC\syscall</Filter>
@@ -154,7 +205,7 @@
       <Filter>SRC\client\hwid</Filter>
     </ClInclude>
     <ClInclude Include="memory.h">
-      <Filter>SRC\client\injection\memory</Filter>
+      <Filter>SRC\syscall\memory</Filter>
     </ClInclude>
     <ClInclude Include="protection.h">
       <Filter>SRC\client\protection</Filter>
@@ -171,10 +222,78 @@
     <ClInclude Include="..\shared_mem.h">
       <Filter>SRC\client\shared_memory</Filter>
     </ClInclude>
+    <ClInclude Include="executor.hpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClInclude>
+    <ClInclude Include="shellcode.hpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ntdll.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="manualmapper.hpp">
+      <Filter>SRC\client\injection\mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="loadlibrary.hpp">
+      <Filter>SRC\client\injection\mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="map_context.hpp">
+      <Filter>SRC\client\injection\mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_section.hpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="process.hpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="thread.hpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="api_set.hpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="binary_file.hpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="portable_executable.hpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="cast.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="maker.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="transformer.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_handle.hpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_memory.hpp">
+      <Filter>SRC\client\injection\wrappers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="syscall_stub.asm">
       <Filter>SRC\syscall</Filter>
     </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dllmain_call_x64_entry.asm">
+      <Filter>SRC\client\injection\shellcode</Filter>
+    </None>
+    <None Include="dllmain_hijack_x64_entry.asm">
+      <Filter>SRC\client\injection\shellcode</Filter>
+    </None>
+    <None Include="dllmain_call_64_exit.asm">
+      <Filter>SRC\client\injection\shellcode</Filter>
+    </None>
   </ItemGroup>
 </Project>

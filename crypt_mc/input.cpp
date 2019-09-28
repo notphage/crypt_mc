@@ -101,6 +101,9 @@ bool c_input_manager::is_key_pressed(int key)
 
 bool c_input_manager::is_key_pressed(keysetting_t key)
 {
+	if (ctx.m_in_chat)
+		return false;
+
 	VirtualKeys_t pressed = (VirtualKeys_t)key.key;
 	keytype_t keytype = (keytype_t)key.type;
 	bool valid{};

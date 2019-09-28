@@ -6,9 +6,16 @@
     <ClCompile Include="SRC\crt_except.cpp" />
     <ClCompile Include="SRC\crt_dllentry.cpp" />
     <ClCompile Include="SRC\crt_alloc.cpp" />
+    <ClCompile Include="SRC\crt_file.cpp" />
+    <ClCompile Include="SRC\crt_math.cpp" />
+    <ClCompile Include="SRC\crt_str.cpp" />
+    <ClCompile Include="SRC\crt_thread.cpp" />
+    <ClCompile Include="SRC\crt_time.cpp" />
+    <ClCompile Include="SRC\crt_rand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SRC\crt_memory.h" />
     <ClInclude Include="SRC\crt_init.h" />
+    <ClInclude Include="SRC\crt_time.h" />
   </ItemGroup>
 </Project>

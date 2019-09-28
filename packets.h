@@ -20,6 +20,14 @@ enum class packet_type_t : uint64_t
 	PACKET_WATCHDOG
 };
 
+enum class login_packet_status_t : uint8_t
+{
+	LOGIN_DUMMY,
+	LOGIN_INVALID,
+	LOGIN_MISMATCH,
+	LOGIN_VALID
+};
+
 enum class game_packet_status_t : uint8_t
 {
 	GAME_INVALID, // used for sending the number of games
@@ -49,14 +57,15 @@ struct c_packet
 struct c_version_packet : c_packet
 {
 	uint64_t m_version;
-	bool  m_upgrade_required;
+	bool	 m_upgrade_required;
 };
 
 struct c_login_packet : c_packet
 {
-	char     m_username[16];
-	uint64_t m_password;
-	uint64_t m_hwid;
+	char				  m_username[16];
+	uint64_t			  m_password;
+	uint64_t			  m_hwid;
+	login_packet_status_t m_status;
 };
 
 struct c_games_packet : c_packet
@@ -158,7 +167,7 @@ public:
 		return version_packet;
 	}
 
-	c_login_packet create_login_packet(const std::string& username, uint64_t password, uint64_t hwid)
+	c_login_packet create_login_packet(const std::string& username, uint64_t password, uint64_t hwid, login_packet_status_t status)
 	{
 		c_login_packet login_packet{};
 		create_base_packet(login_packet, packet_type_t::PACKET_LOGIN);
@@ -166,6 +175,7 @@ public:
 		memcpy(&login_packet.m_username, username.data(), sizeof login_packet.m_username);
 		login_packet.m_password = password;
 		login_packet.m_hwid = hwid;
+		login_packet.m_status = status;
 
 		xor_packet(login_packet);
 
@@ -233,6 +243,8 @@ public:
 		const auto dtc_name = detection_name.substr(0, 64);
 		if (!dtc_name.empty())
 			strcpy(watchdog_packet.m_detection_name, dtc_name.c_str());
+
+		xor_packet(watchdog_packet);
 		
 		return watchdog_packet;
 	}
