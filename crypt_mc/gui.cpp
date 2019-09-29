@@ -81,8 +81,8 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
 					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
 					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")},
-					{&ctx.m_settings.combat_auto_clicker_jitter, xors("jitter")},
-					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")}
+					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")},
+					{&ctx.m_settings.combat_auto_clicker_jitter, xors("jitter")}
 				});
 		}
 		auto_clicker_groupbox.end(menu.data(), &ctx.m_settings.combat_auto_clicker);

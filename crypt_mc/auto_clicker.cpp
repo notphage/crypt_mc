@@ -92,10 +92,14 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 	{
 		if (ctx.m_settings.combat_auto_clicker_jitter && util::random(0, 100) <= ctx.m_settings.combat_auto_clicker_jitter_chance)
 		{
-			auto random = util::random(-((float)ctx.m_settings.combat_auto_clicker_jitter_intensity), (float)ctx.m_settings.combat_auto_clicker_jitter_intensity);
+			float sens = mc->get_mouse_sensitivity() * 0.6f + 0.2f;
+			float step = pow(sens, 3) * 8.0f;
 
-			self->set_yaw(self->get_yaw() + std::copysignf(util::convert_legit_value(abs(random), mc->get_mouse_sensitivity()), random));
-			self->set_pitch(self->get_pitch() + std::copysignf(util::convert_legit_value(abs(random), mc->get_mouse_sensitivity()), random));
+			auto random_h = util::random(-((float)ctx.m_settings.combat_auto_clicker_jitter_intensity), (float)ctx.m_settings.combat_auto_clicker_jitter_intensity);
+			auto random_v = util::random(-((float)ctx.m_settings.combat_auto_clicker_jitter_intensity), (float)ctx.m_settings.combat_auto_clicker_jitter_intensity);
+
+			self->set_yaw(self->get_yaw() + util::convert_legit_value(step, random_h, util::random(1, 3)));
+			self->set_pitch(self->get_pitch() + util::convert_legit_value(step, random_v, util::random(1, 3)));
 		}
 
 		if (in_inventory)
@@ -109,7 +113,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 			if (ret)
 			{
 				left_click = true;
-				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(-20, 20))), ((max_cps - min_cps) + util::random(-20, 20))), 25, 2000);
+				current_delay = std::clamp(util::random_delay(min_cps, max_cps) + util::random(-(((max_cps - min_cps) + util::random(-20, 20))), ((max_cps - min_cps) + util::random(-20, 20))), 10, 2000);
 				last_click = GetTickCount64();
 				return;
 			}
@@ -157,7 +161,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 				{
 					clicks_skip = 0;
 					clicks_until_skip = util::random(62, 81) + ctx.m_settings.combat_auto_clicker_max_cps;
-					skip_click_amt = util::random(1, 2);
+					skip_click_amt = util::random(2, 3);
 					skip_click_count = 0;
 				}
 
