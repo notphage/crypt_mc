@@ -2,7 +2,7 @@
 
 void c_client::run_shared_mem()
 {
-#ifndef _DEBUG
+#ifdef PUBLICBUILD
 	while (m_shared_mem_stage != shared_mem_stage::STAGE_INVALID)
 	{
 		switch (m_shared_mem_stage)
