@@ -24,6 +24,7 @@
 #include "anti_afk.h"
 #include "fast_stop.h"
 #include "safe_walk.h"
+#include "fullbright.h"
 
 int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 {
@@ -101,6 +102,7 @@ void c_context::load()
 	ctx.m_features.emplace_back(std::make_unique<c_anti_afk>(&ctx.m_settings.player_anti_afk));
 	ctx.m_features.emplace_back(std::make_unique<c_auto_clicker>(&ctx.m_settings.combat_auto_clicker, &ctx.m_settings.combat_auto_clicker_key));
 	ctx.m_features.emplace_back(std::make_unique<c_fast_place>(&ctx.m_settings.player_fast_place, &ctx.m_settings.player_fast_place_key));
+	ctx.m_features.emplace_back(std::make_unique<c_fullbright>(&ctx.m_settings.visuals_fullbright, &ctx.m_settings.visuals_fullbright_key));
 	ctx.m_features.emplace_back(std::make_unique<c_fast_stop>(&ctx.m_settings.movement_fast_stop, &ctx.m_settings.movement_fast_stop_key));
 	ctx.m_features.emplace_back(std::make_unique<c_flight>(&ctx.m_settings.movement_flight, &ctx.m_settings.movement_flight_key));
 	ctx.m_features.emplace_back(std::make_unique<c_reach>(&ctx.m_settings.combat_reach, &ctx.m_settings.combat_reach_key));

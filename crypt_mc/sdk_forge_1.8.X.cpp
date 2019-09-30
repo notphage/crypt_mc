@@ -183,6 +183,7 @@ struct game_fields
 	jfieldID fid_render_manager_obj;
 	jfieldID fid_type_of_hit = nullptr;
 	jfieldID fid_key_bind_sneak = nullptr;
+	jfieldID fid_gamma = nullptr;
 
 	jmethodID mid_get_key_code = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
@@ -496,23 +497,40 @@ jobject c_player_forge_18X::get_stack(jint slot)
 jobject c_player_forge_18X::get_effects(jobject potion, jobject item_stack)
 {
 	return jni->CallObjectMethod(potion, playerfields.mid_get_effects, item_stack);
-}
-
-jint c_player_forge_18X::get_effects_id(jobject effects)
-{
-	auto arr_effects = static_cast<jobjectArray>(jni->CallObjectMethod(effects, worldfields.mid_to_array));
-
-	for (jint x = 0; x < jni->GetArrayLength(arr_effects); x++)
-	{
-		auto effect = jni->CallObjectMethod(effects, worldfields.mid_get, x);
-
-		if (!effect)
-			continue;
-
-		return get_potion_id(effect);
-	}
-
-	return -1;
+}
+
+
+
+jint c_player_forge_18X::get_effects_id(jobject effects)
+
+{
+
+	auto arr_effects = static_cast<jobjectArray>(jni->CallObjectMethod(effects, worldfields.mid_to_array));
+
+
+
+	for (jint x = 0; x < jni->GetArrayLength(arr_effects); x++)
+
+	{
+
+		auto effect = jni->CallObjectMethod(effects, worldfields.mid_get, x);
+
+
+
+		if (!effect)
+
+			continue;
+
+
+
+		return get_potion_id(effect);
+
+	}
+
+
+
+	return -1;
+
 }
 
 jint c_player_forge_18X::get_potion_id(jobject effect)
@@ -603,59 +621,112 @@ jobject c_player_forge_18X::get_held_item()
 jobject c_player_forge_18X::get_item(jobject item_stack)
 {
 	return jni->CallObjectMethod(item_stack, playerfields.mid_get_item);
-}
-
-std::vector<int> c_player_forge_18X::find_item(int min, int max, find_item_type item_type)
-{
-	std::vector<int> items;
-
-	for (auto i = min; i < max; ++i)
-	{
-		auto item_stack = get_stack(i);
-		if (item_stack)
-		{
-			auto item = get_item(item_stack);
-
-			if (item)
-			{
-				jclass clazz = nullptr;
-				switch (item_type)
-				{
-				case POTION:
-				{
-					clazz = playerfields.cls_item_potion;
-					break;
-				}
-
-				case SOUP:
-				{
-					clazz = playerfields.cls_item_soup;
-					break;
-				}
-
-				case PEARL:
-				{
-					clazz = playerfields.item_ender_pearl_class;
-					break;
-				}
-
-				case ROD:
-				{
-					break;
-				}
-
-				default:
-					return items;
-				}
-
-				if (clazz)
-					if (jni->IsInstanceOf(item, clazz))
-						items.push_back(i);
-			}
-		}
-	}
-
-	return items;
+}
+
+
+
+std::vector<int> c_player_forge_18X::find_item(int min, int max, find_item_type item_type)
+
+{
+
+	std::vector<int> items;
+
+
+
+	for (auto i = min; i < max; ++i)
+
+	{
+
+		auto item_stack = get_stack(i);
+
+		if (item_stack)
+
+		{
+
+			auto item = get_item(item_stack);
+
+
+
+			if (item)
+
+			{
+
+				jclass clazz = nullptr;
+
+				switch (item_type)
+
+				{
+
+				case POTION:
+
+				{
+
+					clazz = playerfields.cls_item_potion;
+
+					break;
+
+				}
+
+
+
+				case SOUP:
+
+				{
+
+					clazz = playerfields.cls_item_soup;
+
+					break;
+
+				}
+
+
+
+				case PEARL:
+
+				{
+
+					clazz = playerfields.item_ender_pearl_class;
+
+					break;
+
+				}
+
+
+
+				case ROD:
+
+				{
+
+					break;
+
+				}
+
+
+
+				default:
+
+					return items;
+
+				}
+
+
+
+				if (clazz)
+
+					if (jni->IsInstanceOf(item, clazz))
+
+						items.push_back(i);
+
+			}
+
+		}
+
+	}
+
+
+
+	return items;
+
 }
 
 jboolean c_player_forge_18X::holding_weapon()
@@ -859,8 +930,18 @@ jboolean c_player_forge_18X::send_use_item(jobject item_stack)
 
 	if (!mc)
 		return false;
+
+	auto player_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
+
+	if (!player_class)
+		return false;
+
+	auto world_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world);
+
+	if (!world_class)
+		return false;
 	
-	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, gamefields.obj_world, item_stack);
+	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, gamefields.obj_world, player_class, world_class, item_stack);
 }
 
 void c_player_forge_18X::set_current_slot(jint slot)
@@ -973,6 +1054,7 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("field_74341_c"), xors("F"));
 		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("field_72313_a"), xors("Lnet/minecraft/util/MovingObjectPosition$MovingObjectType;"));
 		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("field_74311_E"), xors("Lnet/minecraft/client/settings/KeyBinding;"));
+		gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("field_74333_Y"), xors("F"));
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lnet/minecraft/entity/Entity;)V"));
@@ -1034,7 +1116,15 @@ jboolean c_game_forge_18X::is_in_chat()
 
 jboolean c_game_forge_18X::is_hovering_block()
 {
-	auto type_of_hit = jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.fid_type_of_hit);
+	auto mouse_over = jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over);
+
+	if (!mouse_over)
+		return false;
+
+	auto type_of_hit = jni->GetObjectField(mouse_over, gamefields.fid_type_of_hit);
+
+	if (!type_of_hit)
+		return false;
 
 	return jni->CallIntMethod(type_of_hit, gamefields.mid_ordinal) == 1;
 }
@@ -1135,6 +1225,11 @@ jint c_game_forge_18X::get_sneak_key_code()
 	return jni->CallIntMethod(jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings), gamefields.fid_key_bind_sneak), gamefields.mid_get_key_code);
 }
 
+jfloat c_game_forge_18X::get_gamma()
+{
+	return jni->GetFloatField(gamefields.obj_settings, gamefields.fid_gamma);
+}
+
 jobject c_game_forge_18X::get_net_handler()
 {
 	return jni->CallObjectMethod(gamefields.obj_game, gamefields.mid_get_net_handler);
@@ -1143,6 +1238,11 @@ jobject c_game_forge_18X::get_net_handler()
 jobject c_game_forge_18X::get_player_controller()
 {
 	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_player_controller);
+}
+
+void c_game_forge_18X::set_gamma(jfloat gamma)
+{
+	jni->SetFloatField(gamefields.obj_settings, gamefields.fid_gamma, gamma);
 }
 
 void c_game_forge_18X::enable_light_map()

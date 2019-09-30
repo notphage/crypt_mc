@@ -328,8 +328,8 @@ public:
 
 	setting_t<keysetting_t> player_throwdebuff_key{ &m_holder, fnvc("player_throwdebuff_key"), {} };
 	setting_t<bool> player_throwdebuff_damage{ &m_holder, fnvc("player_throwdebuff_damage") };
-	setting_t<bool> player_throwdebuff_poison{ &m_holder, fnvc("player_throwdebuff_poison") };
-	setting_t<bool> player_throwdebuff_slow{ &m_holder, fnvc("player_throwdebuff_slow") };
+	setting_t<bool> player_throwdebuff_poison{ &m_holder, fnvc("player_throwdebuff_poison"), true};
+	setting_t<bool> player_throwdebuff_slow{ &m_holder, fnvc("player_throwdebuff_slow"), true };
 	setting_t<bool> player_throwdebuff_weakness{ &m_holder, fnvc("player_throwdebuff_weakness") };
 
 	setting_t<bool> player_fast_place{&m_holder, fnvc("player_fast_place"), false};
@@ -340,6 +340,8 @@ public:
 	setting_t<int> player_fast_place_projectiles_delay{ &m_holder, fnvc("player_fast_place_projectiles_delay"), 2 };
 
 	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
+	setting_t<int> player_anti_afk_min_delay{ &m_holder, fnvc("player_anti_afk_min_delay"), 60 };
+	setting_t<int> player_anti_afk_max_delay{ &m_holder, fnvc("player_anti_afk_max_delay"), 180 };
 
 	//Movement features
     setting_t<bool> movement_air_control{ &m_holder, fnvc("movement_air_control"), false };
@@ -384,6 +386,9 @@ public:
 
 	setting_t<keysetting_t> movement_longjump_key{ &m_holder, fnvc("movement_longjump_key"), {} };
 	setting_t<float> movement_longjump_boost{ &m_holder, fnvc("movement_longjump_boost"), 0.5f };
+
+	setting_t<bool> visuals_fullbright{ &m_holder, fnvc("visuals_fullbright"), false };
+	setting_t<keysetting_t> visuals_fullbright_key{ &m_holder, fnvc("visuals_fullbright_key"), {} };
 
 	setting_t<int> visuals_esp_box{&m_holder, fnvc("visuals_esp_box"), 0};
 	setting_t<color_t> visuals_esp_box_color{&m_holder, fnvc("visuals_esp_box_color"), {255, 200, 69, 255}};

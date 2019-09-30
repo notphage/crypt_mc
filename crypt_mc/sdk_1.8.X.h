@@ -140,14 +140,15 @@ public:
 	jfloat get_timer_speed() override;
 
 	jobject get_player_controller() override;
+	jobject get_net_handler() override;
 
 	jint get_right_click_delay() override;
 	jint get_string_width(jstring) override;
 	jint get_sneak_key_code() override;
 	jint draw_string_with_shadow(jstring, jint, jint, jint) override;
+	jfloat get_gamma() override;
 
-	jobject get_net_handler() override;
-
+	void set_gamma(jfloat) override;
 	void enable_light_map() override;
 	void set_pointed_entity(jobject ent) override;
 	void set_object_mouse_over(jobject player) override;

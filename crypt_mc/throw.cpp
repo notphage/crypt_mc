@@ -30,9 +30,9 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 			{
 				const auto held_item = self->get_held_item();
 
-				if (GetTickCount64() - delay > 75 + ctx.m_settings.player_throw_delay + util::random(-30, 30) && held_item)
+				if (GetTickCount64() - delay > ctx.m_settings.player_throw_delay + util::random(-30, 30) && held_item)
 				{
-					self->send_use_item(held_item);
+					g_input.press_mouse(false);
 
 					delay = GetTickCount64();
 					stage++;
@@ -51,8 +51,9 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 
 			case 2:
 			{
-				if (GetTickCount64() - delay > 75 + util::random(-30, 30))
+				if (GetTickCount64() - delay > std::clamp(ctx.m_settings.player_throw_delay + util::random(-10, 30), 30, 1000))
 				{
+					g_input.release_mouse(false);
 					self->set_current_slot(old_slot);
 
 					old_slot = -1;

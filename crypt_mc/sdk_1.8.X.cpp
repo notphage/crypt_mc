@@ -184,6 +184,7 @@ struct game_fields
 	jfieldID fid_type_of_hit = nullptr;
 	jfieldID fid_render_manager_obj;
 	jfieldID fid_key_bind_sneak = nullptr;
+	jfieldID fid_gamma = nullptr;
 
 	jmethodID mid_get_key_code = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
@@ -975,6 +976,7 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
 		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lauh$a;"));
 		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("ac"), xors("Lavb;"));
+		gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aI"), xors("F"));
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));
@@ -1035,7 +1037,15 @@ jboolean c_game_18X::is_in_chat()
 
 jboolean c_game_18X::is_hovering_block()
 {
-	auto type_of_hit = jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.fid_type_of_hit);
+	auto mouse_over = jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over);
+
+	if (!mouse_over)
+		return false;
+
+	auto type_of_hit = jni->GetObjectField(mouse_over, gamefields.fid_type_of_hit);
+
+	if (!type_of_hit)
+		return false;
 
 	return jni->CallIntMethod(type_of_hit, gamefields.mid_ordinal) == 1;
 }
@@ -1131,9 +1141,16 @@ jint c_game_18X::get_sneak_key_code()
 	return jni->CallIntMethod(jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings), gamefields.fid_key_bind_sneak), gamefields.mid_get_key_code);
 }
 
+
+
 jint c_game_18X::draw_string_with_shadow(jstring par1, jint par2, jint par3, jint par4)
 {
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_draw_string_with_shadow, par1, par2, par3, par4, false);
+}
+
+jfloat c_game_18X::get_gamma()
+{
+	return jni->GetFloatField(gamefields.obj_settings, gamefields.fid_gamma);
 }
 
 jobject c_game_18X::get_net_handler()
@@ -1144,6 +1161,11 @@ jobject c_game_18X::get_net_handler()
 jobject c_game_18X::get_player_controller()
 {
 	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_player_controller);
+}
+
+void c_game_18X::set_gamma(jfloat gamma)
+{
+	jni->SetFloatField(gamefields.obj_settings, gamefields.fid_gamma, gamma);
 }
 
 void c_game_18X::enable_light_map()

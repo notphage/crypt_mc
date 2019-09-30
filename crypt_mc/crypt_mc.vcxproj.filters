@@ -104,6 +104,9 @@
     <Filter Include="SRC\render\gui">
       <UniqueIdentifier>{b02a333a-0df3-4241-9482-2c69bf8f1690}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\features\fullbright">
+      <UniqueIdentifier>{c34f2759-2cd6-4415-8ac2-7a390927ee0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aim_assist.cpp">
@@ -222,6 +225,9 @@
     </ClCompile>
     <ClCompile Include="feature.cpp">
       <Filter>SRC\features</Filter>
+    </ClCompile>
+    <ClCompile Include="fullbright.cpp">
+      <Filter>SRC\features\fullbright</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -377,6 +383,9 @@
     </ClInclude>
     <ClInclude Include="safe_walk.h">
       <Filter>SRC\features\safe_walk</Filter>
+    </ClInclude>
+    <ClInclude Include="fullbright.h">
+      <Filter>SRC\features\fullbright</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

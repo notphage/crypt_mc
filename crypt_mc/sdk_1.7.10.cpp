@@ -185,6 +185,7 @@ struct game_fields
 	jfieldID fid_mouse_sensitivity = nullptr;
 	jfieldID fid_type_of_hit = nullptr;
 	jfieldID fid_key_bind_sneak = nullptr;
+	jfieldID fid_gamma = nullptr;
 
 	jmethodID mid_get_key_code = nullptr;
 	jmethodID mid_to_string = nullptr;
@@ -982,7 +983,8 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.fid_entity_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("g"), xors("Lsa;"));;
 		gamefields.fid_view_bobbing = jni->GetFieldID(gamefields.settings_class, xors("d"), xors("Z"));
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
-		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("Z"), xors("Lbal;"));
+		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("Z"), xors("Lbal;")); 
+		gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aG"), xors("F"));
 
 		gamefields.mid_to_string = jni->GetMethodID(gamefields.cls_moving_object_position, xors("toString"), xors("()Ljava/lang/String;"));
 		gamefields.mid_get_minecraft = jni->GetStaticMethodID(gamefields.minecraft, xors("B"), xors("()Lbao;"));
@@ -1164,6 +1166,11 @@ jint c_game_1710::draw_string_with_shadow(jstring par1, jint par2, jint par3, ji
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_draw_string_with_shadow, par1, par2, par3, par4, false);
 }
 
+jfloat c_game_1710::get_gamma()
+{
+	return jni->GetFloatField(gamefields.obj_settings, gamefields.fid_gamma);
+}
+
 jobject c_game_1710::get_net_handler()
 {
 	return jni->CallObjectMethod(gamefields.obj_game, gamefields.mid_get_net_handler);
@@ -1172,6 +1179,11 @@ jobject c_game_1710::get_net_handler()
 jobject c_game_1710::get_player_controller()
 {
 	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_player_controller);
+}
+
+void c_game_1710::set_gamma(jfloat gamma)
+{
+	jni->SetFloatField(gamefields.obj_settings, gamefields.fid_gamma, gamma);
 }
 
 void c_game_1710::enable_light_map()

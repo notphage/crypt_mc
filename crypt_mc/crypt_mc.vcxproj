@@ -304,6 +304,7 @@
     <ClCompile Include="feature.cpp" />
     <ClCompile Include="flight.cpp" />
     <ClCompile Include="font.cpp" />
+    <ClCompile Include="fullbright.cpp" />
     <ClCompile Include="nGetTime.cpp" />
     <ClCompile Include="nUpdate.cpp" />
     <ClCompile Include="gui.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="flight.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="fontstash.h" />
+    <ClInclude Include="fullbright.h" />
     <ClInclude Include="glfontstash.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="hash.h" />

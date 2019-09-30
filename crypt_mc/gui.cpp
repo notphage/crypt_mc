@@ -123,10 +123,10 @@ void c_gui::tab_combat()
 
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
-			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 20.f, 0.01f);
+			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 50.f, 0.01f);
 
 			if (ctx.m_settings.combat_aim_assist_vertical)
-				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 20.f, 0.01f);
+				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 50.f, 0.01f);
 
 			aim_assist_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_aim_assist_distance, 3.f, 6.f, 0.01f);
 			aim_assist_conditions.handle(menu.data(), xors("conditions"),
@@ -199,8 +199,9 @@ void c_gui::tab_player()
 	static UI::c_slider fast_place_block_delay;
 	static UI::c_slider fast_place_projectiles_delay;
 
-	static UI::c_groupbox afk_groupbox;
-	static UI::c_checkbox afk;
+	static UI::c_enable_groupbox afk_groupbox;
+	static UI::c_slider afk_min_delay;
+	static UI::c_slider afk_max_delay;
 
 	menu.column_left();
 	{
@@ -257,9 +258,11 @@ void c_gui::tab_player()
 
 		afk_groupbox.start(menu.data(), xors("anti afk"));
 		{
-			afk.handle(menu.data(), xors("enable"), &ctx.m_settings.player_anti_afk);
+			afk_min_delay.handle(menu.data(), xors("min"), &ctx.m_settings.player_anti_afk_min_delay, 30, 300, 1, xors("s"));
+			afk_max_delay.handle(menu.data(), xors("max"), &ctx.m_settings.player_anti_afk_max_delay, ctx.m_settings.player_anti_afk_min_delay, 300, 1, xors("s"));
+
 		}
-		afk_groupbox.end(menu.data());
+		afk_groupbox.end(menu.data(), &ctx.m_settings.player_anti_afk);
 
 		fast_place_key.dropdown(menu.data());
 		fast_place_items.dropdown(menu.data());
@@ -268,6 +271,22 @@ void c_gui::tab_player()
 
 void c_gui::tab_visuals()
 {
+	static UI::c_groupbox fullbright_groupbox;
+	static UI::c_checkbox fullbright_checkbox;
+	static UI::c_key_bind fullbright_key;
+	menu.column_left();
+	{
+		fullbright_groupbox.start(menu.data(), xors("fullbright"));
+		{
+			fullbright_checkbox.handle(menu.data(), xors("enable"), &ctx.m_settings.visuals_fullbright);
+
+			if (ctx.m_settings.visuals_fullbright)
+				fullbright_key.handle(menu.data(), "", &ctx.m_settings.visuals_fullbright_key, keytype_t::kt_all);
+		}
+		fullbright_groupbox.end(menu.data());
+
+		fullbright_key.dropdown(menu.data());
+	}
 	//static UI::c_groupbox box_groupbox;
 	//static UI::c_dropdown box;
 	//static UI::c_color_picker box_color;
@@ -516,7 +535,7 @@ void c_gui::tab_misc()
 			menu_key.handle(menu.data(), xors("key"), &ctx.m_settings.menu_key, keytype_t::kt_toggle);
 
 			menu_color.handle(menu.data(), xors("accent"), ctx.m_settings.gui_accent_color().r_ptr(), ctx.m_settings.gui_accent_color().g_ptr(), ctx.m_settings.gui_accent_color().b_ptr(), ctx.m_settings.gui_accent_color().a_ptr());
-			menu_fade_speed.handle(menu.data(), xors("fade speed"), &ctx.m_settings.gui_fade_speed, 1, 30);
+			menu_fade_speed.handle(menu.data(), xors("fade speed"), &ctx.m_settings.gui_fade_speed, 1, 50);
 
 			rainbow_mode.handle(menu.data(), xors("rainbow mode"), &ctx.m_settings.gui_rainbow);
 

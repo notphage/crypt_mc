@@ -1424,15 +1424,18 @@ public:
 	virtual jfloat get_render_partial_ticks() = 0;
 	virtual jfloat get_mouse_sensitivity() = 0;
 	virtual jfloat get_timer_speed() = 0;
+	virtual jfloat get_gamma() = 0;
 
 	virtual jint get_right_click_delay() = 0;
 	virtual jint get_string_width(jstring) = 0;
 	virtual jint draw_string_with_shadow(jstring, jint, jint, jint) = 0;
 	virtual jint get_sneak_key_code() = 0;
 
+
 	virtual jobject get_net_handler() = 0;
 	virtual jobject get_player_controller() = 0;
 
+	virtual void set_gamma(jfloat) = 0;
 	virtual void enable_light_map() = 0;
 	virtual void disable_light_map() = 0;
 	virtual void setup_camera_transform(jfloat, int) = 0;

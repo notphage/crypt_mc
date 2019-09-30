@@ -177,8 +177,8 @@ void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::share
 	if (!target_data.m_valid)
 		return;
 
-	auto random_h_scale = std::clamp(0.1f * ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 0.5f);
-	auto random_v_scale = std::clamp(0.1f * ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 0.5f);
+	auto random_h_scale = std::clamp(0.05f * ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 0.5f);
+	auto random_v_scale = std::clamp(0.05f * ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 0.5f);
 
 	auto random_h = 0.f;
 	auto random_v = 0.f;
@@ -192,15 +192,12 @@ void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::share
 	float sens = mc->get_mouse_sensitivity() * 0.6f + 0.2f;
 	float step = pow(sens, 3) * 8.0f;
 
-	float yaw_change = util::convert_legit_value(step, ((target_data.m_yaw_change / util::random(375.f, 425.f) * ctx.m_settings.combat_aim_assist_h_speed * 5.f) + random_h), ctx.m_settings.combat_aim_assist_h_speed);
-	float pitch_change = util::convert_legit_value(step, ((target_data.m_pitch_change / util::random(375.f, 425.f) * ctx.m_settings.combat_aim_assist_v_speed * 5.f) + random_v), ctx.m_settings.combat_aim_assist_v_speed);
+	float yaw_change = util::convert_legit_value(step, ((target_data.m_yaw_change / util::random(390.f, 410.f) * ctx.m_settings.combat_aim_assist_h_speed * 3.f) + random_h), util::random(1, 4));
+	float pitch_change = util::convert_legit_value(step, ((target_data.m_pitch_change / util::random(390.f, 410.f) * ctx.m_settings.combat_aim_assist_v_speed * 3.f) + random_v), util::random(1, 4));
 
-	if (abs(target_data.m_yaw_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint) && yaw_change > 0.00001)
+	if (abs(target_data.m_yaw_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_yaw_change) >= util::convert_legit_value(step, random_h_scale, 1)))
 		self->set_yaw(yaw + yaw_change);
 
-
-	if (ctx.m_settings.combat_aim_assist_vertical && (abs(target_data.m_pitch_change) > 5 || ctx.m_settings.combat_aim_assist_multipoint) && pitch_change > 0.00001)
+	if (ctx.m_settings.combat_aim_assist_vertical && (abs(target_data.m_pitch_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_pitch_change) >= util::convert_legit_value(step, random_h_scale, 1))))
 		self->set_pitch(pitch + pitch_change);
-
-	
 }
