@@ -191,7 +191,7 @@ void c_server::run()
 
 		m_clients.erase(std::remove_if(m_clients.begin(), m_clients.end(), [](auto&& client)
 			{
-				return client->is_disconnected();
+				return client->is_disconnected() || !client->is_running();
 			}), m_clients.end());
 	}
 
@@ -235,6 +235,7 @@ void c_client_handler::handle_client()
 			if (ret == CHPS_INVALID)
 				ctx.m_server->add_infraction(shared_from_this());
 			
+			m_is_running = false;
 			return;
 		}
 
@@ -243,17 +244,21 @@ void c_client_handler::handle_client()
 			safe_cout << "> Client " << m_client_ip << " | Outdated version (" << version_packet.m_version << ")\n";
 
 			version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, true);
-			m_connection.set_buffer(&version_packet, sizeof version_packet);
-			m_connection.send();
+			send_packet<c_version_packet>(version_packet);
 
+			m_is_running = false;
 			return;
 		}
 
 		safe_cout << "> Client " << m_client_ip << " | Updated version\n";
 
 		version_packet = m_packet_handler.create_version_packet(ctx.m_required_version, false);
-		m_connection.set_buffer(&version_packet, sizeof version_packet);
-		m_connection.send();
+
+		if (send_packet<c_version_packet>(version_packet) != CHPS_VALID)
+		{
+			m_is_running = false;
+			return;
+		}
 	}
 
 	// Login Packets
@@ -265,9 +270,9 @@ void c_client_handler::handle_client()
 			{ "mexican", 2489908105208420549, 17383418848068447227 },
 			{ "Ciaran", 10447304709281239008, 9093044100942767960 },
 			{ "uzi", 13694325770137587408, 10889602171640250617 },
-			{ "gangsta", 5358537683607507742, 16595086355998634058 },
+			{ "gangsta", 5358537683607507742, 18047120074447871436 },
 			{ "hacs", 9268916019044813615, 14686244563158872693 },
-			{ "denzo", 7646908165282335792, 4134658753895949041 },
+			{ "denzo", 7646908165282335792, 7290073584587163231 },
 			{ "wise", 9853761865339289714, 11395424104966938625 },
 			{ "_Rtinox", 1308268265119556128, 6138202367498348673 },
 			{ "nomo", 17123985505359595210, 17660965088890772486 },
@@ -286,7 +291,9 @@ void c_client_handler::handle_client()
 			{ "SR", 12920697777794270736, 17559757935203518501 },
 			{ "kyle", 11367569745228157569, 16610940241400276633 },
 			{ "toby", 5380418998039192649, 470631230361383105 },
-			{ "Mango",  12638153115695167455, 7068203223162222966 }
+			{ "Mango",  12638153115695167455, 7068203223162222966 },
+			{ "spo", 15055877905642066443, 18116371784737839134 },
+			{ "Arcazze", 8051186676514505564, 208296451280573501 }
 		};
 
 		c_login_packet login_packet;
@@ -295,6 +302,7 @@ void c_client_handler::handle_client()
 			if (ret == CHPS_INVALID)
 				ctx.m_server->add_infraction(shared_from_this());
 
+			m_is_running = false;
 			return;
 		}
 
@@ -324,30 +332,42 @@ void c_client_handler::handle_client()
 			safe_cout << "> Client " << m_client_ip << " | Attempted user: " << login_packet.m_username << " pass: " << login_packet.m_password << " hwid: " << login_packet.m_hwid << "\n";
 
 			m_packet_handler.xor_packet(login_packet);
-			m_connection.set_buffer(&login_packet, sizeof login_packet);
-			m_connection.send();
+			send_packet<c_login_packet>(login_packet);
 
+			m_is_running = false;
 			return;
 		}
 
 		safe_cout << "> Client " << m_client_ip << " | Logged into user " << login_packet.m_username << "\n";
 
 		m_packet_handler.xor_packet(login_packet);
-		m_connection.set_buffer(&login_packet, sizeof login_packet);
-		m_connection.send();
+
+		if (send_packet<c_login_packet>(login_packet) != CHPS_VALID)
+		{
+			m_is_running = false;
+			return;
+		}
 	}
 
 	// Game Packets
 	{
 		c_games_packet game_packet = m_packet_handler.create_games_packet("", 0, 0, (uint8_t)m_games.size(), game_packet_status_t::GAME_INVALID);
-		m_connection.set_buffer(&game_packet, sizeof game_packet);
-		m_connection.send();
+		
+		if (send_packet<c_games_packet>(game_packet) != CHPS_VALID)
+		{
+			m_is_running = false;
+			return;
+		}
 
 		for (auto&& game : m_games)
 		{
 			game_packet = m_packet_handler.create_games_packet(game.m_name, 1, 30, (uint8_t)m_games.size(), game.m_status);
-			m_connection.set_buffer(&game_packet, sizeof game_packet);
-			m_connection.send();
+
+			if (send_packet<c_games_packet>(game_packet) != CHPS_VALID)
+			{
+				m_is_running = false;
+				return;
+			}
 		}
 	}
 
@@ -361,18 +381,27 @@ void c_client_handler::handle_client()
 			if (ret == CHPS_INVALID)
 				ctx.m_server->add_infraction(shared_from_this());
 
+			m_is_running = false;
 			return;
 		}
 
 		cheat_packet = m_packet_handler.create_cheat_packet("LWJGL", cheat_packet.m_id);
-		m_connection.set_buffer(&cheat_packet, sizeof cheat_packet);
-		m_connection.send();
+
+		if (send_packet<c_cheat_packet>(cheat_packet) != CHPS_VALID)
+		{
+			m_is_running = false;
+			return;
+		}
 	}
 
 	// Send Cheat
 	{
 		m_connection.set_buffer(crypt_mc_dll, crypt_mc_dll_size);
-		m_connection.send();
+		if (m_connection.send() == -1)
+		{
+			m_is_running = false;
+			return;
+		}
 	}
 
 	m_stage = CHS_WATCHDOG;
@@ -426,4 +455,5 @@ void c_client_handler::handle_client()
 
 	m_connection.disconnect();
 	m_disconnected = true;
+	m_is_running = false;
 }

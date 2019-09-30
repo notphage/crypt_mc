@@ -26,7 +26,8 @@ enum client_handler_packet_status_t
 {
 	CHPS_VALID,
 	CHPS_INVALID,
-	CHPS_NO_RECV
+	CHPS_NO_RECV,
+	CHPS_NO_SEND
 };
 
 class c_client_handler : std::enable_shared_from_this<c_client_handler>
@@ -38,6 +39,7 @@ class c_client_handler : std::enable_shared_from_this<c_client_handler>
 	std::vector<c_game_entry> m_games;
 	std::thread m_thread;
 	std::atomic_bool m_disconnected = false;
+	std::atomic_bool m_is_running = true;
 
 	client_handler_stage_t m_stage = CHS_VERSION;
 
@@ -58,6 +60,19 @@ class c_client_handler : std::enable_shared_from_this<c_client_handler>
 			return CHPS_INVALID;
 		
 		m_packet_handler.xor_packet(packet);
+
+		return CHPS_VALID;
+	}
+
+	template <typename T>
+	client_handler_packet_status_t send_packet(T& packet)
+	{
+		static_assert(std::is_base_of<c_packet, T>::value, "T must derive from c_packet");
+
+		m_connection.set_buffer(&packet, sizeof packet);
+
+		if (m_connection.send() == -1)
+			return CHPS_NO_SEND;
 
 		return CHPS_VALID;
 	}
@@ -132,13 +147,19 @@ public:
 	~c_client_handler()
 	{
 		if (!m_disconnected)
+		{
 			m_connection.disconnect();
+			m_disconnected = true;
+		}
 
 		if (m_ssl)
 		{
 			SSL_free(m_ssl);
 			m_ssl = nullptr;
 		}
+
+		if (m_thread.joinable())
+			m_thread.join();
 	}
 
 	client_handler_init_t initialize(SSL_CTX* ssl_context);
@@ -157,6 +178,11 @@ public:
 	bool is_disconnected() const
 	{
 		return m_disconnected;
+	}
+
+	bool is_running() const
+	{
+		return m_is_running;
 	}
 };
 
