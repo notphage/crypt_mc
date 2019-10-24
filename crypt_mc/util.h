@@ -29,6 +29,14 @@ namespace util
 		return steps * step * 0.15f;
 	};
 
+	static __forceinline void move_mouse(int cx, int cy)
+	{
+		POINT cursor_pos;
+		GetCursorPos(&cursor_pos);
+
+		SetCursorPos(cursor_pos.x + cx, cursor_pos.y + cy);
+	}
+
 	static __forceinline int random_delay(int min, int max)
 	{
 		return 1000 / random(min, max);

@@ -66,4 +66,6 @@ void c_stack_trace::get_stack_trace(int index, stack_trace& stack)
 	stack.line_number = line_number;
 
 	jni->ReleaseStringUTFChars(str_method_name, str);
+
+	jni->DeleteLocalRef(str_method_name);
 }

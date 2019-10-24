@@ -929,12 +929,16 @@ namespace UI
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) - 3.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) + 1.f }, xors("+"), text_shadow);
 				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_plus_pos.x + (m_plus_bounds.x * 0.5f) - 4.f, m_plus_pos.y + 2.f - (m_plus_bounds.y * 0.5f) }, xors("+"), text_color);
 			}
-
+		
 			char buf[1024];
 			sprintf(buf, xors("%.2f%s"), *m_value, m_suffix);
 
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow, TEXT_CENTER);
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color, TEXT_CENTER);
+			
+			for (int i = 0; i < sizeof(buf); i++) {
+				buf[i] = '\0';
+			}
 		}
 
 		void handle(c_window_data* data, const char* name, float* setting, float min, float max, float step = 1.f, std::string formatting = xors("%.2f"), std::string suffix = "")
@@ -1126,6 +1130,10 @@ namespace UI
 
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos + 1.f, m_slider_start.y + 1.f }, buf, text_shadow, TEXT_CENTER);
 			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_slider_start.x + m_slider_pos, m_slider_start.y }, buf, text_color, TEXT_CENTER);
+		
+			for (int i = 0; i < sizeof(buf); i++) {
+				buf[i] = '\0';
+			}
 		}
 
 		void handle(c_window_data* data, const char* name, int* setting, int min, int max, int step = 1, std::string suffix = "")

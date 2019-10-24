@@ -2,7 +2,7 @@
 
 bool ray_trace_t::trace(const vec3& mins, const vec3& maxs, float& distance) const
 {
-	// If line is parallel and outsite the box it is not possible to intersect 
+	// If line is parallel and outside the box it is not possible to intersect 
 	if (m_dir.x == 0.f && (m_origin.x < std::min(mins.x, maxs.x) || m_origin.x > std::max(mins.x, maxs.x)))
 		return false;
 

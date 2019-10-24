@@ -37,8 +37,8 @@ void c_gui::tab_combat()
 	static UI::c_enable_groupbox aim_assist_groupbox;
 	static UI::c_key_bind aim_assist_key;
 	static UI::c_slider aim_assist_fov;
-	static UI::c_float_slider aim_assist_v_speed;
-	static UI::c_float_slider aim_assist_h_speed;
+	static UI::c_slider aim_assist_v_speed;
+	static UI::c_slider aim_assist_h_speed;
 	static UI::c_float_slider aim_assist_scale;
 	static UI::c_float_slider aim_assist_distance;
 	static UI::c_multi_dropdown aim_assist_conditions;
@@ -123,10 +123,10 @@ void c_gui::tab_combat()
 
 
 			aim_assist_fov.handle(menu.data(), xors("fov"), &ctx.m_settings.combat_aim_assist_fov, 0, 180, 1);
-			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 0.01f, 50.f, 0.01f);
+			aim_assist_h_speed.handle(menu.data(), xors("horizontal"), &ctx.m_settings.combat_aim_assist_h_speed, 1, 50.f, 1);
 
 			if (ctx.m_settings.combat_aim_assist_vertical)
-				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 0.01f, 50.f, 0.01f);
+				aim_assist_v_speed.handle(menu.data(), xors("vertical"), &ctx.m_settings.combat_aim_assist_v_speed, 1, 50.f, 1);
 
 			aim_assist_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_aim_assist_distance, 3.f, 6.f, 0.01f);
 			aim_assist_conditions.handle(menu.data(), xors("conditions"),

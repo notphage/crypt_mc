@@ -10,11 +10,14 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 		static int stage = 0;
 		static int old_slot = -1;
 		static long delay = GetTickCount64();
+		static int random_delay = -1;
 
 		switch (stage)
 		{
 			case 0:
 			{
+				is_running = true;
+
 				old_slot = self->get_current_slot();
 
 				self->set_current_slot(slot);
@@ -22,7 +25,7 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 				delay = GetTickCount64();
 
 				stage++;
-				is_running = true;
+		
 				break;
 			}
 
@@ -30,18 +33,22 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 			{
 				const auto held_item = self->get_held_item();
 
-				if (GetTickCount64() - delay > ctx.m_settings.player_throw_delay + util::random(-30, 30) && held_item)
-				{
-					g_input.press_mouse(false);
+				if (random_delay == -1)
+					random_delay = std::clamp(ctx.m_settings.player_throw_delay + util::random(-15, 30), 30, 1000);
 
-					delay = GetTickCount64();
+				if (GetTickCount64() - delay > random_delay && held_item)
+				{
+					self->send_use_item(held_item);
+
 					stage++;
+					delay = GetTickCount64();
+					random_delay = -1;
 				}
 				else if (!held_item)
 				{
 					self->set_current_slot(old_slot);
+					
 					old_slot = -1;
-
 					stage = 0;
 					is_running = false;
 				}
@@ -51,16 +58,21 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 
 			case 2:
 			{
-				if (GetTickCount64() - delay > std::clamp(ctx.m_settings.player_throw_delay + util::random(-10, 30), 30, 1000))
+				if (random_delay == -1)
+					random_delay = std::clamp(ctx.m_settings.player_throw_delay + util::random(-15, 30), 30, 1000);
+
+				if (GetTickCount64() - delay > random_delay)
 				{
-					g_input.release_mouse(false);
 					self->set_current_slot(old_slot);
 
 					old_slot = -1;
 
-					stage = 0;
 					is_running = false;
 					g_input.toggle_key(key);
+
+					stage = 0;
+
+					random_delay = -1;
 
 					//Set disabled
 				}
@@ -70,7 +82,7 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 	};
 
 	static bool healing_running = false;
-	if ((valid_keystate(ctx.m_settings.player_throwhealing_key) || healing_running))
+	if (((valid_keystate(ctx.m_settings.player_throwhealing_key) && !healing_running) || healing_running))
 	{
 		if (self->get_max_health() - self->get_health() >= 7.f || healing_running)
 		{
@@ -84,7 +96,7 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 	}
 
 	static bool pearl_running = false;
-	if ((valid_keystate(ctx.m_settings.player_throwpearl_key) || pearl_running) && !healing_running)
+	if (((valid_keystate(ctx.m_settings.player_throwpearl_key) && !pearl_running) || pearl_running) && !healing_running)
 	{
 		if (const auto slot = find_pearl(self); slot >= 0)
 			stage_switch(slot, pearl_running, ctx.m_settings.player_throwpearl_key);
@@ -95,7 +107,7 @@ void c_throw::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr
 		g_input.toggle_key(ctx.m_settings.player_throwpearl_key);
 
 	static bool debuff_running = false;
-	if ((valid_keystate(ctx.m_settings.player_throwdebuff_key) || debuff_running) && !healing_running && !pearl_running)
+	if (((valid_keystate(ctx.m_settings.player_throwdebuff_key) && !debuff_running) || debuff_running) && !healing_running && !pearl_running)
 	{
 		if (const auto slot = find_debuff(self); slot >= 0)
 			stage_switch(slot, debuff_running, ctx.m_settings.player_throwpearl_key);

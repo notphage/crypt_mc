@@ -62,6 +62,10 @@ int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
 	ctx.m_window = nullptr;
 	ctx.m_version = MC_UNKNOWN;
 
+	for (int i = 0; i < sizeof(window_title); i++) {
+		window_title[i] = '\0';
+	}
+
 	return 1;
 }
 

@@ -249,6 +249,7 @@ void c_block_1710::instantiate(jobject block_object, JNIEnv* _jni)
 	const char* char_string = jni->GetStringUTFChars(block_texture_name, nullptr);
 	name = std::string(char_string);
 	jni->ReleaseStringUTFChars(block_texture_name, char_string);
+	jni->DeleteLocalRef(block_texture_name);
 
 	id = jni->CallStaticIntMethod(blockfields.block, blockfields.mid_from_block, block_instance);
 }
@@ -328,6 +329,7 @@ std::vector<std::shared_ptr<c_player>> c_world_1710::get_players()
 	if (!arr_player_ents)
 	{
 		jni->DeleteLocalRef(obj_player_ents);
+		jni->DeleteLocalRef(arr_player_ents);
 		return players;
 	}
 
@@ -479,7 +481,11 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
 			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
+
+			jni->DeleteLocalRef(obj_held_item);
 		}
+
+		jni->DeleteLocalRef(obj_held);
 	}
 	else
 	{
@@ -523,6 +529,8 @@ jint c_player_1710::get_effects_id(jobject effects)
 
 		return get_potion_id(effect);
 	}
+
+	jni->DeleteLocalRef(arr_effects);
 
 	return -1;
 }
@@ -814,7 +822,11 @@ jboolean c_player_1710::has_armor()
 {
 	const auto arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
 	if (!arr_item_stack)
+	{
+		jni->DeleteLocalRef(arr_item_stack);
 		return false;
+	}
+	
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_item_stack); i++)
 	{
@@ -1019,6 +1031,8 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
+
+		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{
@@ -1051,19 +1065,31 @@ jboolean c_game_1710::is_hovering_block()
 {
 	auto test = jni->CallObjectMethod(jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over), gamefields.mid_to_string);
 
-	if (!test)
+	if (!test) 
+	{
+		jni->DeleteLocalRef(test);
 		return false;
+	}
+		
 
 	jstring to_string = (jstring) test;
 
-	if (!to_string)
+	jni->DeleteLocalRef(test);
+
+	if (!to_string) 
+	{
+		jni->DeleteLocalRef(to_string);
 		return false;
+	}
+	
 
 	const char* char_string = jni->GetStringUTFChars(to_string, nullptr);
 
 	std::string contain_string(char_string);
 
 	jni->ReleaseStringUTFChars(to_string, char_string);
+
+	jni->DeleteLocalRef(to_string);
 
 	if (contain_string.find(xors("BLOCK")) != std::string::npos)
 		return true;

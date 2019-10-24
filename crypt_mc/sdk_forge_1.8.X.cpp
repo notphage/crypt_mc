@@ -128,15 +128,15 @@ struct player_fields
 	jclass cls_aabb = nullptr;
 	jclass cls_item_soup = nullptr;
 
-	bool holding_weapon = false;
-	bool holding_sword = false;
-	bool holding_axe = false;
-	bool holding_pick_axe = false;
-	bool holding_shovel = false;
-	bool holding_hoe = false;
-	bool holding_projectile = false;
-	bool holding_block = false;
-	bool holding_fishing_rod = false;
+	std::atomic_bool holding_weapon = false;
+	std::atomic_bool holding_sword = false;
+	std::atomic_bool holding_axe = false;
+	std::atomic_bool holding_pick_axe = false;
+	std::atomic_bool holding_shovel = false;
+	std::atomic_bool holding_hoe = false;
+	std::atomic_bool holding_projectile = false;
+	std::atomic_bool holding_block = false;
+	std::atomic_bool holding_fishing_rod = false;
 };
 
 struct game_fields
@@ -211,8 +211,8 @@ struct game_fields
 	jobject obj_settings = nullptr;
 	jobject obj_timer = nullptr;
 
-	bool in_chat = false;
-	bool in_inventory = false;
+	std::atomic_bool in_chat = false;
+	std::atomic_bool in_inventory = false;
 };
 
 static block_fields blockfields;
@@ -316,6 +316,7 @@ std::vector<std::shared_ptr<c_player>> c_world_forge_18X::get_players()
 
 	if (!arr_player_ents)
 	{
+		jni->DeleteLocalRef(arr_player_ents);
 		jni->DeleteLocalRef(obj_player_ents);
 		return players;
 	}
@@ -468,7 +469,11 @@ void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni)
 			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
 			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
+		
+			jni->DeleteLocalRef(obj_held_item);
 		}
+
+		jni->DeleteLocalRef(obj_held);
 	}
 	else
 	{
@@ -501,36 +506,24 @@ jobject c_player_forge_18X::get_effects(jobject potion, jobject item_stack)
 
 
 
-jint c_player_forge_18X::get_effects_id(jobject effects)
-
+jint c_player_forge_18X::get_effects_id(jobject effects) 
 {
-
 	auto arr_effects = static_cast<jobjectArray>(jni->CallObjectMethod(effects, worldfields.mid_to_array));
 
-
-
 	for (jint x = 0; x < jni->GetArrayLength(arr_effects); x++)
-
 	{
-
 		auto effect = jni->CallObjectMethod(effects, worldfields.mid_get, x);
 
-
-
 		if (!effect)
-
 			continue;
 
-
+		jni->DeleteLocalRef(arr_effects);
 
 		return get_potion_id(effect);
-
 	}
 
-
-
+	jni->DeleteLocalRef(arr_effects);
 	return -1;
-
 }
 
 jint c_player_forge_18X::get_potion_id(jobject effect)
@@ -873,7 +866,11 @@ jboolean c_player_forge_18X::has_armor()
 {
 	const auto arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
 	if (!arr_item_stack)
+	{
+		jni->DeleteLocalRef(arr_item_stack);
 		return false;
+	}
+	
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_item_stack); i++)
 	{
@@ -934,14 +931,22 @@ jboolean c_player_forge_18X::send_use_item(jobject item_stack)
 	auto player_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
 
 	if (!player_class)
+	{
+		jni->DeleteLocalRef(player_class);
 		return false;
+	}
+		
 
 	auto world_class = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world);
 
 	if (!world_class)
+	{
+		jni->DeleteLocalRef(world_class);
 		return false;
+	}
+		
 	
-	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, gamefields.obj_world, player_class, world_class, item_stack);
+	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, gamefields.obj_world, item_stack);
 }
 
 void c_player_forge_18X::set_current_slot(jint slot)
@@ -1086,6 +1091,8 @@ void c_game_forge_18X::instantiate(JNIEnv* _jni)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
+
+		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{

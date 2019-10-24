@@ -21,10 +21,10 @@ public:
 	{
 		using namespace std::placeholders;
 
-		register_feature(std::bind(&c_aim_assist::on_update, this, _1, _2, _3), feature_type::FEATURE_UPDATE);
+		register_feature(std::bind(&c_aim_assist::on_get_time, this, _1, _2, _3), feature_type::FEATURE_GET_TIME);
 	}
 
-	void on_update(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
 
 	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };

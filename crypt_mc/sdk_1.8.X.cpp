@@ -319,6 +319,7 @@ std::vector<std::shared_ptr<c_player>> c_world_18X::get_players()
 
 	if (!arr_player_ents)
 	{
+		jni->DeleteLocalRef(arr_player_ents);
 		jni->DeleteLocalRef(obj_player_ents);
 		return players;
 	}
@@ -470,7 +471,11 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
 			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
 			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
+
+			jni->DeleteLocalRef(obj_held_item);
 		}
+
+		jni->DeleteLocalRef(obj_held);
 	}
 	else
 	{
@@ -512,8 +517,12 @@ jint c_player_18X::get_effects_id(jobject effects)
 		if (!effect)
 			continue;
 
+		jni->DeleteLocalRef(arr_effects);
+
 		return get_potion_id(effect);
 	}
+
+	jni->DeleteLocalRef(arr_effects);
 
 	return -1;
 }
@@ -805,7 +814,11 @@ jboolean c_player_18X::has_armor()
 {
 	const auto arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
 	if (!arr_item_stack)
+	{
+		jni->DeleteLocalRef(arr_item_stack);
 		return false;
+	}
+
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_item_stack); i++)
 	{
@@ -1007,6 +1020,8 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 	{
 		gamefields.in_inventory = jni->IsInstanceOf(obj_screen, gamefields.cls_inventory);
 		gamefields.in_chat = jni->IsInstanceOf(obj_screen, gamefields.cls_chat);
+
+		jni->DeleteLocalRef(obj_screen);
 	}
 	else
 	{
