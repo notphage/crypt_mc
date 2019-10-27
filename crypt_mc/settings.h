@@ -265,8 +265,7 @@ public:
 	//Combat features
 	setting_t<bool> combat_auto_clicker{&m_holder, fnvc("combat_auto_clicker"), false};
 	setting_t<keysetting_t> combat_auto_clicker_key{&m_holder, fnvc("combat_auto_clicker_key"), {}};
-	setting_t<int> combat_auto_clicker_min_cps{&m_holder, fnvc("combat_auto_clicker_min_cps"), 9};
-	setting_t<int> combat_auto_clicker_max_cps{&m_holder, fnvc("combat_auto_clicker_max_cps"), 13};
+	setting_t<int> combat_auto_clicker_cps{&m_holder, fnvc("combat_auto_clicker_cps"), 11};
 	setting_t<int> combat_auto_clicker_jitter_chance{ &m_holder, fnvc("combat_auto_clicker_jitter_chance"), 10 };
 	setting_t<float> combat_auto_clicker_jitter_intensity{ &m_holder, fnvc("combat_auto_clicker_jitter_intensity"), 0.2f };
 	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), true };
@@ -312,6 +311,7 @@ public:
 	setting_t<bool> combat_reach_visible{ &m_holder, fnvc("combat_reach_visible"), true };
 	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), true };
 	setting_t<bool> combat_reach_hitboxes{ &m_holder, fnvc("combat_reach_hitboxes"), false };
+	setting_t<bool> combat_reach_ycheck{ &m_holder, fnvc("combat_reach_ycheck"), true };
 	setting_t<float> combat_reach_distance{ &m_holder, fnvc("combat_reach_distance"), 3.1f };
 	setting_t<int> combat_reach_hitchance{ &m_holder, fnvc("combat_reach_hitchance"), 40 };
 	setting_t<float> combat_reach_hitboxes_scale{ &m_holder, fnvc("combat_reach_hitboxes_scale"), 1.f };
@@ -346,6 +346,7 @@ public:
 	//Movement features
     setting_t<bool> movement_air_control{ &m_holder, fnvc("movement_air_control"), false };
     setting_t<keysetting_t> movement_air_control_key{ &m_holder, fnvc("movement_air_control_key"), {} };
+	setting_t<float> movement_air_control_speed{ &m_holder, fnvc("movement_air_control_speed"), 0.2873f };
 
     setting_t<bool> movement_step{ &m_holder, fnvc("movement_step"), false };
     setting_t<keysetting_t> movement_step_key{ &m_holder, fnvc("movement_step_key"), {} };
@@ -378,8 +379,8 @@ public:
 	setting_t<bool> movement_speed_custom_slow{ &m_holder, fnvc("movement_speed_custom_slow"), false };
 	setting_t<bool> movement_speed_custom_slow_down{ &m_holder, fnvc("movement_speed_custom_slow_down"), false };
 	setting_t<float> movement_speed_custom_jump_height_val{ &m_holder, fnvc("movement_speed_custom_jump_height_val"), 0.42f };
-	setting_t<float> movement_speed_custom_ground_speed_val{ &m_holder, fnvc("movement_speed_custom_ground_speed_val"), 0.08f };
-	setting_t<float> movement_speed_custom_air_speed_val{ &m_holder, fnvc("movement_speed_custom_air_speed_val"), 0.14f };
+	setting_t<float> movement_speed_custom_ground_speed_val{ &m_holder, fnvc("movement_speed_custom_ground_speed_val"), 0.2873f };
+	setting_t<float> movement_speed_custom_air_speed_val{ &m_holder, fnvc("movement_speed_custom_air_speed_val"), 0.2873f };
 	setting_t<int> movement_speed_custom_slow_down_ticks{ &m_holder, fnvc("movement_speed_custom_slow_down_ticks"), 2 };
 	setting_t<float> movement_speed_custom_slow_speed_val{ &m_holder, fnvc("movement_speed_custom_slow_speed_val"), 0.2673f };
 	setting_t<float> movement_speed_custom_fall_speed_val{ &m_holder, fnvc("movement_speed_custom_fall_speed_val"), 0.1f };

@@ -6,8 +6,6 @@ bool m_left_click = true;
 bool m_set_change = false;
 bool m_blocking = false;
 
-uint32_t m_min_cps = ctx.m_settings.combat_auto_clicker_min_cps;
-uint32_t m_max_cps = ctx.m_settings.combat_auto_clicker_max_cps;
 uint32_t m_clicks_skip = 0;
 uint32_t m_clicks_until_skip = 57;
 uint32_t m_skip_click_amt = 2;
@@ -23,8 +21,6 @@ float m_multiplier = 0.5f;
 
 void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	m_min_cps = ctx.m_settings.combat_auto_clicker_min_cps;
-	m_max_cps = ctx.m_settings.combat_auto_clicker_max_cps;
 	if (ctx.m_menu_open)
 		return;
 
@@ -186,8 +182,8 @@ void c_auto_clicker::reset()
 	auto chance_two = util::random(0, 50);
 	auto chance_final = chance_one + chance_two;
 
-	auto tick = util::random(0, 100) < 50 ? chance_one < 25 ? (int) (std::ceil((1000.f / m_min_cps) / 50.f)) : (int) (std::floor((1000.f / m_min_cps) / 50.f)) : chance_two < 25 ? (int)(std::ceil((1000.f / m_min_cps) / 50.f)) : (int)(std::floor((1000.f / m_min_cps) / 50.f));
-	auto final_tick = chance_final < std::clamp((17 - (int) (m_min_cps * 0.75f)), 5, 17) ? tick - 1 : chance_final > std::clamp((83 + (int) (m_min_cps * 0.75f)), 83, 95) ? tick + 1 : tick;
+	auto tick = util::random(0, 100) < 50 ? chance_one < 25 ? (int) (std::ceil((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f)) : (int) (std::floor((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f)) : chance_two < 25 ? (int)(std::ceil((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f)) : (int)(std::floor((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f));
+	auto final_tick = chance_final < std::clamp((17 - (int) (ctx.m_settings.combat_auto_clicker_cps * 0.75f)), 5, 17) ? tick - 1 : chance_final > std::clamp((83 + (int) (ctx.m_settings.combat_auto_clicker_cps * 0.75f)), 83, 95) ? tick + 1 : tick;
 
 	if (m_clicks_skip > m_clicks_until_skip)
 	{

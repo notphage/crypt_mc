@@ -29,8 +29,7 @@ void c_gui::tab_combat()
 {
 	static UI::c_enable_groupbox auto_clicker_groupbox;
 	static UI::c_key_bind auto_clicker_key;
-	static UI::c_slider auto_clicker_min_cps;
-	static UI::c_slider auto_clicker_max_cps;
+	static UI::c_slider auto_clicker_cps;
 	static UI::c_slider auto_clicker_jitter_chance;
 	static UI::c_float_slider auto_clicker_jitter_intensity;
 	static UI::c_multi_dropdown auto_clicker_conditions;
@@ -69,8 +68,7 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_auto_clicker)
 				auto_clicker_key.handle(menu.data(), "", &ctx.m_settings.combat_auto_clicker_key, keytype_t::kt_all);
 
-			auto_clicker_min_cps.handle(menu.data(), xors("min"), &ctx.m_settings.combat_auto_clicker_min_cps, 1, 24, 1, xors("cps"));
-			auto_clicker_max_cps.handle(menu.data(), xors("max"), &ctx.m_settings.combat_auto_clicker_max_cps, ctx.m_settings.combat_auto_clicker_min_cps, 25, 1, xors("cps"));
+			auto_clicker_cps.handle(menu.data(), xors("cps"), &ctx.m_settings.combat_auto_clicker_cps, 1, 24, 1, xors("cps"));
 			
 			if (ctx.m_settings.combat_auto_clicker_jitter)
 			{
@@ -105,6 +103,7 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_reach_visible, xors("visible only")},
 					{&ctx.m_settings.combat_reach_on_sprint, xors("require sprint")},
 					{&ctx.m_settings.combat_reach_disable_in_water, xors("disable in water")},
+					{&ctx.m_settings.combat_reach_ycheck, xors("y-check")},
 					{&ctx.m_settings.combat_reach_hitboxes, xors("hitboxes")}
 				});
 		}
@@ -367,6 +366,7 @@ void c_gui::tab_movement()
 
 	static UI::c_enable_groupbox air_control_groupbox;
 	static UI::c_key_bind air_control_key;
+	static UI::c_float_slider air_control_speed;
 
 	static UI::c_enable_groupbox sprint_groupbox;
 	static UI::c_key_bind sprint_key;
@@ -391,9 +391,13 @@ void c_gui::tab_movement()
 
 			flight_mode.handle(menu.data(), xors("mode"), { xors("hypixel"), xors("bypass"), xors("slow bypass"), xors("normal") }, &ctx.m_settings.movement_flight_mode);
 
-			flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
-			flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
+			if (ctx.m_settings.movement_flight_mode != 0) 
+			{
+				flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
+				flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
 
+			}
+			
 			if (ctx.m_settings.movement_flight_glide)
 				flight_glide_speed.handle(menu.data(), xors("glide speed"), &ctx.m_settings.movement_flight_glide_speed, 0.f, 1.f, 0.01f);
 		
@@ -486,6 +490,7 @@ void c_gui::tab_movement()
 		air_control_groupbox.start(menu.data(), xors("air control"));
 		{
 			air_control_key.handle(menu.data(), "", &ctx.m_settings.movement_air_control_key, keytype_t::kt_all);
+			air_control_speed.handle(menu.data(), xors("speed"), &ctx.m_settings.movement_air_control_speed, 0.f, 3.f, 0.01f);
 		}
 		air_control_groupbox.end(menu.data(), &ctx.m_settings.movement_air_control);
 

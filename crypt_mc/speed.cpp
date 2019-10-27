@@ -77,9 +77,9 @@ void c_speed::custom(const std::shared_ptr<c_player>& self) const
 	if (ctx.m_settings.movement_speed_custom_slow_down && slow)
 		set_speed(self, ctx.m_settings.movement_speed_custom_slow_speed_val);
 	else if (slow)
-		set_speed(self, get_base_speed(self) - 0.025f);
+		set_speed(self, get_base_speed(self) - 0.05f);
 	else
-		set_speed(self, get_base_speed(self) + (m_on_ground ? ctx.m_settings.movement_speed_custom_ground_speed_val : ctx.m_settings.movement_speed_custom_air_speed_val));
+		set_speed(self, (m_on_ground ? ctx.m_settings.movement_speed_custom_ground_speed_val : ctx.m_settings.movement_speed_custom_air_speed_val));
 }
 
 void c_speed::minihop(const std::shared_ptr<c_player>& self) const
@@ -182,7 +182,7 @@ void c_air_control::on_get_time(const std::shared_ptr<c_game>&, const std::share
 	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
 
 	if (!m_on_ground)
-		set_speed(self, get_base_speed(self));
+		set_speed(self, (get_base_speed(self) - 0.2873f) + ctx.m_settings.movement_air_control_speed);
 }
 
 void c_long_jump::on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>&)
