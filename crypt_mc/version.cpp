@@ -116,7 +116,9 @@ void c_context::load()
 	ctx.m_features.emplace_back(std::make_unique<c_sprint>(&ctx.m_settings.movement_sprint, &ctx.m_settings.movement_sprint_key));
 	ctx.m_features.emplace_back(std::make_unique<c_air_control>(&ctx.m_settings.movement_air_control, &ctx.m_settings.movement_air_control_key));
 	ctx.m_features.emplace_back(std::make_unique<c_step>(&ctx.m_settings.movement_step, &ctx.m_settings.movement_step_key));
-	//ctx.m_features.emplace_back(std::make_unique<c_throw>(&ctx.m_settings.player_throw));
+	ctx.m_features.emplace_back(std::make_unique<c_throw_healing>(&ctx.m_settings.player_throw, &ctx.m_settings.player_throwhealing_key));
+	ctx.m_features.emplace_back(std::make_unique<c_throw_debuff>(&ctx.m_settings.player_throw, &ctx.m_settings.player_throwdebuff_key));
+	ctx.m_features.emplace_back(std::make_unique<c_throw_pearl>(&ctx.m_settings.player_throw, &ctx.m_settings.player_throwpearl_key));
 	ctx.m_features.emplace_back(std::make_unique<c_positive_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_negative_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_negative_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));

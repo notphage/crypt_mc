@@ -219,7 +219,7 @@ float c_aim_assist::limit_angle(float change, float speed)
 		ret = -speed;
 	}
 	
-	ret += util::random(-(ret / 12), ret / 12);
+	ret += util::random(-(fabs(ret) / 12), fabs(ret) / 12);
 
 	return ret;
 }

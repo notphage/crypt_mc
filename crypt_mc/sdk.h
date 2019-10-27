@@ -1431,9 +1431,9 @@ public:
 	virtual jint draw_string_with_shadow(jstring, jint, jint, jint) = 0;
 	virtual jint get_sneak_key_code() = 0;
 
-
 	virtual jobject get_net_handler() = 0;
 	virtual jobject get_player_controller() = 0;
+	virtual jobject get_screen() = 0;
 
 	virtual void set_gamma(jfloat) = 0;
 	virtual void enable_light_map() = 0;

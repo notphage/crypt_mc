@@ -34,7 +34,7 @@ void c_reach::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 		const vec3 self_origin(self->origin_x(), self->aabb_min_y(), self->origin_z());
 		const vec3 player_origin(player->origin_x(), player->aabb_min_y(), player->origin_z());
 
-		if (fabs(self_origin.y - player_origin.y) > 1 && ctx.m_settings.combat_reach_ycheck)
+		if (fabs(self_origin.y - player_origin.y) > 1.f && ctx.m_settings.combat_reach_ycheck)
 			continue;
 
 		vec3 player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());

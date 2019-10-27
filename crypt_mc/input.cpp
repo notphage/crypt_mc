@@ -133,14 +133,6 @@ bool c_input_manager::is_key_pressed(keysetting_t key)
 		{
 			m_key_downs[pressed] = false;
 		}
-		//if (is_key_pressed(pressed))
-		//	m_pressed_once[pressed] = true;
-		//
-		//if (!is_key_pressed(pressed) && m_pressed_once[pressed])
-		//{
-		//	m_toggled[pressed] = !m_toggled[pressed];
-		//	m_pressed_once[pressed] = false;
-		//}
 
 		return m_toggled[pressed];
 	}

@@ -458,36 +458,41 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 		init_fields = true;
 	}
 
-	if (const jobject obj_held = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item); obj_held != nullptr && ctx.m_ingame)
+	auto local_player = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
+
+	if (jni->IsSameObject(local_player, player_instance))
 	{
-		if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
+		if (const jobject obj_held = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item); obj_held != nullptr && ctx.m_ingame)
 		{
-			playerfields.holding_sword = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class);
-			playerfields.holding_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
-			playerfields.holding_weapon = playerfields.holding_axe || playerfields.holding_sword;
-			playerfields.holding_hoe = jni->IsInstanceOf(obj_held_item, playerfields.item_hoe_class);
-			playerfields.holding_pick_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_pick_axe_class);
-			playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
-			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
-			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
-			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
+			if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
+			{
+				playerfields.holding_sword = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class);
+				playerfields.holding_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
+				playerfields.holding_weapon = playerfields.holding_axe || playerfields.holding_sword;
+				playerfields.holding_hoe = jni->IsInstanceOf(obj_held_item, playerfields.item_hoe_class);
+				playerfields.holding_pick_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_pick_axe_class);
+				playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
+				playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
+				playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
+				playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
 
-			jni->DeleteLocalRef(obj_held_item);
+				jni->DeleteLocalRef(obj_held_item);
+			}
+
+			jni->DeleteLocalRef(obj_held);
 		}
-
-		jni->DeleteLocalRef(obj_held);
-	}
-	else
-	{
-		playerfields.holding_weapon = false;
-		playerfields.holding_sword = false;
-		playerfields.holding_axe = false;
-		playerfields.holding_hoe = false;
-		playerfields.holding_pick_axe = false;
-		playerfields.holding_shovel = false;
-		playerfields.holding_projectile = false;
-		playerfields.holding_fishing_rod = false;
-		playerfields.holding_block = false;
+		else
+		{
+			playerfields.holding_weapon = false;
+			playerfields.holding_sword = false;
+			playerfields.holding_axe = false;
+			playerfields.holding_hoe = false;
+			playerfields.holding_pick_axe = false;
+			playerfields.holding_shovel = false;
+			playerfields.holding_projectile = false;
+			playerfields.holding_fishing_rod = false;
+			playerfields.holding_block = false;
+		}
 	}
 }
 
@@ -989,14 +994,17 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
 		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lauh$a;"));
 		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("ac"), xors("Lavb;"));
-		jni->GetFieldID(gamefields.cls_game_settings, xors("aH"), xors("F"));
-		if (JNI_TRUE == jni->ExceptionCheck())
+
 		{
-			jni->ExceptionClear();
-			gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aJ"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
+			jni->GetFieldID(gamefields.cls_game_settings, xors("aH"), xors("F"));
+			if (JNI_TRUE == jni->ExceptionCheck())
+			{
+				jni->ExceptionClear();
+				gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aJ"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
+			}
+			else
+				gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aI"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
 		}
-		else
-			gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aI"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));
@@ -1163,8 +1171,6 @@ jint c_game_18X::get_sneak_key_code()
 	return jni->CallIntMethod(jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings), gamefields.fid_key_bind_sneak), gamefields.mid_get_key_code);
 }
 
-
-
 jint c_game_18X::draw_string_with_shadow(jstring par1, jint par2, jint par3, jint par4)
 {
 	return jni->CallIntMethod(gamefields.obj_font_renderer, gamefields.mid_draw_string_with_shadow, par1, par2, par3, par4, false);
@@ -1178,6 +1184,11 @@ jfloat c_game_18X::get_gamma()
 jobject c_game_18X::get_net_handler()
 {
 	return jni->CallObjectMethod(gamefields.obj_game, gamefields.mid_get_net_handler);
+}
+
+jobject c_game_18X::get_screen()
+{
+	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen);
 }
 
 jobject c_game_18X::get_player_controller()

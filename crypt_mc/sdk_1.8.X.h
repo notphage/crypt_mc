@@ -141,6 +141,7 @@ public:
 
 	jobject get_player_controller() override;
 	jobject get_net_handler() override;
+	jobject get_screen() override;
 
 	jint get_right_click_delay() override;
 	jint get_string_width(jstring) override;

@@ -456,36 +456,41 @@ void c_player_forge_18X::instantiate(jobject player_object, JNIEnv* _jni)
 		init_fields = true;
 	}
 
-	if (const jobject obj_held = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item); obj_held != nullptr && ctx.m_ingame)
-	{
-		if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
-		{
-			playerfields.holding_sword = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class);
-			playerfields.holding_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
-			playerfields.holding_weapon = playerfields.holding_axe || playerfields.holding_sword;
-			playerfields.holding_hoe = jni->IsInstanceOf(obj_held_item, playerfields.item_hoe_class);
-			playerfields.holding_pick_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_pick_axe_class);
-			playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
-			playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
-			playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
-			playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
-		
-			jni->DeleteLocalRef(obj_held_item);
-		}
+	auto local_player = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
 
-		jni->DeleteLocalRef(obj_held);
-	}
-	else
+	if (jni->IsSameObject(local_player, player_instance))
 	{
-		playerfields.holding_weapon = false;
-		playerfields.holding_sword = false;
-		playerfields.holding_axe = false;
-		playerfields.holding_hoe = false;
-		playerfields.holding_pick_axe = false;
-		playerfields.holding_shovel = false;
-		playerfields.holding_projectile = false;
-		playerfields.holding_fishing_rod = false;
-		playerfields.holding_block = false;
+		if (const jobject obj_held = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item); obj_held != nullptr && ctx.m_ingame)
+		{
+			if (const jobject obj_held_item = jni->CallObjectMethod(obj_held, playerfields.mid_get_item); obj_held_item != nullptr)
+			{
+				playerfields.holding_sword = jni->IsInstanceOf(obj_held_item, playerfields.item_sword_class);
+				playerfields.holding_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_axe_class);
+				playerfields.holding_weapon = playerfields.holding_axe || playerfields.holding_sword;
+				playerfields.holding_hoe = jni->IsInstanceOf(obj_held_item, playerfields.item_hoe_class);
+				playerfields.holding_pick_axe = jni->IsInstanceOf(obj_held_item, playerfields.item_pick_axe_class);
+				playerfields.holding_shovel = jni->IsInstanceOf(obj_held_item, playerfields.item_shovel_class);
+				playerfields.holding_projectile = jni->IsInstanceOf(obj_held_item, playerfields.item_egg_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_snowball_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_pearl_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_ender_eye_class) || jni->IsInstanceOf(obj_held_item, playerfields.item_exp_bottle_class) || jni->IsInstanceOf(obj_held_item, playerfields.cls_item_potion);
+				playerfields.holding_block = jni->IsInstanceOf(obj_held_item, playerfields.item_block_class);
+				playerfields.holding_fishing_rod = jni->IsInstanceOf(obj_held_item, playerfields.item_fishing_rod_class);
+
+				jni->DeleteLocalRef(obj_held_item);
+			}
+
+			jni->DeleteLocalRef(obj_held);
+		}
+		else
+		{
+			playerfields.holding_weapon = false;
+			playerfields.holding_sword = false;
+			playerfields.holding_axe = false;
+			playerfields.holding_hoe = false;
+			playerfields.holding_pick_axe = false;
+			playerfields.holding_shovel = false;
+			playerfields.holding_projectile = false;
+			playerfields.holding_fishing_rod = false;
+			playerfields.holding_block = false;
+		}
 	}
 }
 
@@ -1240,6 +1245,11 @@ jfloat c_game_forge_18X::get_gamma()
 jobject c_game_forge_18X::get_net_handler()
 {
 	return jni->CallObjectMethod(gamefields.obj_game, gamefields.mid_get_net_handler);
+}
+
+jobject c_game_forge_18X::get_screen()
+{
+	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_current_screen);
 }
 
 jobject c_game_forge_18X::get_player_controller()

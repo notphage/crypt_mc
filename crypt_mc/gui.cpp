@@ -703,8 +703,6 @@ void c_gui::tab_misc()
 
 void c_gui::draw()
 {
-	ctx.m_menu_open = menu.is_open();
-
 	if (!menu.handle(m_tabs, color_t(ctx.m_settings.gui_accent_color().r(), ctx.m_settings.gui_accent_color().g(), ctx.m_settings.gui_accent_color().b())))
 		return;
 

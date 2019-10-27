@@ -55,7 +55,7 @@ public:
 
 	bool m_panic = false;
 	bool m_init = false;
-	bool m_menu_open = true;
+	bool m_menu_open = false;
 	bool m_menu_closing = false;
 	bool m_menu_opening = false;
 	bool m_block_keyinput = false;

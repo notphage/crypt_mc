@@ -42,16 +42,18 @@ long __stdcall hooked::get_update(JNIEnv* jni, jclass caller)
 					stack.method_name == fnvc("ak") ||
 					stack.method_name == fnvc("av")) // func_71411_J
 				{
-					if (ctx.m_menu_opening)
+					if (ctx.m_menu_opening || ctx.m_menu_open)
 					{
-						//mc->set_not_in_focus();
 						mc->set_mouse_grabbed(false);
 					}
 					else if (ctx.m_menu_closing)
 					{
-						//mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
-						//mc->set_in_focus();
-						mc->set_mouse_grabbed(true);
+						mc->set_cursor_pos(mc->get_screen_w() / 2, mc->get_screen_h() / 2);
+
+						if (mc->get_screen() == nullptr)
+						{
+							mc->set_mouse_grabbed(true);
+						}
 					}
 			
 					ctx.m_in_chat = mc->is_in_chat();

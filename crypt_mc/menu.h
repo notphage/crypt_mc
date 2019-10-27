@@ -291,11 +291,6 @@ namespace UI
 			m_end = m_start + m_bounds;
 		}
 
-		bool is_open() const
-		{
-			return m_is_open;
-		}
-
 		bool handle(std::vector<std::string>& tabs, color_t color)
 		{
 			ctx.m_block_keyinput = false;
@@ -329,6 +324,7 @@ namespace UI
 
 				ctx.m_menu_closing = m_data.m_alpha < 255 && m_data.m_alpha > 1;
 				ctx.m_menu_opening = m_should_open && m_data.m_alpha < 255;
+				ctx.m_menu_open = m_data.m_alpha == 255 && !ctx.m_menu_closing && !ctx.m_menu_opening;
 
 				static float sinebow_t = 0.f;
 				sinebow_t += 0.01f;
