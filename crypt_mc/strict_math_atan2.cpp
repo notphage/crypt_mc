@@ -14,17 +14,18 @@ long __stdcall hooked::strict_math_atan2(JNIEnv* jni, jclass caller)
 
 		if (stack.valid)
 		{
-			printf("%s\n", stack.method_str.c_str());
-
-			auto mc = ctx.get_game(jni);
-
-			const auto self = mc->get_player();
-			const auto world = mc->get_world();
-
-			if (self && world)
+			if (stack.method_name == fnvc("func_94248_c") || stack.method_name == fnvc("d"))
 			{
-				for (auto&& feature : ctx.m_features)
-					feature->run(mc, self, world, feature_type::FEATURE_ATAN2);
+				auto mc = ctx.get_game(jni);
+
+				const auto self = mc->get_player();
+				const auto world = mc->get_world();
+
+				if (self && world)
+				{
+					for (auto&& feature : ctx.m_features)
+						feature->run(mc, self, world, feature_type::FEATURE_ATAN2);
+				}
 			}
 		}
 	}
