@@ -19,37 +19,47 @@ void c_flight::on_get_time(const std::shared_ptr<c_game>& mc, const std::shared_
 
 	switch (ctx.m_settings.movement_flight_mode)
 	{
-	case 0:
-		self->set_motion_y(0);
-
-		if (self->is_on_ground())
-			return;
-		count++;
-
-		mc->set_timer_speed(self->get_ticks_existed() % 15 == 0 ? 1.9F : 1.7F);
-
-		if (count == 15)
+		case 0:
 		{
-			self->set_position(self->origin_x(), self->aabb_min_y() + util::random(0.00000000000001235423532523523532521, 0.0000000000000123542353252352353252 * 10), self->origin_z());
-			count = 0;
+			self->set_motion_y(0);
+
+			if (self->is_on_ground())
+				return;
+			count++;
+
+			mc->set_timer_speed(self->get_ticks_existed() % 15 == 0 ? 1.9F : 1.7F);
+
+			if (count == 15)
+			{
+				self->set_position(self->origin_x(), self->aabb_min_y() + util::random(0.00000000000001235423532523523532521, 0.0000000000000123542353252352353252 * 10), self->origin_z());
+				count = 0;
+			}
+
+			break;
 		}
 
+		case 1:
+		{
+			self->set_motion_y(-0.005);
 
-		break;
-	case 1:
-		self->set_motion_y(-0.005);
+			if (self->get_ticks_existed() % 2 == 0)
+				self->set_motion_y(0);
+			break;
+		}
 
-		if (self->get_ticks_existed() % 2 == 0)
+		case 2:
+		{
 			self->set_motion_y(0);
-		break;
-	case 2:
-		self->set_motion_y(0);
 
-		mc->set_timer_speed(0.149f);
-		break;
-	default:
-		self->set_motion_y(0);
-		break;
+			mc->set_timer_speed(0.149f);
+			break;
+		}
+
+		default:
+		{
+			self->set_motion_y(0);
+			break;
+		}
 	}
 
 	if (g_input.is_key_pressed(KEYS_LEFTSHIFT))
@@ -82,13 +92,13 @@ void c_flight::on_disable(const std::shared_ptr<c_game>& mc, const std::shared_p
 	mc->set_timer_speed(1.f);
 }
 
-void c_flight::set_speed(std::shared_ptr<c_player> self, float speed) const
+void c_flight::set_speed(const std::shared_ptr<c_player>& self, float speed) const
 {
 	self->set_motion_x(-(sin(get_direction(self)) * speed));
 	self->set_motion_z(cos(get_direction(self)) * speed);
 }
 
-float c_flight::get_direction(std::shared_ptr<c_player> self)
+float c_flight::get_direction(const std::shared_ptr<c_player>& self)
 {
 	auto yaw = self->get_yaw();
 
@@ -112,7 +122,7 @@ float c_flight::get_direction(std::shared_ptr<c_player> self)
 	}
 	else
 	{
-		forward = 1;
+		forward = 1.f;
 	}
 
 	if (moving_strafing > 0.0F)

@@ -128,15 +128,15 @@ struct player_fields
 	jclass cls_aabb = nullptr;
 	jclass cls_item_soup = nullptr;
 
-	bool holding_weapon = false;
-	bool holding_sword = false;
-	bool holding_axe = false;
-	bool holding_pick_axe = false;
-	bool holding_shovel = false;
-	bool holding_hoe = false;
-	bool holding_projectile = false;
-	bool holding_block = false;
-	bool holding_fishing_rod = false;
+	std::atomic_bool holding_weapon = false;
+	std::atomic_bool holding_sword = false;
+	std::atomic_bool holding_pick_axe = false;
+	std::atomic_bool holding_shovel = false;
+	std::atomic_bool holding_hoe = false;
+	std::atomic_bool holding_axe = false;
+	std::atomic_bool holding_projectile = false;
+	std::atomic_bool holding_block = false;
+	std::atomic_bool holding_fishing_rod = false;
 };
 
 struct game_fields

@@ -1,7 +1,7 @@
 #include "context.h"
 #include "fullbright.h"
 
-float gamma = 0;
+float gamma = 0.f;
 
 void c_fullbright::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
@@ -18,5 +18,5 @@ void c_fullbright::on_disable(const std::shared_ptr<c_game>& mc, const std::shar
 {
 	mc->set_gamma(gamma);
 
-	gamma = 0;
+	gamma = 0.f;
 }

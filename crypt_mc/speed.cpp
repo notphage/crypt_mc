@@ -116,22 +116,9 @@ void c_speed::vanilla(const std::shared_ptr<c_player>& self) const
 		set_speed(self, get_base_speed(self) + 0.15f);
 }
 
-void c_speed::longjump(const std::shared_ptr<c_player>& self) const
-{
-	if (m_on_ground)
-	{
-		set_speed(self, get_base_speed(self) + ctx.m_settings.movement_longjump_boost);
-
-		jump(self, 0.42f);
-	}
-}
-
 void c_speed::on_get_time(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
-
-	if (valid_keystate(ctx.m_settings.movement_longjump_key))
-		longjump(self);
 
 	if (self->get_strafing() != 0.f || self->get_forward() != 0.f)
 	{
@@ -196,4 +183,16 @@ void c_air_control::on_get_time(const std::shared_ptr<c_game>&, const std::share
 
 	if (!m_on_ground)
 		set_speed(self, get_base_speed(self));
+}
+
+void c_long_jump::on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>&)
+{
+	m_on_ground = self->is_on_ground() && self->is_collided_vertically();
+
+	if (m_on_ground)
+	{
+		set_speed(self, get_base_speed(self) + ctx.m_settings.movement_longjump_boost);
+
+		jump(self, 0.42f);
+	}
 }

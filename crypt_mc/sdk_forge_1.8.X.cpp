@@ -130,10 +130,10 @@ struct player_fields
 
 	std::atomic_bool holding_weapon = false;
 	std::atomic_bool holding_sword = false;
-	std::atomic_bool holding_axe = false;
 	std::atomic_bool holding_pick_axe = false;
 	std::atomic_bool holding_shovel = false;
 	std::atomic_bool holding_hoe = false;
+	std::atomic_bool holding_axe = false;
 	std::atomic_bool holding_projectile = false;
 	std::atomic_bool holding_block = false;
 	std::atomic_bool holding_fishing_rod = false;

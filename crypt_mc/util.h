@@ -21,7 +21,9 @@ namespace util
 
 		return dis(gen);
 	}
-	static __forceinline float convert_legit_value(float step, float angle, float speed) {
+
+	static __forceinline float convert_legit_value(float step, float angle, float speed)
+	{
 		angle *= 0.15f;
 
 		float steps = angle < 0.0f ? floorf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 3.f) * angle * 5.0f) : ceilf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 5.f) * angle * 5.0f);

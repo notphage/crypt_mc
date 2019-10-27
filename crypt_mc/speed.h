@@ -14,6 +14,9 @@ public:
 	c_base_speed(bool* setting, keysetting_t* keybind = nullptr)
 		: c_feature(setting, keybind)
 	{}
+
+	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 };
 
 class c_speed : public c_base_speed
@@ -26,7 +29,6 @@ class c_speed : public c_base_speed
     void yport(const std::shared_ptr<c_player>& self) const;
     void vanilla(const std::shared_ptr<c_player>& self) const;
 
-	void longjump(const std::shared_ptr<c_player>& self) const;
 public:
 	c_speed(bool* setting, keysetting_t* keybind = nullptr)
 		: c_base_speed(setting, keybind)
@@ -37,9 +39,20 @@ public:
 	}
 
 	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+};
 
-	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
-	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
+class c_long_jump : public c_base_speed
+{
+public:
+	c_long_jump(bool* setting, keysetting_t* keybind = nullptr)
+		: c_base_speed(setting, keybind)
+	{
+		using namespace std::placeholders;
+
+		register_feature(std::bind(&c_long_jump::on_get_time, this, _1, _2, _3), feature_type::FEATURE_GET_TIME);
+	}
+
+	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
 };
 
 class c_air_control : public c_base_speed
@@ -54,7 +67,4 @@ public:
 	}
 
 	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
-
-	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
-	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 };

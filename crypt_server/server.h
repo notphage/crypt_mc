@@ -30,7 +30,7 @@ enum client_handler_packet_status_t
 	CHPS_NO_SEND
 };
 
-class c_client_handler : std::enable_shared_from_this<c_client_handler>
+class c_client_handler : public std::enable_shared_from_this<c_client_handler>
 {
 	SSL* m_ssl;
 	std::string m_client_ip;

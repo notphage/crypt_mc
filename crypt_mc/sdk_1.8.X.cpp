@@ -129,15 +129,15 @@ struct player_fields
 	jclass cls_aabb = nullptr;
 	jclass cls_item_soup = nullptr;
 
-	bool holding_weapon = false;
-	bool holding_sword = false;
-	bool holding_axe = false;
-	bool holding_pick_axe = false;
-	bool holding_shovel = false;
-	bool holding_hoe = false;
-	bool holding_projectile = false;
-	bool holding_block = false;
-	bool holding_fishing_rod = false;
+	std::atomic_bool holding_weapon = false;
+	std::atomic_bool holding_sword = false;
+	std::atomic_bool holding_pick_axe = false;
+	std::atomic_bool holding_shovel = false;
+	std::atomic_bool holding_hoe = false;
+	std::atomic_bool holding_axe = false;
+	std::atomic_bool holding_projectile = false;
+	std::atomic_bool holding_block = false;
+	std::atomic_bool holding_fishing_rod = false;
 };
 
 struct game_fields
@@ -989,7 +989,14 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_mouse_sensitivity = jni->GetFieldID(gamefields.settings_class, xors("a"), xors("F"));
 		gamefields.fid_type_of_hit = jni->GetFieldID(gamefields.cls_moving_object_position, xors("a"), xors("Lauh$a;"));
 		gamefields.fid_key_bind_sneak = jni->GetFieldID(gamefields.cls_game_settings, xors("ac"), xors("Lavb;"));
-		gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aI"), xors("F"));
+		jni->GetFieldID(gamefields.cls_game_settings, xors("aH"), xors("F"));
+		if (JNI_TRUE == jni->ExceptionCheck())
+		{
+			jni->ExceptionClear();
+			gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aJ"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
+		}
+		else
+			gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aI"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
 		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));

@@ -2,8 +2,8 @@
 
 class c_flight : public c_feature
 {
-    void set_speed(std::shared_ptr<c_player> self, float speed) const;
-    static float get_direction(std::shared_ptr<c_player> self);
+    void set_speed(const std::shared_ptr<c_player>& self, float speed) const;
+    static float get_direction(const std::shared_ptr<c_player>& self);
 public:
 	c_flight(bool* setting, keysetting_t* keybind = nullptr)
 		: c_feature(setting, keybind)
