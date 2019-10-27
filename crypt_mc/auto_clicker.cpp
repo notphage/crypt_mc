@@ -2,19 +2,29 @@
 #include "auto_clicker.h" 
 #include <random> 
 
-bool left_click = true, set_change = false, blocking = false;
+bool m_left_click = true;
+bool m_set_change = false;
+bool m_blocking = false;
 
-int min_cps = ctx.m_settings.combat_auto_clicker_min_cps, max_cps = ctx.m_settings.combat_auto_clicker_max_cps;
-int clicks_skip = 0, clicks_until_skip = 40, skip_click_amt = 4, skip_click_count = 0, clicks_change = 0, clicks_until_change = 50, clicks_until_escape = 9, current_delay = 0, clicks = 0;
-int max_rand = 0;
-float multiplier = 0.5;
+uint32_t m_min_cps = ctx.m_settings.combat_auto_clicker_min_cps;
+uint32_t m_max_cps = ctx.m_settings.combat_auto_clicker_max_cps;
+uint32_t m_clicks_skip = 0;
+uint32_t m_clicks_until_skip = 57;
+uint32_t m_skip_click_amt = 2;
+uint32_t m_skip_click_count = 0;
+uint32_t m_clicks_change = 0;
+uint32_t m_clicks_until_change = 50;
+uint32_t m_clicks_until_escape = 9;
+uint32_t m_current_delay = 0;
+uint32_t m_clicks = 0;
+uint32_t m_last_click = 0;
 
-uint64_t last_click = 0;
+float m_multiplier = 0.5f;
 
 void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
-	min_cps = ctx.m_settings.combat_auto_clicker_min_cps;
-	max_cps = ctx.m_settings.combat_auto_clicker_max_cps;
+	m_min_cps = ctx.m_settings.combat_auto_clicker_min_cps;
+	m_max_cps = ctx.m_settings.combat_auto_clicker_max_cps;
 	if (ctx.m_menu_open)
 		return;
 
@@ -138,14 +148,20 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 		//}
 
 
-		if (left_click && ((GetTickCount64() - last_click) > current_delay * multiplier))
+		if (m_left_click && ((GetTickCount64() - m_last_click) > m_current_delay * m_multiplier))
 		{
-			if (blocking)
+			if ((GetTickCount64() - m_last_click) > (m_current_delay * 1.3f))
+			{
+				m_last_click = GetTickCount64();
+				return;
+			}
+			
+			if (m_blocking)
 				g_input.release_mouse(false);
 
 			g_input.press_mouse(true);
-			left_click = false;
-			multiplier = util::random(0.45, 0.55);
+			m_left_click = false;
+			m_multiplier = util::random(0.45, 0.55);
 		}
 		else if (!m_left_click && GetTickCount64() - m_last_click > m_current_delay)
 		{
@@ -170,27 +186,26 @@ void c_auto_clicker::reset()
 	auto chance_two = util::random(0, 50);
 	auto chance_final = chance_one + chance_two;
 
+	auto tick = util::random(0, 100) < 50 ? chance_one < 25 ? (int) (std::ceil((1000.f / m_min_cps) / 50.f)) : (int) (std::floor((1000.f / m_min_cps) / 50.f)) : chance_two < 25 ? (int)(std::ceil((1000.f / m_min_cps) / 50.f)) : (int)(std::floor((1000.f / m_min_cps) / 50.f));
+	auto final_tick = chance_final < std::clamp((17 - (int) (m_min_cps * 0.75f)), 5, 17) ? tick - 1 : chance_final > std::clamp((83 + (int) (m_min_cps * 0.75f)), 83, 95) ? tick + 1 : tick;
 
-	auto tick = util::random(0, 100) < 50 ? chance_one < 25 ? (int) (std::ceil((1000.f / min_cps) / 50.f)) : (int) (std::floor((1000.f / min_cps) / 50.f)) : chance_two < 25 ? (int)(std::ceil((1000.f / min_cps) / 50.f)) : (int)(std::floor((1000.f / min_cps) / 50.f));
-	auto final_tick = chance_final < std::clamp((17 - (int) (min_cps / 2)), 5, 17) ? tick - 1 : chance_final > std::clamp((83 + (int) (min_cps / 2)), 83, 95) ? tick + 1 : tick;
-
-	if (clicks_skip > clicks_until_skip) 
+	if (m_clicks_skip > m_clicks_until_skip)
 	{
-		set_tick_delay(std::clamp(util::random(3, 6), 1, 10));
+		set_tick_delay(std::clamp(final_tick + util::random(2, 4), 4, 10));
 
-		skip_click_count++;
+		m_skip_click_count++;
 
-		if (skip_click_count >= skip_click_amt)
+		if (m_skip_click_count >= m_skip_click_amt)
 		{
-			clicks_skip = 0;
-			skip_click_count = 0;
-			clicks_until_skip = util::random(35, 60);
-			skip_click_amt = util::random(3, 5);
+			m_clicks_skip = 0;
+			m_skip_click_count = 0;
+			m_clicks_until_skip = util::random(35, 60);
+			m_skip_click_amt = util::random(1, 3);
 		}
 	}
 	else 
 	{
-		set_tick_delay(std::clamp(final_tick, 1, 10));
+		set_tick_delay(std::clamp(final_tick, 0, 10));
 	}
 
 	m_left_click = true;
@@ -199,6 +214,9 @@ void c_auto_clicker::reset()
 
 void c_auto_clicker::set_tick_delay(int tick)
 {
-	current_delay = tick * 50;
+	if (tick > 0)
+		m_current_delay = tick * 50;
+	else
+		m_current_delay = util::random(15, 30);
 }
 

@@ -25,12 +25,14 @@ bool c_input_manager::register_key_press(VirtualKeyEvents_t key_event, VirtualKe
 	{
 		case KEYDOWN:
 		{
+
 			if (is_valid_key(key))
 				m_pressed_keys[key] = true;
 			return true;
 		}
 		case KEYUP:
 		{
+
 			if (is_valid_key(key))
 				m_pressed_keys[key] = false;
 			return true;
@@ -45,6 +47,8 @@ bool c_input_manager::register_key_press(VirtualKeyEvents_t key_event, VirtualKe
 		{
 			if (key == KEYS_ALT)
 				m_pressed_keys[key] = false;
+			
+			
 			break;
 		}
 		case LBUTTONDOWN:
@@ -117,13 +121,26 @@ bool c_input_manager::is_key_pressed(keysetting_t key)
 	if (keytype == kt_toggle)
 	{
 		if (is_key_pressed(pressed))
-			m_pressed_once[pressed] = true;
-
-		if (!is_key_pressed(pressed) && m_pressed_once[pressed])
 		{
-			m_toggled[pressed] = !m_toggled[pressed];
-			m_pressed_once[pressed] = false;
+			bool first = !m_key_downs[pressed];
+
+			m_key_downs[pressed] = true;
+
+			if (first)
+				m_toggled[pressed] = !m_toggled[pressed];
 		}
+		else
+		{
+			m_key_downs[pressed] = false;
+		}
+		//if (is_key_pressed(pressed))
+		//	m_pressed_once[pressed] = true;
+		//
+		//if (!is_key_pressed(pressed) && m_pressed_once[pressed])
+		//{
+		//	m_toggled[pressed] = !m_toggled[pressed];
+		//	m_pressed_once[pressed] = false;
+		//}
 
 		return m_toggled[pressed];
 	}
@@ -131,6 +148,17 @@ bool c_input_manager::is_key_pressed(keysetting_t key)
 	return false;
 }
 
+bool c_input_manager::was_key_pressed(keysetting_t key)
+{
+	VirtualKeys_t pressed = (VirtualKeys_t)key.key;
+
+	auto down = m_key_downs[pressed];
+
+	if (down)
+		m_key_downs[pressed] = false;
+
+	return down;
+}
 void c_input_manager::toggle_key(keysetting_t key)
 {
 	VirtualKeys_t pressed = (VirtualKeys_t)key.key;

@@ -158,6 +158,7 @@ struct keysetting_t
 class c_input_manager
 {
 	bool m_pressed_keys[KEYS_MAX]{};
+	bool m_key_downs[KEYS_MAX]{};
 	int m_mouse_pos[2]{};
 	int m_scroll_wheel_state{};
 	char m_keyboard_char{};
@@ -175,6 +176,8 @@ public:
 	//checks if the key is pressed
 	bool is_key_pressed(int key);
 	bool is_key_pressed(keysetting_t key);
+
+	bool was_key_pressed(keysetting_t key);
 
 	//allows code to toggle on/off keybinds
 	void toggle_key(keysetting_t key);

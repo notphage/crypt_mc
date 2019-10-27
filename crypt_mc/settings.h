@@ -279,8 +279,8 @@ public:
 	setting_t<keysetting_t> combat_aim_assist_key{&m_holder, fnvc("combat_aim_assist_key"), {}};
 	setting_t<bool> combat_aim_assist_item_whitelist{ &m_holder, fnvc("combat_aim_assist_item_whitelist"), true };
 	setting_t<int> combat_aim_assist_fov{&m_holder, fnvc("combat_aim_assist_fov"), 90};
-	setting_t<int> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 2};
-	setting_t<int> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 2};
+	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 2.f};
+	setting_t<float> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 2.f};
 
 	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.5f};
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };

@@ -11,9 +11,9 @@ struct target_t
 
 class c_aim_assist : public c_feature
 {
-
 	void find_best_point(const std::shared_ptr<c_player>& self, const std::shared_ptr<c_player>& player, const vec3& trace_origin, target_t& target_data);
 	void find_target(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world, target_t& best_target_data);
+	float limit_angle(float change, float speed);
 ;
 public:
 	c_aim_assist(bool* setting, keysetting_t* keybind = nullptr)
@@ -21,10 +21,10 @@ public:
 	{
 		using namespace std::placeholders;
 
-		register_feature(std::bind(&c_aim_assist::on_get_time, this, _1, _2, _3), feature_type::FEATURE_GET_TIME);
+		register_feature(std::bind(&c_aim_assist::on_update, this, _1, _2, _3), feature_type::FEATURE_UPDATE);
 	}
 
-	void on_get_time(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
+	void on_update(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&);
 
 	void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
 	void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) override { };
