@@ -34,7 +34,7 @@ long long __stdcall hooked::wnd_proc(HWND hwnd, uint32_t msg, uint64_t uparam, i
 	g_input.register_key_press(static_cast<VirtualKeyEvents_t>(msg), static_cast<VirtualKeys_t>(uparam));
 
 	// dont pass mouse input to game when menu is open
-	if (ctx.m_menu_open)
+	if (ctx.m_menu_open || ctx.m_menu_opening)
 	{
 		if (ctx.m_block_keyinput && (msg == VirtualKeyEvents_t::KEYDOWN || msg == VirtualKeyEvents_t::SYSKEYDOWN))
 			return false;
