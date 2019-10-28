@@ -8,6 +8,7 @@ protected:
 	int m_old_slot = -1;
 
 	uint64_t m_delay = 0;
+	uint64_t m_current_delay = 0;
 
 	bool m_healing_running = false;
 	bool m_debuff_running = false;

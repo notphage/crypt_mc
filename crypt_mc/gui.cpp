@@ -79,7 +79,6 @@ void c_gui::tab_combat()
 			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
-					{&ctx.m_settings.combat_auto_clicker_block_hit, xors("block hit")},
 					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")},
 					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")},
 					{&ctx.m_settings.combat_auto_clicker_jitter, xors("jitter")}
@@ -226,7 +225,7 @@ void c_gui::tab_player()
 					{&ctx.m_settings.player_throwdebuff_weakness, xors("weakness")},
 				});
 
-			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 0, 200, 1, xors("ms"));
+			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 50, 200, 1, xors("ms"));
 		}
 		throw_groupbox.end(menu.data(), &ctx.m_settings.player_throw);
 

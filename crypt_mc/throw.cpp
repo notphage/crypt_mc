@@ -172,12 +172,16 @@ int c_base_throw::stage_switch(const std::shared_ptr<c_player>& self, int slot)
 
 		case 1:
 		{
+			if (m_current_delay == 0)
+				m_current_delay = ctx.m_settings.player_throw_delay + util::random(-(ctx.m_settings.player_throw_delay * 0.2f), ctx.m_settings.player_throw_delay * 0.2f);
 
-			if (GetTickCount64() - m_delay > ctx.m_settings.player_throw_delay)
+			if (GetTickCount64() - m_delay > m_current_delay)
 			{
 				g_input.press_mouse(false);
+				g_input.release_mouse(false);
 				++m_stage;
 				m_delay = GetTickCount64();
+				m_current_delay = ctx.m_settings.player_throw_delay + util::random(-(ctx.m_settings.player_throw_delay * 0.2f), ctx.m_settings.player_throw_delay * 0.2f);
 			}
 
 			return m_stage;
@@ -185,13 +189,17 @@ int c_base_throw::stage_switch(const std::shared_ptr<c_player>& self, int slot)
 
 		case 2:
 		{
-			if (GetTickCount64() - m_delay > ctx.m_settings.player_throw_delay)
+			if (m_current_delay == 0)
+				m_current_delay = ctx.m_settings.player_throw_delay + util::random(-(ctx.m_settings.player_throw_delay * 0.2f), ctx.m_settings.player_throw_delay * 0.2f);
+
+			if (GetTickCount64() - m_delay > m_current_delay)
 			{
 				g_input.release_mouse(false);
 				self->set_current_slot(m_old_slot);
 
 				m_old_slot = -1;
 				m_stage = 0;
+				m_current_delay = ctx.m_settings.player_throw_delay + util::random(-(ctx.m_settings.player_throw_delay * 0.2f), ctx.m_settings.player_throw_delay * 0.2f);
 				g_input.toggle_key(*m_keybind);
 			}
 
