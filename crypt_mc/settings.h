@@ -267,11 +267,12 @@ public:
 	setting_t<keysetting_t> combat_auto_clicker_key{&m_holder, fnvc("combat_auto_clicker_key"), {}};
 	setting_t<int> combat_auto_clicker_cps{&m_holder, fnvc("combat_auto_clicker_cps"), 11};
 	setting_t<int> combat_auto_clicker_jitter_chance{ &m_holder, fnvc("combat_auto_clicker_jitter_chance"), 10 };
+	setting_t<int> combat_auto_clicker_block_delay{ &m_holder, fnvc("combat_auto_clicker_block_delay"), 500 };
 	setting_t<float> combat_auto_clicker_jitter_intensity{ &m_holder, fnvc("combat_auto_clicker_jitter_intensity"), 0.2f };
 	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), true };
 	setting_t<bool> combat_auto_clicker_inventory{&m_holder, fnvc("combat_auto_clicker_inventory"), true};
 	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), false };
-	setting_t<bool> combat_auto_clicker_block_hit{&m_holder, fnvc("combat_auto_clicker_block_hit"), false};
+	setting_t<bool> combat_auto_clicker_auto_block{&m_holder, fnvc("combat_auto_clicker_auto_block"), false};
 	setting_t<bool> combat_auto_clicker_jitter{ &m_holder, fnvc("combat_auto_clicker_jitter"), false }; 
 
 	setting_t<bool> combat_aim_assist{&m_holder, fnvc("combat_aim_assist"), false};

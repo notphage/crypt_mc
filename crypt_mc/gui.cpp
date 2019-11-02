@@ -31,6 +31,7 @@ void c_gui::tab_combat()
 	static UI::c_key_bind auto_clicker_key;
 	static UI::c_slider auto_clicker_cps;
 	static UI::c_slider auto_clicker_jitter_chance;
+	static UI::c_slider auto_clicker_block_delay;
 	static UI::c_float_slider auto_clicker_jitter_intensity;
 	static UI::c_multi_dropdown auto_clicker_conditions;
 	static UI::c_checkbox auto_clicker_item_whitelist;
@@ -75,11 +76,17 @@ void c_gui::tab_combat()
 				auto_clicker_jitter_chance.handle(menu.data(), xors("chance"), &ctx.m_settings.combat_auto_clicker_jitter_chance, 1, 100, 1, xors("%"));
 				auto_clicker_jitter_intensity.handle(menu.data(), xors("intensity"), &ctx.m_settings.combat_auto_clicker_jitter_intensity, 0.01f, 1.0f, 0.01f);
 			}
+
+			if (ctx.m_settings.combat_auto_clicker_auto_block)
+			{
+				auto_clicker_block_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_auto_clicker_block_delay, 1, 1000, 1, xors("ms"));
+			}
 		
 			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
 				{
 					{&ctx.m_settings.combat_auto_clicker_inventory, xors("inventory")},
 					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")},
+					{&ctx.m_settings.combat_auto_clicker_auto_block, xors("auto block")},
 					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")},
 					{&ctx.m_settings.combat_auto_clicker_jitter, xors("jitter")}
 				});

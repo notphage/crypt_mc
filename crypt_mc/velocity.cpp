@@ -73,31 +73,44 @@ std::pair<bool, bool> c_velocity::check_player_pos(const std::shared_ptr<c_game>
 		if ((self_origin - player_origin).length() > 8.0f)
 			continue;
 
-		vec3 player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
-		vec3 player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());
+		vec3 forward_player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
+		vec3 forward_player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());
+		vec3 behind_player_mins(player->aabb_min_x(), player->aabb_min_y(), player->aabb_min_z());
+		vec3 behind_player_maxs(player->aabb_max_x(), player->aabb_max_y(), player->aabb_max_z());
 
-		player_mins -= player_origin;
-		player_maxs -= player_origin;
+		forward_player_mins -= player_origin;
+		forward_player_maxs -= player_origin;
 
-		player_mins *= 2.f;
-		player_maxs *= 2.f;
-		player_maxs.y = std::copysignf(1.5f, player_maxs.y) + (.3f * 2.f);
+		forward_player_mins *= 2.f;
+		forward_player_maxs *= 2.f;
+		forward_player_maxs.y = std::copysignf(1.5f, forward_player_maxs.y) + (.3f * 2.f);
 
-		player_mins += player_origin;
-		player_maxs += player_origin;
+		forward_player_mins += player_origin;
+		forward_player_maxs += player_origin;
+
+
+		behind_player_mins -= player_origin;
+		behind_player_maxs -= player_origin;
+
+		behind_player_mins *= 3.f;
+		behind_player_maxs *= 3.f;
+		behind_player_maxs.y = std::copysignf(1.5f, behind_player_maxs.y) + (.3f * 2.f);
+
+		behind_player_mins += player_origin;
+		behind_player_maxs += player_origin;
 
 		if (!player_infront)
 		{
 			ray_trace_t forward_ray_trace(trace_origin, self_forward);
 
 			float foward_distance = 0.f;
-			if (!forward_ray_trace.trace(player_mins, player_maxs, foward_distance))
-				continue;
 
-			if (foward_distance < 6.0f)
+			if (forward_ray_trace.trace(forward_player_mins, forward_player_maxs, foward_distance))
 			{
-				player_infront = true;
-				continue;
+				if (foward_distance < 6.0f)
+				{
+					player_infront = true;
+				}
 			}
 		}
 
@@ -106,11 +119,12 @@ std::pair<bool, bool> c_velocity::check_player_pos(const std::shared_ptr<c_game>
 			ray_trace_t backward_ray_trace(trace_origin, self_backward);
 
 			float backward_distance = 0.f;
-			if (!backward_ray_trace.trace(player_mins, player_maxs, backward_distance))
-				continue;
 
-			if (backward_distance < 6.0f)
-				player_behind = true;
+			if (backward_ray_trace.trace(behind_player_mins, behind_player_maxs, backward_distance))
+			{
+				if (backward_distance < 6.0f)
+					player_behind = true;
+			}
 		}
 	}
 

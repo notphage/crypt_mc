@@ -116,7 +116,6 @@ class c_game_forge_18X : public c_game
 {
 public:
 	void instantiate(JNIEnv*) override;
-
 	jboolean in_game_has_focus() override;
 	jboolean is_in_inventory() override;
 	jboolean is_view_bobbing() override;
@@ -139,6 +138,8 @@ public:
 	jfloat get_timer_speed() override;
 
 	jobject get_player_controller() override;
+	jobject get_pointed_entity() override;
+	jobject get_mouse_over() override;
 	jobject get_net_handler() override;
 	jobject get_screen() override;
 

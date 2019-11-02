@@ -1433,6 +1433,8 @@ public:
 
 	virtual jobject get_net_handler() = 0;
 	virtual jobject get_player_controller() = 0;
+	virtual jobject get_pointed_entity() = 0;
+	virtual jobject get_mouse_over() = 0;
 	virtual jobject get_screen() = 0;
 
 	virtual void set_gamma(jfloat) = 0;

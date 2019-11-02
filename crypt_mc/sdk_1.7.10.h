@@ -139,6 +139,8 @@ public:
 
 	jobject get_player_controller() override;
 	jobject get_net_handler() override;
+	jobject get_pointed_entity() override;
+	jobject get_mouse_over() override;
 	jobject get_screen() override;
 
 	jint get_right_click_delay() override;

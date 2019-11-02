@@ -138,6 +138,8 @@ public:
 	jfloat get_timer_speed() override;
 
 	jobject get_player_controller() override;
+	jobject get_pointed_entity() override;
+	jobject get_mouse_over() override;
 	jobject get_net_handler() override;
 	jobject get_screen() override;
 

@@ -1038,6 +1038,7 @@ void c_game_forge_1710::instantiate(JNIEnv* _jni)
 	}
 }
 
+
 jboolean c_game_forge_1710::in_game_has_focus()
 {
 	return jni->GetBooleanField(gamefields.obj_game, gamefields.fid_in_game_has_focus);
@@ -1174,6 +1175,11 @@ jfloat c_game_forge_1710::get_gamma()
 	return jni->GetFloatField(gamefields.obj_settings, gamefields.fid_gamma);
 }
 
+jobject c_game_forge_1710::get_mouse_over()
+{
+	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over);
+}
+
 jobject c_game_forge_1710::get_net_handler()
 {
 	return jni->CallObjectMethod(gamefields.obj_game, gamefields.mid_get_net_handler);
@@ -1187,6 +1193,11 @@ jobject c_game_forge_1710::get_screen()
 jobject c_game_forge_1710::get_player_controller()
 {
 	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_player_controller);
+}
+
+jobject c_game_forge_1710::get_pointed_entity()
+{
+	return jni->GetObjectField(gamefields.obj_game, gamefields.fid_pointed_entity);
 }
 
 void c_game_forge_1710::set_gamma(jfloat gamma)

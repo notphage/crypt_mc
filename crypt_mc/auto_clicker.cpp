@@ -2,7 +2,7 @@
 #include "auto_clicker.h" 
 #include <random> 
 
-bool m_left_click = true;
+bool m_left_click = true, m_right_click = true;
 bool m_set_change = false;
 bool m_blocking = false;
 
@@ -14,27 +14,40 @@ uint32_t m_clicks_change = 0;
 uint32_t m_clicks_until_change = 50;
 uint32_t m_clicks_until_escape = 9;
 uint32_t m_current_delay = 0;
+uint32_t m_current_r_delay = 0;
 uint32_t m_clicks = 0;
 uint32_t m_last_click = 0;
+uint32_t m_last_r_click = 0;
 
 float m_multiplier = 0.5f;
+
+long last_attack = GetTickCount64();
+
+bool auto_block = false;
 
 void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	if (ctx.m_menu_open)
 		return;
 
-	if (m_current_delay == 0)
+	if (m_current_delay == 0 || m_last_click == 0)
 		reset();
 
 	const bool in_inventory = mc->is_in_inventory();
 	const bool has_focus = mc->in_game_has_focus();
 
 	if (!in_inventory && !has_focus)
+	{
+		reset();
 		return;
+	}
+
 
 	if (!ctx.m_settings.combat_auto_clicker_inventory && in_inventory)
+	{
+		reset();
 		return;
+	}
 
 	bool white_list = false;
 
@@ -59,7 +72,10 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 			white_list = true;
 
 		if (!white_list)
+		{
+			reset();
 			return;
+		}
 	}
 
 	if (in_inventory && ctx.m_settings.combat_auto_clicker_inventory && !g_input.is_key_pressed(KEYS_SHIFT))
@@ -121,59 +137,63 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 			}
 		}
 
-		if (m_last_click == 0)
-			m_last_click = GetTickCount64();
 
-		//if (right_mouse_down && ctx.m_settings.combat_auto_clicker_block_hit)
-		//{
-		//	if (((GetTickCount64() - last_click) <= current_delay * 0.1f && (GetTickCount64() - last_click) >= current_delay * 0.025f) || (GetTickCount64() - last_click <= current_delay * 0.75 && GetTickCount64() - last_click > current_delay * 0.7))
-		//	{
-		//		if (!blocking)
-		//		{
-		//			blocking = true;
-		//
-		//			g_input.press_mouse(false);
-		//		}
-		//	}
-		//	else if (blocking)
-		//	{
-		//		blocking = false;
-		//
-		//		g_input.release_mouse(false);
-		//	}
-		//}
-
-
-		if (m_left_click && ((GetTickCount64() - m_last_click) > m_current_delay * m_multiplier))
+		if (ctx.m_settings.combat_auto_clicker_auto_block && auto_block)
 		{
-			if ((GetTickCount64() - m_last_click) > (m_current_delay * 1.3f))
+			if (m_right_click) 
 			{
-				m_last_click = GetTickCount64();
-				return;
+				g_input.press_mouse(false);
+
+
+				m_current_r_delay = 50 * util::random(1, 2);
+				m_last_r_click = GetTickCount64();
+				m_right_click = false;
 			}
-			
-			if (m_blocking)
+			else if (GetTickCount64() - m_last_r_click > m_current_r_delay)
+			{
+
 				g_input.release_mouse(false);
 
-			g_input.press_mouse(true);
-			m_left_click = false;
-			m_multiplier = util::random(0.45, 0.55);
+				auto_block = false;
+				m_right_click = true;
+			}
+
 		}
-		else if (!m_left_click && GetTickCount64() - m_last_click > m_current_delay)
+		else 
 		{
-			g_input.release_mouse(true);
+			if (m_left_click && ((GetTickCount64() - m_last_click) > m_current_delay * m_multiplier))
+			{
+				g_input.press_mouse(true);
+				m_left_click = false;
+				m_multiplier = util::random(0.3, 0.7);
 
-			m_clicks += 1;
+				if (GetTickCount64() - last_attack >= ctx.m_settings.combat_auto_clicker_block_delay && ctx.m_settings.combat_auto_clicker_auto_block)
+				{
+					if (mc->get_mouse_over() != nullptr && mc->get_pointed_entity() != nullptr)
+					{
+						last_attack = GetTickCount64();
 
-			reset();
+						auto_block = true;
+					}
+				}
+			}
+			else if (!m_left_click && GetTickCount64() - m_last_click > m_current_delay)
+			{
+				g_input.release_mouse(true);
 
-			m_clicks_skip += 1;
-			m_clicks_change += 1;
+				m_clicks += 1;
+
+				reset();
+
+				m_clicks_skip += 1;
+				m_clicks_change += 1;
+			}
 		}
+
 		return;
 	}
 
-	m_last_click = 0;
+	m_last_click = GetTickCount64();
 }
 
 void c_auto_clicker::reset()
@@ -211,8 +231,8 @@ void c_auto_clicker::reset()
 void c_auto_clicker::set_tick_delay(int tick)
 {
 	if (tick > 0)
-		m_current_delay = tick * 50;
+		m_current_delay = tick * util::random(50, 60);
 	else
-		m_current_delay = util::random(15, 30);
+		m_current_delay = util::random(0, 50);
 }
 
