@@ -2024,7 +2024,7 @@ namespace UI
 				data->m_ignore = true;
 			}
 
-			if (!m_is_inside && !m_inside_picker_window && data->m_first_click)
+			if (!m_is_inside && !m_inside_picker_window && data->m_first_click && m_is_open)
 			{
 				m_is_open = false;
 				data->m_ignore = false;

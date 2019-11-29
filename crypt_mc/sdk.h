@@ -1237,6 +1237,21 @@ struct matrix4x4_t
 	}
 };
 
+struct matrix3x4_t
+{
+	float m[3][4];
+
+	inline float* operator[](int i)
+	{
+		return m[i];
+	}
+
+	inline const float* operator[](int i) const
+	{
+		return m[i];
+	}
+};
+
 enum client_flavor
 {
 	VANILLA,
@@ -1297,13 +1312,21 @@ public:
 
 	virtual void instantiate(jobject, JNIEnv*) = 0;
 
-	virtual bool is_same(std::shared_ptr<c_player>) = 0;
+	virtual bool is_same(const std::shared_ptr<c_player>&) = 0;
 	virtual jboolean is_invisible() = 0;
 	virtual jboolean is_sneaking() = 0;
     virtual jboolean is_potion_active(jint) = 0;
 
 	virtual jfloat get_pitch() = 0;
+	virtual jfloat get_prev_pitch() = 0;
 	virtual jfloat get_yaw() = 0;
+	virtual jfloat get_prev_yaw() = 0;
+
+	virtual jfloat get_camera_pitch() = 0;
+	virtual jfloat get_prev_camera_pitch() = 0;
+	virtual jfloat get_camera_yaw() = 0;
+	virtual jfloat get_prev_camera_yaw() = 0;
+
 	virtual jfloat get_strafing() = 0;
 	virtual jfloat get_forward() = 0;
 	virtual jobject get_held_item() = 0;
@@ -1335,6 +1358,9 @@ public:
 	virtual jdouble old_origin_x() = 0;
 	virtual jdouble old_origin_y() = 0;
 	virtual jdouble old_origin_z() = 0;
+
+	virtual jfloat get_distance_walked() = 0;
+	virtual jfloat get_prev_distance_walked() = 0;
 
 	virtual jboolean is_dead() = 0;
     virtual jboolean is_collided_vertically() = 0;
@@ -1425,6 +1451,7 @@ public:
 	virtual jfloat get_mouse_sensitivity() = 0;
 	virtual jfloat get_timer_speed() = 0;
 	virtual jfloat get_gamma() = 0;
+	virtual jfloat get_fov(jfloat) = 0;
 
 	virtual jint get_right_click_delay() = 0;
 	virtual jint get_string_width(jstring) = 0;

@@ -19,6 +19,7 @@ protected:
 	bool m_ran_callback = true;
 	bool* m_setting = nullptr;
 	keysetting_t* m_keybind = nullptr;
+	JNIEnv* m_jni = nullptr;
 
 	std::vector<std::pair<std::function<feature_func_t>, feature_type>> m_callbacks;
 
@@ -29,7 +30,7 @@ public:
 		: m_setting(setting), m_keybind(keybind)
 	{}
 
-	void run(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&, feature_type type);
+	void run(JNIEnv* jni, const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&, feature_type type);
 
 	virtual void on_enable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) = 0;
 	virtual void on_disable(const std::shared_ptr<c_game>&, const std::shared_ptr<c_player>&, const std::shared_ptr<c_world>&) = 0;

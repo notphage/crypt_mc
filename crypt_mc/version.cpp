@@ -1,5 +1,11 @@
 #include "context.h"
 #include "MinHook.h"
+#include "math.h"
+
+// GLM
+#include "glm/glm.hpp"
+#include "glm/ext/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale
+#include "glm/gtc/matrix_transform.hpp"
 
 // SDK include
 #include "sdk_1.7.10.h"
@@ -102,6 +108,8 @@ void c_context::load()
 		hooked::o_wnd_proc = reinterpret_cast<decltype(&hooked::wnd_proc)>(SetWindowLongPtrA(ctx.m_window, -4, (long long)hooked::wnd_proc));
 	}
 
+	static bool test_value = true;
+
 	ctx.m_features.emplace_back(std::make_unique<c_aim_assist>(&ctx.m_settings.combat_aim_assist, &ctx.m_settings.combat_aim_assist_key));
 	ctx.m_features.emplace_back(std::make_unique<c_anti_afk>(&ctx.m_settings.player_anti_afk));
 	ctx.m_features.emplace_back(std::make_unique<c_auto_clicker>(&ctx.m_settings.combat_auto_clicker, &ctx.m_settings.combat_auto_clicker_key));
@@ -122,6 +130,7 @@ void c_context::load()
 	ctx.m_features.emplace_back(std::make_unique<c_positive_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_negative_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_negative_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));
+	ctx.m_features.emplace_back(std::make_unique<c_visuals>(&test_value));
 }
 
 void c_context::unload()
@@ -281,5 +290,30 @@ std::shared_ptr<c_game> c_context::get_game(JNIEnv* _jni)
 	ptr->instantiate(_jni);
 
 	return ptr;
+}
+
+bool c_context::screen_transform(const vec3& world, vec2& screen)
+{
+	screen.x = ctx.m_world_to_screen_matrix[0][0] * world[0] + ctx.m_world_to_screen_matrix[1][0] * world[1] + ctx.m_world_to_screen_matrix[2][0] * world[2] + ctx.m_world_to_screen_matrix[3][0];
+	screen.y = ctx.m_world_to_screen_matrix[0][1] * world[0] + ctx.m_world_to_screen_matrix[1][1] * world[1] + ctx.m_world_to_screen_matrix[2][1] * world[2] + ctx.m_world_to_screen_matrix[3][1];
+	float w  = ctx.m_world_to_screen_matrix[0][3] * world[0] + ctx.m_world_to_screen_matrix[1][3] * world[1] + ctx.m_world_to_screen_matrix[2][3] * world[2] + ctx.m_world_to_screen_matrix[3][3];
+
+	bool behind = false;
+
+	if (w < 0.001f)
+	{
+		behind = true;
+		screen.x *= 100000;
+		screen.y *= 100000;
+	}
+	else
+	{
+		behind = false;
+		float invw = 1.0f / w;
+		screen.x *= invw;
+		screen.y *= invw;
+	}
+
+	return behind;
 }
 

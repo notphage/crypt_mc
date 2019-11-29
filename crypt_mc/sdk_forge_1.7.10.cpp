@@ -56,8 +56,13 @@ struct player_fields
 	jfieldID fid_move_strafing = nullptr;
 	jfieldID fid_move_forward = nullptr;
 	jfieldID fid_pitch = nullptr;
+	jfieldID fid_prev_pitch = nullptr;
 	jfieldID fid_yaw = nullptr;
 	jfieldID fid_prev_yaw = nullptr;
+	jfieldID fid_camera_pitch = nullptr;
+	jfieldID fid_prev_camera_pitch = nullptr;
+	jfieldID fid_camera_yaw = nullptr;
+	jfieldID fid_prev_camera_yaw = nullptr;
 	jfieldID fid_width = nullptr;
 	jfieldID fid_height = nullptr;
 	jfieldID fid_move_speed = nullptr;
@@ -74,6 +79,8 @@ struct player_fields
 	jfieldID fid_aabb_max_y = nullptr;
 	jfieldID fid_aabb_max_z = nullptr;
 	jfieldID fid_ticks_existed = nullptr;
+	jfieldID fid_distance_walked = nullptr;
+	jfieldID fid_prev_distance_walked = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -202,6 +209,7 @@ struct game_fields
 	jmethodID mid_get_height = nullptr;
 	jmethodID mid_ordinal = nullptr;
 	jmethodID mid_set_key_bind_state = nullptr;
+	jmethodID mid_get_fov = nullptr;
 
 	jobject obj_game = nullptr;
 	jobject obj_world = nullptr;
@@ -408,8 +416,15 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_move_strafing = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70702_br"), xors("F"));
 		playerfields.fid_move_forward = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70701_bs"), xors("F"));
 		playerfields.fid_pitch = jni->GetFieldID(playerfields.entity_class, xors("field_70125_A"), xors("F"));
+		playerfields.fid_prev_pitch = jni->GetFieldID(playerfields.entity_class, xors("field_70127_C"), xors("F"));
 		playerfields.fid_yaw = jni->GetFieldID(playerfields.entity_class, xors("field_70177_z"), xors("F"));
 		playerfields.fid_prev_yaw = jni->GetFieldID(playerfields.entity_class, xors("field_70126_B"), xors("F"));
+
+		playerfields.fid_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70726_aT"), xors("F"));
+		playerfields.fid_prev_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70727_aS"), xors("F"));
+		playerfields.fid_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("field_71109_bG"), xors("F"));
+		playerfields.fid_prev_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("field_71107_bF"), xors("F"));
+
 		playerfields.fid_width = jni->GetFieldID(playerfields.entity_class, xors("field_70130_N"), xors("F"));
 		playerfields.fid_height = jni->GetFieldID(playerfields.entity_class, xors("field_70131_O"), xors("F"));
 		playerfields.fid_move_speed = jni->GetStaticFieldID(playerfields.cls_potion, xors("field_76424_c"), xors("Lnet/minecraft/potion/Potion;"));
@@ -426,6 +441,8 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_aabb_max_y = jni->GetFieldID(playerfields.cls_aabb, xors("field_72337_e"), xors("D"));
 		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("field_72334_f"), xors("D"));
 		playerfields.fid_ticks_existed = jni->GetFieldID(playerfields.entity_player_class, xors("field_70173_aa"), xors("I"));
+		playerfields.fid_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("field_70140_Q"), xors("F"));
+		playerfields.fid_prev_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("field_70141_P"), xors("F"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70660_b"), xors("(Lnet/minecraft/potion/Potion;)Lnet/minecraft/potion/PotionEffect;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76458_c"), xors("()I"));
@@ -494,7 +511,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 	}
 }
 
-bool c_player_forge_1710::is_same(std::shared_ptr<c_player> other)
+bool c_player_forge_1710::is_same(const std::shared_ptr<c_player>& other)
 {
 	return jni->IsSameObject(player_instance, other->player_instance);
 }
@@ -595,9 +612,39 @@ jfloat c_player_forge_1710::get_pitch()
 	return jni->GetFloatField(player_instance, playerfields.fid_pitch);
 }
 
+jfloat c_player_forge_1710::get_prev_pitch()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_pitch);
+}
+
 jfloat c_player_forge_1710::get_yaw()
 {
 	return jni->GetFloatField(player_instance, playerfields.fid_yaw);
+}
+
+jfloat c_player_forge_1710::get_prev_yaw()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_yaw);
+}
+
+jfloat c_player_forge_1710::get_camera_pitch()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_camera_pitch);
+}
+
+jfloat c_player_forge_1710::get_prev_camera_pitch()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_camera_pitch);
+}
+
+jfloat c_player_forge_1710::get_camera_yaw()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_camera_yaw);
+}
+
+jfloat c_player_forge_1710::get_prev_camera_yaw()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_camera_yaw);
 }
 
 jfloat c_player_forge_1710::get_strafing()
@@ -791,6 +838,16 @@ jdouble c_player_forge_1710::old_origin_y()
 jdouble c_player_forge_1710::old_origin_z()
 {
 	return jni->GetDoubleField(player_instance, playerfields.fid_old_zorigin);
+}
+
+jfloat c_player_forge_1710::get_distance_walked()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_distance_walked);
+}
+
+jfloat c_player_forge_1710::get_prev_distance_walked()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_distance_walked);
 }
 
 jboolean c_player_forge_1710::is_dead()
@@ -1012,6 +1069,7 @@ void c_game_forge_1710::instantiate(JNIEnv* _jni)
 		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
 		gamefields.mid_set_key_bind_state = jni->GetStaticMethodID(gamefields.cls_keybinding, xors("func_74510_a"), xors("(IZ)V"));
 		gamefields.mid_get_key_code = jni->GetMethodID(gamefields.cls_keybinding, xors("func_151463_i"), xors("()I"));
+		gamefields.mid_get_fov = jni->GetMethodID(gamefields.entity_renderer_class, xors("func_78481_a"), xors("(FZ)F"));
 
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
 		gamefields.obj_world = jni->NewGlobalRef(jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world));
@@ -1173,6 +1231,11 @@ jint c_game_forge_1710::draw_string_with_shadow(jstring par1, jint par2, jint pa
 jfloat c_game_forge_1710::get_gamma()
 {
 	return jni->GetFloatField(gamefields.obj_settings, gamefields.fid_gamma);
+}
+
+jfloat c_game_forge_1710::get_fov(jfloat partial_render_ticks)
+{
+	return jni->CallFloatMethod(gamefields.obj_entity_renderer, gamefields.mid_get_fov, partial_render_ticks, true);
 }
 
 jobject c_game_forge_1710::get_mouse_over()

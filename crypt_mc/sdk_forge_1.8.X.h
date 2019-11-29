@@ -20,13 +20,21 @@ class c_player_forge_18X : public c_player
 public:
 	void instantiate(jobject, JNIEnv*) override;
 
-	bool is_same(std::shared_ptr<c_player>) override;
+	bool is_same(const std::shared_ptr<c_player>&) override;
 	jboolean is_invisible() override;
 	jboolean is_sneaking() override;
 	jboolean is_potion_active(jint) override;
 
 	jfloat get_pitch() override;
+	jfloat get_prev_pitch() override;
 	jfloat get_yaw() override;
+	jfloat get_prev_yaw() override;
+
+	jfloat get_camera_pitch() override;
+	jfloat get_prev_camera_pitch() override;
+	jfloat get_camera_yaw() override;
+	jfloat get_prev_camera_yaw() override;
+
 	jfloat get_strafing() override;
 	jfloat get_forward() override;
 	jobject get_held_item() override;
@@ -58,6 +66,9 @@ public:
 	jdouble old_origin_x() override;
 	jdouble old_origin_y() override;
 	jdouble old_origin_z() override;
+
+	jfloat get_distance_walked() override;
+	jfloat get_prev_distance_walked() override;
 
 	jboolean is_dead() override;
 	jboolean is_collided_vertically() override;
@@ -148,6 +159,7 @@ public:
 	jint draw_string_with_shadow(jstring, jint, jint, jint) override;
 	jint get_sneak_key_code() override;
 	jfloat get_gamma() override;
+	jfloat get_fov(jfloat) override;
 
 	void set_gamma(jfloat) override;
 	void enable_light_map() override;

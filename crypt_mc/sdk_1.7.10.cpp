@@ -59,8 +59,13 @@ struct player_fields
 	jfieldID fid_move_strafing = nullptr;
 	jfieldID fid_move_forward = nullptr;
 	jfieldID fid_pitch = nullptr;
+	jfieldID fid_prev_pitch = nullptr;
 	jfieldID fid_yaw = nullptr;
 	jfieldID fid_prev_yaw = nullptr;
+	jfieldID fid_camera_pitch = nullptr;
+	jfieldID fid_prev_camera_pitch = nullptr;
+	jfieldID fid_camera_yaw = nullptr;
+	jfieldID fid_prev_camera_yaw = nullptr;
 	jfieldID fid_width = nullptr;
 	jfieldID fid_height = nullptr;
 	jfieldID fid_move_speed = nullptr;
@@ -77,6 +82,8 @@ struct player_fields
 	jfieldID fid_aabb_max_y = nullptr;
 	jfieldID fid_aabb_max_z = nullptr;
 	jfieldID fid_ticks_existed = nullptr;
+	jfieldID fid_distance_walked = nullptr;
+	jfieldID fid_prev_distance_walked = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -205,6 +212,7 @@ struct game_fields
 	jmethodID mid_get_width = nullptr;
 	jmethodID mid_get_height = nullptr;
 	jmethodID mid_set_key_bind_state = nullptr;
+	jmethodID mid_get_fov = nullptr;
 
 	jobject obj_game = nullptr;
 	jobject obj_render_manager = nullptr;
@@ -420,6 +428,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_move_strafing = jni->GetFieldID(playerfields.cls_entity_living_base, xors("bd"), xors("F"));
 		playerfields.fid_move_forward = jni->GetFieldID(playerfields.cls_entity_living_base, xors("be"), xors("F"));
 		playerfields.fid_pitch = jni->GetFieldID(playerfields.entity_class, xors("z"), xors("F"));
+		playerfields.fid_prev_pitch = jni->GetFieldID(playerfields.entity_class, xors("B"), xors("F"));
 		playerfields.fid_yaw = jni->GetFieldID(playerfields.entity_class, xors("y"), xors("F"));
 		playerfields.fid_prev_yaw = jni->GetFieldID(playerfields.entity_class, xors("A"), xors("F"));
 		playerfields.fid_width = jni->GetFieldID(playerfields.entity_class, xors("M"), xors("F"));
@@ -438,6 +447,13 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_aabb_max_y = jni->GetFieldID(playerfields.cls_aabb, xors("e"), xors("D"));
 		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("f"), xors("D"));
 		playerfields.fid_ticks_existed = jni->GetFieldID(playerfields.entity_player_class, xors("aa"), xors("I"));
+		playerfields.fid_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("P"), xors("F"));
+		playerfields.fid_prev_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("O"), xors("F"));
+
+		playerfields.fid_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aJ"), xors("F"));
+		playerfields.fid_prev_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aI"), xors("F"));
+		playerfields.fid_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("bs"), xors("F"));
+		playerfields.fid_prev_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("br"), xors("F"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("b"), xors("(Lrv;)Lrw;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("c"), xors("()I"));
@@ -506,7 +522,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 	}
 }
 
-bool c_player_1710::is_same(std::shared_ptr<c_player> other)
+bool c_player_1710::is_same(const std::shared_ptr<c_player>& other)
 {
 	return jni->IsSameObject(player_instance, other->player_instance);
 }
@@ -605,9 +621,39 @@ jfloat c_player_1710::get_pitch()
 	return jni->GetFloatField(player_instance, playerfields.fid_pitch);
 }
 
+jfloat c_player_1710::get_prev_pitch()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_pitch);
+}
+
 jfloat c_player_1710::get_yaw()
 {
 	return jni->GetFloatField(player_instance, playerfields.fid_yaw);
+}
+
+jfloat c_player_1710::get_prev_yaw()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_yaw);
+}
+
+jfloat c_player_1710::get_camera_pitch()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_camera_pitch);
+}
+
+jfloat c_player_1710::get_prev_camera_pitch()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_camera_pitch);
+}
+
+jfloat c_player_1710::get_camera_yaw()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_camera_yaw);
+}
+
+jfloat c_player_1710::get_prev_camera_yaw()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_camera_yaw);
 }
 
 jfloat c_player_1710::get_strafing()
@@ -801,6 +847,16 @@ jdouble c_player_1710::old_origin_y()
 jdouble c_player_1710::old_origin_z()
 {
 	return jni->GetDoubleField(player_instance, playerfields.fid_old_zorigin);
+}
+
+jfloat c_player_1710::get_distance_walked()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_distance_walked);
+}
+
+jfloat c_player_1710::get_prev_distance_walked()
+{
+	return jni->GetFloatField(player_instance, playerfields.fid_prev_distance_walked);
 }
 
 jboolean c_player_1710::is_dead()
@@ -1021,6 +1077,7 @@ void c_game_1710::instantiate(JNIEnv* _jni)
 		gamefields.mid_set_mouse_grabbed = jni->GetStaticMethodID(gamefields.cls_lwjgl_mouse, xors("setGrabbed"), xors("(Z)V"));
 		gamefields.mid_set_key_bind_state = jni->GetStaticMethodID(gamefields.cls_keybinding, xors("a"), xors("(IZ)V"));
 		gamefields.mid_get_key_code = jni->GetMethodID(gamefields.cls_keybinding, xors("i"), xors("()I"));
+		gamefields.mid_get_fov = jni->GetMethodID(gamefields.entity_renderer_class, xors("a"), xors("(FZ)F"));
 
 		gamefields.obj_game = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_minecraft));
 		gamefields.obj_render_manager = jni->NewGlobalRef(jni->GetStaticObjectField(gamefields.minecraft, gamefields.fid_render_manager_obj));
@@ -1188,6 +1245,11 @@ jint c_game_1710::draw_string_with_shadow(jstring par1, jint par2, jint par3, ji
 jfloat c_game_1710::get_gamma()
 {
 	return jni->GetFloatField(gamefields.obj_settings, gamefields.fid_gamma);
+}
+
+jfloat c_game_1710::get_fov(jfloat partial_render_ticks)
+{
+	return jni->CallFloatMethod(gamefields.obj_entity_renderer, gamefields.mid_get_fov, partial_render_ticks, true);
 }
 
 jobject c_game_1710::get_net_handler()

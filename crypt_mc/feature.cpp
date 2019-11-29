@@ -1,8 +1,13 @@
 #include "context.h"
 #include "feature.h"
 
-void c_feature::run(const std::shared_ptr<c_game>& game, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world, feature_type type)
+void c_feature::run(JNIEnv* jni, const std::shared_ptr<c_game>& game, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world, feature_type type)
 {
+	if (jni == nullptr)
+		return;
+
+	m_jni = jni;
+
 	if (*m_setting && (m_keybind == nullptr || (g_input.is_key_pressed(*m_keybind) && (m_keybind->key > KEYS_NONE || m_keybind->type == kt_always))))
 	{
 		if (!m_enabled)
@@ -23,6 +28,8 @@ void c_feature::run(const std::shared_ptr<c_game>& game, const std::shared_ptr<c
 		on_disable(game, self, world);
 		m_enabled = false;
 	}
+
+	m_jni = nullptr;
 }
 
 void c_feature::register_feature(std::function<feature_func_t> callback, feature_type type)

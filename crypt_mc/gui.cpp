@@ -77,10 +77,10 @@ void c_gui::tab_combat()
 				auto_clicker_jitter_intensity.handle(menu.data(), xors("intensity"), &ctx.m_settings.combat_auto_clicker_jitter_intensity, 0.01f, 1.0f, 0.01f);
 			}
 
-			if (ctx.m_settings.combat_auto_clicker_auto_block)
-			{
-				auto_clicker_block_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_auto_clicker_block_delay, 1, 1000, 1, xors("ms"));
-			}
+			//if (ctx.m_settings.combat_auto_clicker_auto_block)
+			//{
+			//	auto_clicker_block_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.combat_auto_clicker_block_delay, 1, 1000, 1, xors("ms"));
+			//}
 		
 			auto_clicker_conditions.handle(menu.data(), xors("conditions"),
 				{
@@ -232,7 +232,7 @@ void c_gui::tab_player()
 					{&ctx.m_settings.player_throwdebuff_weakness, xors("weakness")},
 				});
 
-			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 50, 200, 1, xors("ms"));
+			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 75, 250, 1, xors("ms"));
 		}
 		throw_groupbox.end(menu.data(), &ctx.m_settings.player_throw);
 
@@ -278,11 +278,44 @@ void c_gui::tab_player()
 
 void c_gui::tab_visuals()
 {
+	static UI::c_enable_groupbox box_groupbox;
+	static UI::c_dropdown box_mode;
+	static UI::c_color_picker box_color;
+	static UI::c_multi_dropdown box_conditions;
+	static UI::c_multi_dropdown box_options;
+	static UI::c_color_picker box_filled_color;
+	static UI::c_color_picker snaplines_color;
+
 	static UI::c_groupbox fullbright_groupbox;
 	static UI::c_checkbox fullbright_checkbox;
 	static UI::c_key_bind fullbright_key;
+
 	menu.column_left();
 	{
+		box_groupbox.start(menu.data(), xors("box"));
+		{
+			box_mode.handle(menu.data(), xors("mode"), { xors("2d"), xors("corner") }, &ctx.m_settings.visuals_esp_box_mode);
+			box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr(), ctx.m_settings.visuals_esp_box_color().a_ptr());
+			box_conditions.handle(menu.data(), xors("conditions"), {
+				{&ctx.m_settings.visuals_esp_invisible, xors("invisible")},
+				{&ctx.m_settings.visuals_esp_bots, xors("bots")}
+			});
+
+			box_options.handle(menu.data(), xors("options"), {
+				{&ctx.m_settings.visuals_esp_names, xors("name")},
+				{&ctx.m_settings.visuals_esp_healthbar, xors("healthbar")},
+				{&ctx.m_settings.visuals_esp_box_filled, xors("filled")},
+				//{&ctx.m_settings.visuals_esp_snap_lines, xors("snaplines")}
+			});
+			
+			if (ctx.m_settings.visuals_esp_box_filled)
+				box_filled_color.handle(menu.data(), xors("filled color"), ctx.m_settings.visuals_esp_box_filled_color().r_ptr(), ctx.m_settings.visuals_esp_box_filled_color().g_ptr(), ctx.m_settings.visuals_esp_box_filled_color().b_ptr(), ctx.m_settings.visuals_esp_box_filled_color().a_ptr());
+			
+			if (ctx.m_settings.visuals_esp_snap_lines)
+				snaplines_color.handle(menu.data(), xors("snapline color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().a_ptr());
+		}
+		box_groupbox.end(menu.data(), &ctx.m_settings.visuals_esp_box);
+
 		fullbright_groupbox.start(menu.data(), xors("fullbright"));
 		{
 			fullbright_checkbox.handle(menu.data(), xors("enable"), &ctx.m_settings.visuals_fullbright);
@@ -292,55 +325,20 @@ void c_gui::tab_visuals()
 		}
 		fullbright_groupbox.end(menu.data());
 
+		box_mode.dropdown(menu.data());
+		box_conditions.dropdown(menu.data());
+		box_options.dropdown(menu.data());
 		fullbright_key.dropdown(menu.data());
 	}
-	//static UI::c_groupbox box_groupbox;
-	//static UI::c_dropdown box;
-	//static UI::c_color_picker box_color;
-	//static UI::c_slider box_color_alpha;
-	//static UI::c_checkbox box_filled;
-	//static UI::c_color_picker box_outline_color;
-	//static UI::c_slider box_outline_color_alpha;
-	//static UI::c_checkbox snap_lines;
-	//static UI::c_color_picker snap_lines_color;
-	//static UI::c_slider snap_lines_color_alpha;
-	//
-	//static UI::c_checkbox name_tags;
-	//
-	//menu.column_left();
-	//{
-	//	box_groupbox.start(menu.data(), xors("box"));
-	//	{
-	//		box.handle(menu.data(), xors("mode"), { xors("none"), xors("2d"), xors("3d") }, &ctx.m_settings.visuals_esp_box);
-	//		box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr());
-	//		box_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_box_color().a_ptr()), 0, 255, 1);
-	//		box_filled.handle(menu.data(), xors("filled"), &ctx.m_settings.visuals_esp_box_filled);
-	//		snap_lines.handle(menu.data(), xors("snap lines"), &ctx.m_settings.visuals_esp_snap_lines);
-	//
-	//		if (ctx.m_settings.visuals_esp_box_filled)
-	//		{
-	//			box_outline_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_outline_color().r_ptr(), ctx.m_settings.visuals_esp_box_outline_color().g_ptr(), ctx.m_settings.visuals_esp_box_outline_color().b_ptr());
-	//			box_outline_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_box_outline_color().a_ptr()), 0, 255, 1);
-	//		}
-	//
-	//		if (ctx.m_settings.visuals_esp_snap_lines)
-	//		{
-	//			snap_lines_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr());
-	//			snap_lines_color_alpha.handle(menu.data(), "", reinterpret_cast<int*>(ctx.m_settings.visuals_esp_snap_lines_color().a_ptr()), 0, 255, 1);
-	//		}
-	//	}
-	//	box_groupbox.end(menu.data());
-	//
-	//	box.dropdown(menu.data());
-	//}
-	//
-	//menu.column_right();
-	//{
-	//	name_tags.handle(menu.data(), xors("nametags"), &ctx.m_settings.visuals_esp_nametags);
-	//}
-	//
-	//box_color.picker(menu.data());
-	//box_outline_color.picker(menu.data());
+
+	menu.column_right();
+	{
+
+	}
+
+	box_color.picker(menu.data());
+	box_filled_color.picker(menu.data());
+	snaplines_color.picker(menu.data());
 }
 
 void c_gui::tab_movement()
@@ -386,8 +384,6 @@ void c_gui::tab_movement()
 	static UI::c_float_slider flight_glide_speed;
 	static UI::c_multi_dropdown flight_options;
 
-
-
 	menu.column_left();
 	{
 		flight_groupbox.start(menu.data(), xors("flight"));
@@ -401,7 +397,6 @@ void c_gui::tab_movement()
 			{
 				flight_hspeed.handle(menu.data(), xors("horizontal speed"), &ctx.m_settings.movement_flight_hspeed, 0.f, 1.f, 0.01f);
 				flight_vspeed.handle(menu.data(), xors("vertical speed"), &ctx.m_settings.movement_flight_vspeed, 0.f, 1.f, 0.01f);
-
 			}
 			
 			if (ctx.m_settings.movement_flight_glide)

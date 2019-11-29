@@ -2,8 +2,6 @@
 
 class c_velocity : public c_feature
 {
-
-
 public:
 	c_velocity(bool* setting, keysetting_t* keybind = nullptr)
 		: c_feature(setting, keybind)

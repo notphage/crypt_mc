@@ -36,6 +36,7 @@ typedef HWND hwnd_t;
 #include "input.h"
 #include "settings.h"
 #include "client.h"
+#include "glm/glm.hpp"
 
 enum MC_VERSION
 {
@@ -78,6 +79,10 @@ public:
 	std::atomic_bool m_ingame = false;
 	std::atomic_bool m_in_chat = false;
 
+	glm::f64mat4x4 m_projection_matrix{};
+	glm::f64mat4x4 m_view_matrix{};
+	glm::f64mat4x4 m_world_to_screen_matrix{};
+
 	std::atomic<client_flavor> m_client_flavor = VANILLA;
 
 public:
@@ -86,6 +91,25 @@ public:
 
 	std::shared_ptr<c_class_loader> get_class_loader(JNIEnv*);
 	std::shared_ptr<c_game> get_game(JNIEnv*);
+
+	bool screen_transform(const vec3& world, vec2& screen);
+
+	bool w2s(const vec3& world, vec2& screen)
+	{
+		if (!screen_transform(world, screen))
+		{
+			float x = (float)m_screen_w / 2.f;
+			float y = (float)m_screen_h / 2.f;
+			x += 0.5f * screen.x * (float)m_screen_w + 0.5f;
+			y -= 0.5f * screen.y * (float)m_screen_h + 0.5f;
+			screen.x = x;
+			screen.y = y;
+
+			return true;
+		}
+
+		return false;
+	}
 };
 
 extern c_context ctx;

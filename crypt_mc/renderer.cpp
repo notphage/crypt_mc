@@ -42,6 +42,12 @@ void c_renderer::draw_begin()
 	m_last_enable_depth_test = LI_FN(glIsEnabled).cached()(GL_DEPTH_TEST);
 	m_last_enable_scissor_test = LI_FN(glIsEnabled).cached()(GL_SCISSOR_TEST);
 
+	//LI_FN(glEnable).cached()(GL_POINT_SMOOTH);
+	//LI_FN(glEnable).cached()(GL_LINE_SMOOTH);
+	//LI_FN(glEnable).cached()(GL_POLYGON_SMOOTH);
+	//LI_FN(glHint).cached()(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	//LI_FN(glHint).cached()(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	//LI_FN(glHint).cached()(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	LI_FN(glEnable).cached()(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	LI_FN(glBlendFunc).cached()(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

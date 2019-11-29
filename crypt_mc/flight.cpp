@@ -25,6 +25,7 @@ void c_flight::on_get_time(const std::shared_ptr<c_game>& mc, const std::shared_
 
 			if (self->is_on_ground())
 				return;
+
 			count++;
 
 			mc->set_timer_speed(self->get_ticks_existed() % 15 == 0 ? 1.9F : 1.7F);
@@ -40,10 +41,10 @@ void c_flight::on_get_time(const std::shared_ptr<c_game>& mc, const std::shared_
 
 		case 1:
 		{
-			self->set_motion_y(-0.005);
 
 			if (self->get_ticks_existed() % 2 == 0)
 				self->set_motion_y(0);
+
 			break;
 		}
 

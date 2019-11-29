@@ -202,7 +202,6 @@ void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::share
 		self->set_pitch(pitch + util::convert_legit_value(step, random_v, util::random(1, 3)));
 }
 
-
 float c_aim_assist::limit_angle(float change, float speed)
 {
 	if (change == 0.0f)

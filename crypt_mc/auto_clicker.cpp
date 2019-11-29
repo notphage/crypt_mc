@@ -28,7 +28,10 @@ bool auto_block = false;
 void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	if (ctx.m_menu_open)
+	{
+		reset();
 		return;
+	}
 
 	if (m_current_delay == 0 || m_last_click == 0)
 		reset();
@@ -114,22 +117,22 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 		{
 			float sens = mc->get_mouse_sensitivity() * 0.6f + 0.2f;
 			float step = pow(sens, 3) * 8.0f;
-		
+
 			auto random_h = util::random(-((float)ctx.m_settings.combat_auto_clicker_jitter_intensity), (float)ctx.m_settings.combat_auto_clicker_jitter_intensity);
 			auto random_v = util::random(-((float)ctx.m_settings.combat_auto_clicker_jitter_intensity), (float)ctx.m_settings.combat_auto_clicker_jitter_intensity);
-		
+
 			self->set_yaw(self->get_yaw() + util::convert_legit_value(step, random_h, util::random(1, 3)));
 			self->set_pitch(self->get_pitch() + util::convert_legit_value(step, random_v, util::random(1, 3)));
 		}
-		
+
 		if (in_inventory)
 		{
 			bool ret = true;
-		
+
 			for (auto i = 36; i < 45; ++i)
 				if (!self->get_stack(i))
 					ret = false;
-		
+
 			if (ret)
 			{
 				reset();
@@ -140,7 +143,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 
 		if (ctx.m_settings.combat_auto_clicker_auto_block && auto_block)
 		{
-			if (m_right_click) 
+			if (m_right_click)
 			{
 				g_input.press_mouse(false);
 
@@ -159,7 +162,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 			}
 
 		}
-		else 
+		else
 		{
 			if (m_left_click && ((GetTickCount64() - m_last_click) > m_current_delay * m_multiplier))
 			{
@@ -196,18 +199,64 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 	m_last_click = GetTickCount64();
 }
 
+int random_reset = 0;
+
 void c_auto_clicker::reset()
 {
-	auto chance_one = util::random(0, 50);
-	auto chance_two = util::random(0, 50);
-	auto chance_final = chance_one + chance_two;
+	if (random_reset == 0)
+		random_reset = util::random(800, 1500);
 
-	auto tick = util::random(0, 100) < 50 ? chance_one < 25 ? (int) (std::ceil((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f)) : (int) (std::floor((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f)) : chance_two < 25 ? (int)(std::ceil((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f)) : (int)(std::floor((1000.f / ctx.m_settings.combat_auto_clicker_cps) / 50.f));
-	auto final_tick = chance_final < std::clamp((17 - (int) (ctx.m_settings.combat_auto_clicker_cps * 0.75f)), 5, 17) ? tick - 1 : chance_final > std::clamp((83 + (int) (ctx.m_settings.combat_auto_clicker_cps * 0.75f)), 83, 95) ? tick + 1 : tick;
+	if (m_clicks < 100)
+	{
+		set_delay(util::random(25, 35), util::random(45, 75));
+	}
+	else if (m_clicks < 300)
+	{
+		set_delay(util::random(25, 45), util::random(45, 60));
+	}
+	else if (m_clicks < 500)
+	{
+		set_delay(util::random(35, 55), util::random(50, 55));
+	}
+	else if (m_clicks < 750)
+	{
+		set_delay(util::random(25, 60), util::random(63, 66));
+	}
+	else if (m_clicks < 1000)
+	{
+		set_delay(util::random(50, 70), util::random(73, 76));
+	}
+	else if (m_clicks < 1150)
+	{
+		set_delay(util::random(30, 50), util::random(50, 60));
+	}
+	else if (m_clicks < 1300)
+	{
+		set_delay(util::random(30, 45), util::random(55, 60));
+	}
+	else if (m_clicks <= 1500)
+	{
+		set_delay(util::random(25, 35), util::random(35, 45));
+	}
+
+	if (m_clicks >= random_reset)
+	{
+		random_reset = util::random(800, 1500);
+		m_clicks = 0;
+	}
+
+	m_left_click = true;
+	m_last_click = GetTickCount64();
+}
+
+void c_auto_clicker::set_delay(int slow_chance, int fast_chance)
+{
+	auto random = util::random(0, 50) + util::random(0, 50);
+	auto base_random = util::random(0, 100);
 
 	if (m_clicks_skip > m_clicks_until_skip)
 	{
-		set_tick_delay(std::clamp(final_tick + util::random(2, 4), 4, 10));
+		m_current_delay = util::random(200, 300);
 
 		m_skip_click_count++;
 
@@ -215,24 +264,23 @@ void c_auto_clicker::reset()
 		{
 			m_clicks_skip = 0;
 			m_skip_click_count = 0;
-			m_clicks_until_skip = util::random(35, 60);
-			m_skip_click_amt = util::random(1, 3);
+			m_clicks_until_skip = util::random(30, 50);
+			m_skip_click_amt = util::random(1, 2);
 		}
+
+		return;
 	}
-	else 
+
+	if (random <= slow_chance)
 	{
-		set_tick_delay(std::clamp(final_tick, 0, 10));
+		m_current_delay = util::random(1100.f + (base_random / 2), 1300.f + base_random) / ctx.m_settings.combat_auto_clicker_cps;
 	}
-
-	m_left_click = true;
-	m_last_click = GetTickCount64();
-}
-
-void c_auto_clicker::set_tick_delay(int tick)
-{
-	if (tick > 0)
-		m_current_delay = tick * util::random(50, 60);
+	else if (random <= fast_chance)
+	{
+		m_current_delay = util::random(650.0f + base_random, 850.f + base_random) / ctx.m_settings.combat_auto_clicker_cps;
+	}
 	else
-		m_current_delay = util::random(0, 50);
+	{
+		m_current_delay = util::random(900.f - base_random, 1100.f + base_random) / ctx.m_settings.combat_auto_clicker_cps;
+	}
 }
-

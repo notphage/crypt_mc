@@ -145,6 +145,10 @@ enum keytype_t
 
 struct keysetting_t
 {
+	keysetting_t(int _key = KEYS_NONE, int _type = kt_always)
+		: key(_key), type(_type)
+	{ }
+
 	int key;
 	int type;
 };

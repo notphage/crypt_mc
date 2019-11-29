@@ -263,51 +263,51 @@ public:
 
 
 	//Combat features
-	setting_t<bool> combat_auto_clicker{&m_holder, fnvc("combat_auto_clicker"), false};
-	setting_t<keysetting_t> combat_auto_clicker_key{&m_holder, fnvc("combat_auto_clicker_key"), {}};
-	setting_t<int> combat_auto_clicker_cps{&m_holder, fnvc("combat_auto_clicker_cps"), 11};
+	setting_t<bool> combat_auto_clicker{ &m_holder, fnvc("combat_auto_clicker"), false };
+	setting_t<keysetting_t> combat_auto_clicker_key{ &m_holder, fnvc("combat_auto_clicker_key"), {} };
+	setting_t<int> combat_auto_clicker_cps{ &m_holder, fnvc("combat_auto_clicker_cps"), 12 };
 	setting_t<int> combat_auto_clicker_jitter_chance{ &m_holder, fnvc("combat_auto_clicker_jitter_chance"), 10 };
-	setting_t<int> combat_auto_clicker_block_delay{ &m_holder, fnvc("combat_auto_clicker_block_delay"), 500 };
-	setting_t<float> combat_auto_clicker_jitter_intensity{ &m_holder, fnvc("combat_auto_clicker_jitter_intensity"), 0.2f };
-	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), true };
-	setting_t<bool> combat_auto_clicker_inventory{&m_holder, fnvc("combat_auto_clicker_inventory"), true};
-	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), false };
-	setting_t<bool> combat_auto_clicker_auto_block{&m_holder, fnvc("combat_auto_clicker_auto_block"), false};
-	setting_t<bool> combat_auto_clicker_jitter{ &m_holder, fnvc("combat_auto_clicker_jitter"), false }; 
+	setting_t<int> combat_auto_clicker_block_delay{ &m_holder, fnvc("combat_auto_clicker_block_delay"), 495 };
+	setting_t<float> combat_auto_clicker_jitter_intensity{ &m_holder, fnvc("combat_auto_clicker_jitter_intensity"), 0.1f };
+	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), false };
+	setting_t<bool> combat_auto_clicker_inventory{ &m_holder, fnvc("combat_auto_clicker_inventory"), true };
+	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), true };
+	setting_t<bool> combat_auto_clicker_auto_block{ &m_holder, fnvc("combat_auto_clicker_auto_block"), false };
+	setting_t<bool> combat_auto_clicker_jitter{ &m_holder, fnvc("combat_auto_clicker_jitter"), false };
 
-	setting_t<bool> combat_aim_assist{&m_holder, fnvc("combat_aim_assist"), false};
-	setting_t<keysetting_t> combat_aim_assist_key{&m_holder, fnvc("combat_aim_assist_key"), {}};
-	setting_t<bool> combat_aim_assist_item_whitelist{ &m_holder, fnvc("combat_aim_assist_item_whitelist"), true };
-	setting_t<int> combat_aim_assist_fov{&m_holder, fnvc("combat_aim_assist_fov"), 90};
-	setting_t<float> combat_aim_assist_h_speed{&m_holder, fnvc("combat_aim_assist_h_speed"), 2.f};
-	setting_t<float> combat_aim_assist_v_speed{&m_holder, fnvc("combat_aim_assist_v_speed"), 2.f};
+	setting_t<bool> combat_aim_assist{ &m_holder, fnvc("combat_aim_assist"), false };
+	setting_t<keysetting_t> combat_aim_assist_key{ &m_holder, fnvc("combat_aim_assist_key"), {} };
+	setting_t<bool> combat_aim_assist_item_whitelist{ &m_holder, fnvc("combat_aim_assist_item_whitelist"), false };
+	setting_t<int> combat_aim_assist_fov{ &m_holder, fnvc("combat_aim_assist_fov"), 70 };
+	setting_t<float> combat_aim_assist_h_speed{ &m_holder, fnvc("combat_aim_assist_h_speed"), 5.f };
+	setting_t<float> combat_aim_assist_v_speed{ &m_holder, fnvc("combat_aim_assist_v_speed"), 1.f };
 
-	setting_t<float> combat_aim_assist_distance{&m_holder, fnvc("combat_aim_assist_distance"), 4.5f};
+	setting_t<float> combat_aim_assist_distance{ &m_holder, fnvc("combat_aim_assist_distance"), 4.0f };
 	setting_t<bool> combat_aim_assist_sticky{ &m_holder, fnvc("combat_aim_assist_sticky"), true };
 	setting_t<bool> combat_aim_assist_visible_only{ &m_holder, fnvc("combat_aim_assist_visible_only"), true };
-	setting_t<bool> combat_aim_assist_break_blocks{ &m_holder, fnvc("combat_aim_assist_break_blocks"), true };
+	setting_t<bool> combat_aim_assist_break_blocks{ &m_holder, fnvc("combat_aim_assist_break_blocks"), false };
 	setting_t<bool> combat_aim_assist_vertical{ &m_holder, fnvc("combat_aim_assist_vertical"), true };
-	setting_t<bool> combat_aim_assist_require_click{&m_holder, fnvc("combat_aim_assist_require_click"), true};
+	setting_t<bool> combat_aim_assist_require_click{ &m_holder, fnvc("combat_aim_assist_require_click"), true };
 	setting_t<bool> combat_aim_assist_invisibles{ &m_holder, fnvc("combat_aim_assist_invisibles"), true };
-	setting_t<bool> combat_aim_assist_nakeds{&m_holder, fnvc("combat_aim_assist_nakeds"), true};
+	setting_t<bool> combat_aim_assist_nakeds{ &m_holder, fnvc("combat_aim_assist_nakeds"), true };
 	setting_t<bool> combat_aim_assist_multipoint{ &m_holder, fnvc("combat_aim_assist_multipoint"), true };
 
-	setting_t<bool> combat_velocity{&m_holder, fnvc("combat_velocity"), false};
-	setting_t<keysetting_t> combat_velocity_key{&m_holder, fnvc("combat_velocity_key"), {}};
+	setting_t<bool> combat_velocity{ &m_holder, fnvc("combat_velocity"), false };
+	setting_t<keysetting_t> combat_velocity_key{ &m_holder, fnvc("combat_velocity_key"), {} };
 	setting_t<bool> combat_velocity_on_sprint{ &m_holder, fnvc("combat_velocity_on_sprint"), true };
-	setting_t<bool> combat_velocity_weapons_only{ &m_holder, fnvc("combat_velocity_weapons_only"), true };
+	setting_t<bool> combat_velocity_weapons_only{ &m_holder, fnvc("combat_velocity_weapons_only"), false };
 	setting_t<bool> combat_velocity_delay{ &m_holder, fnvc("combat_velocity_delay"), true };
 	setting_t<bool> combat_velocity_require_click{ &m_holder, fnvc("combat_velocity_require_click"), true };
 	setting_t<bool> combat_velocity_require_target{ &m_holder, fnvc("combat_velocity_require_target"), true };
 	setting_t<bool> combat_velocity_kite{ &m_holder, fnvc("combat_velocity_kite"), true };
-	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 4 };
-	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 60 };
-	setting_t<int> combat_velocity_vertical{&m_holder, fnvc("combat_velocity_vertical"), 100};
-	setting_t<int> combat_velocity_horizontal{&m_holder, fnvc("combat_velocity_horizontal"), 90};
+	setting_t<int> combat_velocity_delay_ticks{ &m_holder, fnvc("combat_velocity_delay_ticks"), 1 };
+	setting_t<int> combat_velocity_chance{ &m_holder, fnvc("combat_velocity_chance"), 80 };
+	setting_t<int> combat_velocity_vertical{ &m_holder, fnvc("combat_velocity_vertical"), 100 };
+	setting_t<int> combat_velocity_horizontal{ &m_holder, fnvc("combat_velocity_horizontal"), 90 };
 	setting_t<int> combat_velocity_kite_val{ &m_holder, fnvc("combat_velocity_kite_val"), 150 };
 
-	setting_t<bool> combat_reach{&m_holder, fnvc("combat_reach"), false};
-	setting_t<keysetting_t> combat_reach_key{&m_holder, fnvc("combat_reach_key"), {}};
+	setting_t<bool> combat_reach{ &m_holder, fnvc("combat_reach"), false };
+	setting_t<keysetting_t> combat_reach_key{ &m_holder, fnvc("combat_reach_key"), {} };
 	setting_t<bool> combat_reach_on_sprint{ &m_holder, fnvc("combat_reach_on_sprint"), true };
 	setting_t<bool> combat_reach_visible{ &m_holder, fnvc("combat_reach_visible"), true };
 	setting_t<bool> combat_reach_disable_in_water{ &m_holder, fnvc("combat_reach_disable_in_water"), true };
@@ -329,29 +329,29 @@ public:
 
 	setting_t<keysetting_t> player_throwdebuff_key{ &m_holder, fnvc("player_throwdebuff_key"), {} };
 	setting_t<bool> player_throwdebuff_damage{ &m_holder, fnvc("player_throwdebuff_damage") };
-	setting_t<bool> player_throwdebuff_poison{ &m_holder, fnvc("player_throwdebuff_poison"), true};
+	setting_t<bool> player_throwdebuff_poison{ &m_holder, fnvc("player_throwdebuff_poison"), true };
 	setting_t<bool> player_throwdebuff_slow{ &m_holder, fnvc("player_throwdebuff_slow"), true };
 	setting_t<bool> player_throwdebuff_weakness{ &m_holder, fnvc("player_throwdebuff_weakness") };
 
-	setting_t<bool> player_fast_place{&m_holder, fnvc("player_fast_place"), false};
-	setting_t<keysetting_t> player_fast_place_key{&m_holder, fnvc("player_fast_place_key"), {}};
+	setting_t<bool> player_fast_place{ &m_holder, fnvc("player_fast_place"), false };
+	setting_t<keysetting_t> player_fast_place_key{ &m_holder, fnvc("player_fast_place_key"), {} };
 	setting_t<bool> player_fast_place_blocks{ &m_holder, fnvc("player_fast_place_blocks"), true };
 	setting_t<bool> player_fast_place_projectiles{ &m_holder, fnvc("player_fast_place_projectiles"), true };
-	setting_t<int> player_fast_place_block_delay{ &m_holder, fnvc("player_fast_place_block_delay"), 0 };
-	setting_t<int> player_fast_place_projectiles_delay{ &m_holder, fnvc("player_fast_place_projectiles_delay"), 2 };
+	setting_t<int> player_fast_place_block_delay{ &m_holder, fnvc("player_fast_place_block_delay"), 2 };
+	setting_t<int> player_fast_place_projectiles_delay{ &m_holder, fnvc("player_fast_place_projectiles_delay"), 3 };
 
 	setting_t<bool> player_anti_afk{ &m_holder, fnvc("player_anti_afk"), false };
-	setting_t<int> player_anti_afk_min_delay{ &m_holder, fnvc("player_anti_afk_min_delay"), 60 };
+	setting_t<int> player_anti_afk_min_delay{ &m_holder, fnvc("player_anti_afk_min_delay"), 100 };
 	setting_t<int> player_anti_afk_max_delay{ &m_holder, fnvc("player_anti_afk_max_delay"), 180 };
 
 	//Movement features
-    setting_t<bool> movement_air_control{ &m_holder, fnvc("movement_air_control"), false };
-    setting_t<keysetting_t> movement_air_control_key{ &m_holder, fnvc("movement_air_control_key"), {} };
+	setting_t<bool> movement_air_control{ &m_holder, fnvc("movement_air_control"), false };
+	setting_t<keysetting_t> movement_air_control_key{ &m_holder, fnvc("movement_air_control_key"), {} };
 	setting_t<float> movement_air_control_speed{ &m_holder, fnvc("movement_air_control_speed"), 0.2873f };
 
-    setting_t<bool> movement_step{ &m_holder, fnvc("movement_step"), false };
-    setting_t<keysetting_t> movement_step_key{ &m_holder, fnvc("movement_step_key"), {} };
-    setting_t<float> movement_step_height{ &m_holder, fnvc("movement_step_height"), 1.0f };
+	setting_t<bool> movement_step{ &m_holder, fnvc("movement_step"), false };
+	setting_t<keysetting_t> movement_step_key{ &m_holder, fnvc("movement_step_key"), {} };
+	setting_t<float> movement_step_height{ &m_holder, fnvc("movement_step_height"), 1.0f };
 
 	setting_t<bool> movement_fast_stop{ &m_holder, fnvc("movement_fast_stop"), false };
 	setting_t<keysetting_t> movement_fast_stop_key{ &m_holder, fnvc("movement_fast_stop_key"), {} };
@@ -359,22 +359,22 @@ public:
 	setting_t<bool> movement_safe_walk{ &m_holder, fnvc("movement_safe_walk"), false };
 	setting_t<keysetting_t>movement_safe_walk_key{ &m_holder, fnvc("movement_safe_walk_key"), {} };
 
-    setting_t<bool> movement_flight{ &m_holder, fnvc("movement_flight"), false };
-    setting_t<keysetting_t> movement_flight_key{ &m_holder, fnvc("movement_flight_key"), {} };
+	setting_t<bool> movement_flight{ &m_holder, fnvc("movement_flight"), false };
+	setting_t<keysetting_t> movement_flight_key{ &m_holder, fnvc("movement_flight_key"), {} };
 	setting_t<int> movement_flight_mode{ &m_holder, fnvc("movement_flight_mode"), 3 };
-    setting_t<bool> movement_flight_tight{ &m_holder, fnvc("movement_flight_tight"), true };
-    setting_t<bool> movement_flight_glide{ &m_holder, fnvc("movement_flight_glide"), false };
-    setting_t<float> movement_flight_hspeed{ &m_holder, fnvc("movement_flight_hspeed"), 0.4f };
-    setting_t<float> movement_flight_vspeed{ &m_holder, fnvc("movement_flight_vspeed"), 0.4f };
-    setting_t<float> movement_flight_glide_speed{ &m_holder, fnvc("movement_flight_glide_speed"), 0.08f };
+	setting_t<bool> movement_flight_tight{ &m_holder, fnvc("movement_flight_tight"), true };
+	setting_t<bool> movement_flight_glide{ &m_holder, fnvc("movement_flight_glide"), false };
+	setting_t<float> movement_flight_hspeed{ &m_holder, fnvc("movement_flight_hspeed"), 0.4f };
+	setting_t<float> movement_flight_vspeed{ &m_holder, fnvc("movement_flight_vspeed"), 0.2f };
+	setting_t<float> movement_flight_glide_speed{ &m_holder, fnvc("movement_flight_glide_speed"), 0.08f };
 
-    setting_t<bool> movement_sprint{ &m_holder, fnvc("movement_sprint"), false };
-    setting_t<keysetting_t> movement_sprint_key{ &m_holder, fnvc("movement_sprint_key"), {} };
+	setting_t<bool> movement_sprint{ &m_holder, fnvc("movement_sprint"), false };
+	setting_t<keysetting_t> movement_sprint_key{ &m_holder, fnvc("movement_sprint_key"), {} };
 
-	setting_t<bool> movement_speed{&m_holder, fnvc("movement_speed"), false};
-	setting_t<keysetting_t> movement_speed_key{&m_holder, fnvc("movement_speed_key"), {}};
-    setting_t<int> movement_speed_mode{ &m_holder, fnvc("movement_speed_mode"), 0 };
-	setting_t<bool> movement_speed_custom_jump_ground{ &m_holder, fnvc("movement_speed_custom_jump_ground"), true};
+	setting_t<bool> movement_speed{ &m_holder, fnvc("movement_speed"), false };
+	setting_t<keysetting_t> movement_speed_key{ &m_holder, fnvc("movement_speed_key"), {} };
+	setting_t<int> movement_speed_mode{ &m_holder, fnvc("movement_speed_mode"), 0 };
+	setting_t<bool> movement_speed_custom_jump_ground{ &m_holder, fnvc("movement_speed_custom_jump_ground"), true };
 	setting_t<bool> movement_speed_custom_jump_height{ &m_holder, fnvc("movement_speed_custom_jump_height"), false };
 	setting_t<bool> movement_speed_custom_fall{ &m_holder, fnvc("movement_speed_custom_fall"), false };
 	setting_t<bool> movement_speed_custom_slow{ &m_holder, fnvc("movement_speed_custom_slow"), false };
@@ -389,22 +389,26 @@ public:
 	setting_t<keysetting_t> movement_longjump_key{ &m_holder, fnvc("movement_longjump_key"), {} };
 	setting_t<float> movement_longjump_boost{ &m_holder, fnvc("movement_longjump_boost"), 0.5f };
 
-	setting_t<bool> visuals_fullbright{ &m_holder, fnvc("visuals_fullbright"), false };
-	setting_t<keysetting_t> visuals_fullbright_key{ &m_holder, fnvc("visuals_fullbright_key"), {} };
-
-	setting_t<int> visuals_esp_box{&m_holder, fnvc("visuals_esp_box"), 0};
-	setting_t<color_t> visuals_esp_box_color{&m_holder, fnvc("visuals_esp_box_color"), {255, 200, 69, 255}};
-	setting_t<bool> visuals_esp_box_filled{&m_holder, fnvc("visuals_esp_box_filled"), false};
-	setting_t<color_t> visuals_esp_box_outline_color{&m_holder, fnvc("visuals_esp_box_outline_color"), {255, 200, 69, 255}};
+	setting_t<bool> visuals_esp_box{ &m_holder, fnvc("visuals_esp_box"), false };
+	setting_t<int> visuals_esp_box_mode{ &m_holder, fnvc("visuals_esp_box_mode"), 0 };
+	setting_t<color_t> visuals_esp_box_color{ &m_holder, fnvc("visuals_esp_box_color"), {255, 200, 69, 255} };
+	setting_t<bool> visuals_esp_invisible{ &m_holder, fnvc("visuals_esp_invisible"), false };
+	setting_t<bool> visuals_esp_bots{ &m_holder, fnvc("visuals_esp_bots"), false };
+	setting_t<bool> visuals_esp_healthbar{ &m_holder, fnvc("visuals_esp_healthbar"), false };
+	setting_t<bool> visuals_esp_box_filled{ &m_holder, fnvc("visuals_esp_box_filled"), false };
+	setting_t<color_t> visuals_esp_box_filled_color{ &m_holder, fnvc("visuals_esp_box_filled_color"), {255, 200, 69, 255} };
 	setting_t<bool> visuals_esp_snap_lines{ &m_holder, fnvc("visuals_esp_snap_lines"), false };
 	setting_t<color_t> visuals_esp_snap_lines_color{ &m_holder, fnvc("visuals_esp_snap_lines_color"), {255, 200, 69, 255} };
-	setting_t<bool> visuals_esp_nametags{ &m_holder, fnvc("visuals_esp_nametags"), false };
+	setting_t<bool> visuals_esp_names{ &m_holder, fnvc("visuals_esp_names"), false };
+
+	setting_t<bool> visuals_fullbright{ &m_holder, fnvc("visuals_fullbright"), false };
+	setting_t<keysetting_t> visuals_fullbright_key{ &m_holder, fnvc("visuals_fullbright_key"), {} };
 
 	// config
 	setting_t<keysetting_t> menu_key{ &m_holder, fnvc("menu_key"), {KEYS_INSERT, kt_toggle} };
 	setting_t<keysetting_t> hide_key{ &m_holder, fnvc("hide_key"), {} };
 	setting_t<color_t> gui_accent_color{ &m_holder, fnvc("gui_accent_color"), { 181, 0, 41, 255 } };
-	setting_t<int> gui_fade_speed{ &m_holder, fnvc("menu_fade_speed"), 25 };
+	setting_t<int> gui_fade_speed{ &m_holder, fnvc("menu_fade_speed"), 35 };
 	setting_t<bool> gui_rainbow{ &m_holder, fnvc("gui_rainbow"), false };
 	setting_t<bool> log_use_accent_color{ &m_holder, fnvc("log_use_accent_color"), false };
 	setting_t<color_t> log_color{ &m_holder, fnvc("log_color"), { 181, 0, 41, 255 } };
