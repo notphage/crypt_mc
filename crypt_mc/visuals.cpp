@@ -94,7 +94,7 @@ void c_visuals::draw_ent_corner_box(const color_t& color, esp_box_t& box, bool o
 
 		// top right
 		ctx.m_renderer->draw_line({ x + w - linew, y - 1.f }, { x + w + 1.f, y - 1.f }, outline_color);
-		ctx.m_renderer->draw_line({ x + w + 1.f, y - 1.f }, { x + w + 1.f, y - lineh }, outline_color);
+		ctx.m_renderer->draw_line({ x + w + 1.f, y - 1.f }, { x + w + 1.f, y + lineh }, outline_color);
 
 		// bot right
 		ctx.m_renderer->draw_line({ x + w + 1.f, y + h - lineh }, { x + w + 1.f, y + h + 1.f }, outline_color);
@@ -134,20 +134,20 @@ void c_visuals::on_swap_buffers(const std::shared_ptr<c_game>& mc, const std::sh
 
 	for (auto&& player : world->get_players())
 	{
-		if (player->is_same(self) || player->get_health() <= 0|| player->is_dead())
+		if (player->is_same(self) || player->get_health() <= 0 || player->is_dead())
 			continue;
-
+	
 		if (player->is_invisible() && !ctx.m_settings.visuals_esp_invisible)
 			continue;
-
+	
 		//if (player->is_bot() && !ctx.m_settings.visuals_esp_bots)
 		//	continue;
-
+	
 		vec3 self_origin(self->origin_x(), self->origin_y(), self->origin_z());
 		vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());
-
+	
 		float distance = self_origin.dist(player_origin);
-
+	
 		players.emplace_back(player, distance);
 	}
 
@@ -155,7 +155,7 @@ void c_visuals::on_swap_buffers(const std::shared_ptr<c_game>& mc, const std::sh
 		{
 			return a.m_dist > b.m_dist;
 		});
-
+	
 	for (auto&& esp_player : players)
 	{
 		esp_player.draw(m_jni, mc, self, world);

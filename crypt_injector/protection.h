@@ -1,6 +1,6 @@
 #pragma once
 
-enum protection_status_t
+enum class protection_status_t
 {
 	STATUS_SAFE,
 	STATUS_UNSAFE_SYSTEM,
@@ -158,17 +158,17 @@ class c_protection
 
 	KUSER_SHARED_DATA* m_kuser_shared_data = reinterpret_cast<KUSER_SHARED_DATA*>(KUSER_SHARED_DATA_PTR);
 public:
-	protection_status_t m_status = STATUS_SAFE;
+	protection_status_t m_status = protection_status_t::STATUS_SAFE;
 	std::string m_err_str{};
 
-	__declspec(noinline) bool init_safety_check()
+	__forceinline bool init_safety_check()
 	{
 		// safe boot
 		{
 			if (m_kuser_shared_data->SafeBootMode == TRUE)
 			{
 				m_err_str = xors("Please disable safe boot mode");
-				m_status = STATUS_UNSAFE_SYSTEM;
+				m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 				return false;
 			}
 		}
@@ -182,20 +182,20 @@ public:
 		return true;
 	}
 
-	__declspec(noinline) bool safety_check()
+	__forceinline bool safety_check()
 	{
 		if (is_running_forbidden_program())
 			return false;
-
+		
 		if (is_running_forbidden_program())
 			return false;
-
+		
 		if (has_forbidden_mac_address())
 			return false;
-
+		
 		if (tables_remapped())
 			return false;
-
+		
 		if (hypervisor_present())
 			return false;
 

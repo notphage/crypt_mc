@@ -169,7 +169,7 @@ bool injection::executor::handle_create_entry(map_ctx& ctx, native::process& pro
 	}
 
 	// FAILED TO WAIT FOR THREAD?
-	if (!thread.wait())
+	if (!thread.wait(5000))
 	{
 		logger::log_error("Failed to wait for shellcode thread");
 		return false;
@@ -225,7 +225,7 @@ bool injection::executor::handle_create_exit(map_ctx& ctx, native::process& proc
 	}
 
 	// FAILED TO WAIT FOR THREAD?
-	if (!thread.wait())
+	if (!thread.wait(5000))
 	{
 		logger::log_error("Failed to wait for shellcode thread");
 		return false;

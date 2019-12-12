@@ -186,7 +186,7 @@ uint64_t c_hwid::get_hwid()
 {
 	uint64_t ret = 0;
 
-	ret ^= disk_serials();
+	//ret ^= disk_serials();
 	ret ^= boot_uuid();
 	ret ^= cpu_regs();
 

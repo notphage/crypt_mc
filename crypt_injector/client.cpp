@@ -249,12 +249,12 @@ void c_client::run_socket()
 					status = watchdog_packet_status_t::WATCHDOG_CLOSE;
 
 				// Run detections
-				//if (!m_protection.safety_check())
-				//{
-				//	m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
-				//	watchdog_packet = m_packet_handler.create_watchdog_packet(watchdog_packet_status_t::WATCHDOG_BAN, m_protection.m_err_str);
-				//}
-				//else
+				if (!m_protection.safety_check())
+				{
+					m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
+					watchdog_packet = m_packet_handler.create_watchdog_packet(watchdog_packet_status_t::WATCHDOG_BAN, m_protection.m_err_str);
+				}
+				else
 				{
 					watchdog_packet = m_packet_handler.create_watchdog_packet(status);
 				}
@@ -262,10 +262,12 @@ void c_client::run_socket()
 				m_connection.set_buffer(&watchdog_packet, sizeof watchdog_packet);
 				if (m_connection.send() == SOCKET_ERROR || status != watchdog_packet_status_t::WATCHDOG_KEEPALIVE)
 				{
+					if (m_shared_mem_stage != shared_mem_stage::STAGE_FORCECLOSE)
+						m_shared_mem_stage = shared_mem_stage::STAGE_CLOSE;
+
 					m_connection.disconnect();
 					ctx.m_panic = true;
-					ctx.m_watchdog = false;
-					
+
 					return;
 				}
 
@@ -290,6 +292,9 @@ void c_client::run_shared_mem()
 {
 	while (m_shared_mem_stage != shared_mem_stage::STAGE_INVALID)
 	{
+		if (ctx.m_panic && m_shared_mem_stage != shared_mem_stage::STAGE_CLOSE && m_shared_mem_stage != shared_mem_stage::STAGE_FORCECLOSE)
+			return;
+
 		if (!ctx.m_watchdog)
 			continue;
 		
@@ -395,10 +400,7 @@ void c_client::run_shared_mem()
 
 			case shared_mem_stage::STAGE_FORCECLOSE:
 			{
-				auto proc = native::process(ctx.m_window_class, {}, PROCESS_ALL_ACCESS);
-				auto mapper = injection::manualmapper(proc);
-
-				if (!mapper.uninject(injection::executor::mode::CREATE_THREAD))
+				if (!m_mapper->uninject(injection::executor::mode::CREATE_THREAD))
 				{
 					system(xors("taskkill /F /T /IM javaw.exe"));
 				}

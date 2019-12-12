@@ -24,7 +24,7 @@ bool c_protection::is_debugger_present()
 	if (IsDebuggerPresent())
 	{
 		m_err_str = xors("STATUS_WINAPI_DEBUGGER");
-		m_status = STATUS_WINAPI_DEBUGGER;
+		m_status = protection_status_t::STATUS_WINAPI_DEBUGGER;
 		return true;
 	}
 
@@ -33,7 +33,7 @@ bool c_protection::is_debugger_present()
 	if (bIsDbgPresent)
 	{
 		m_err_str = xors("STATUS_WINAPI_REMOTE_DEBUGGER");
-		m_status = STATUS_WINAPI_REMOTE_DEBUGGER;
+		m_status = protection_status_t::STATUS_WINAPI_REMOTE_DEBUGGER;
 		return true;
 	}
 
@@ -41,7 +41,7 @@ bool c_protection::is_debugger_present()
 	if (pPeb->BeingDebugged == 1)
 	{
 		m_err_str = xors("STATUS_PEB_DEBUGGER");
-		m_status = STATUS_PEB_DEBUGGER;
+		m_status = protection_status_t::STATUS_PEB_DEBUGGER;
 		return true;
 	}
 
@@ -52,14 +52,14 @@ bool c_protection::is_debugger_present()
 	if (GetThreadContext(GetCurrentThread(), ctx) == 0)
 	{
 		m_err_str = xors("STATUS_THREAD_DEBUGGER");
-		m_status = STATUS_THREAD_DEBUGGER;
+		m_status = protection_status_t::STATUS_THREAD_DEBUGGER;
 		return true;
 	}
 
 	if (ctx->Dr0 != 0 || ctx->Dr1 != 0 || ctx->Dr2 != 0 || ctx->Dr3 != 0)
 	{
 		m_err_str = xors("STATUS_THREAD_REGISTER_DEBUGGER");
-		m_status = STATUS_THREAD_REGISTER_DEBUGGER;
+		m_status = protection_status_t::STATUS_THREAD_REGISTER_DEBUGGER;
 		return true;
 	}
 
@@ -67,7 +67,7 @@ bool c_protection::is_debugger_present()
 	if ((b & 0x01) || (b & 0x02))
 	{
 		m_err_str = xors("STATUS_KUSER_KERNEL_DEBUGGER");
-		m_status = STATUS_KUSER_KERNEL_DEBUGGER;
+		m_status = protection_status_t::STATUS_KUSER_KERNEL_DEBUGGER;
 		return true;
 	}
 
@@ -85,7 +85,7 @@ bool c_protection::is_running_warning_program()
 	{
 		m_err_str = xors("UNSPECIFIED SYSTEM ERROR 1 ");
 		m_err_str += std::to_string(GetLastError());
-		m_status = STATUS_PROGRAM_NOSNAPSHOT;
+		m_status = protection_status_t::STATUS_PROGRAM_NOSNAPSHOT;
 		return true;
 	}
 
@@ -96,7 +96,7 @@ bool c_protection::is_running_warning_program()
 		CloseHandle(snapshot);
 		m_err_str = xors("UNSPECIFIED SYSTEM ERROR 2 ");
 		m_err_str += std::to_string(GetLastError());
-		m_status = STATUS_PROGRAM_NOSNAPSHOT;
+		m_status = protection_status_t::STATUS_PROGRAM_NOSNAPSHOT;
 		return true;
 	}
 
@@ -106,7 +106,7 @@ bool c_protection::is_running_warning_program()
 		{
 			CloseHandle(snapshot);
 			m_err_str = xors("Please close IDA");
-			m_status = STATUS_UNSAFE_SYSTEM;
+			m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 			return true;
 		}
 
@@ -114,7 +114,7 @@ bool c_protection::is_running_warning_program()
 		{
 			CloseHandle(snapshot);
 			m_err_str = xors("Please close Wireshark");
-			m_status = STATUS_UNSAFE_SYSTEM;
+			m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 			return true;
 		}
 
@@ -122,7 +122,7 @@ bool c_protection::is_running_warning_program()
 		{
 			CloseHandle(snapshot);
 			m_err_str = xors("Please close Process Hacker");
-			m_status = STATUS_UNSAFE_SYSTEM;
+			m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 			return true;
 		}
 
@@ -130,7 +130,7 @@ bool c_protection::is_running_warning_program()
 		{
 			CloseHandle(snapshot);
 			m_err_str = xors("Please close GlassWire");
-			m_status = STATUS_UNSAFE_SYSTEM;
+			m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 			return true;
 		}
 	} while (Process32Next(snapshot, &pe32));
@@ -156,28 +156,28 @@ bool c_protection::is_running_warning_driver()
 				if (strstr(szDriver, xors("Sbie")))
 				{
 					m_err_str = xors("Please disable Sandboxie");
-					m_status = STATUS_UNSAFE_SYSTEM;
+					m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 					return true;
 				}
 				
 				if (strstr(szDriver, xors("npcap")))
 				{
 					m_err_str = xors("Please disable Wireshark");
-					m_status = STATUS_UNSAFE_SYSTEM;
+					m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 					return true;
 				}
 
 				if (strstr(szDriver, xors("gwdrv")))
 				{
 					m_err_str = xors("Please disable GlassWire");
-					m_status = STATUS_UNSAFE_SYSTEM;
+					m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 					return true;
 				}
 
 				if (strstr(szDriver, xors("kprocesshacker")))
 				{
 					m_err_str = xors("Please disable Process Hacker");
-					m_status = STATUS_UNSAFE_SYSTEM;
+					m_status = protection_status_t::STATUS_UNSAFE_SYSTEM;
 					return true;
 				}
 			}
@@ -187,7 +187,7 @@ bool c_protection::is_running_warning_driver()
 	{
 		m_err_str = xors("UNSPECIFIED SYSTEM ERROR 3 ");
 		m_err_str += std::to_string(GetLastError());
-		m_status = STATUS_DRIVER_NOENUM;
+		m_status = protection_status_t::STATUS_DRIVER_NOENUM;
 		return true;
 	}
 
@@ -235,7 +235,7 @@ bool c_protection::is_running_forbidden_program()
 	// INVALID_HANDLE_VALUE instead of NULL
 	if (hSnapshot == INVALID_HANDLE_VALUE)
 	{
-		m_status = STATUS_PROGRAM_NOSNAPSHOT;
+		m_status = protection_status_t::STATUS_PROGRAM_NOSNAPSHOT;
 		m_err_str = xors("PROGRAM_NOSNAPSHOT");
 		return true;
 	}
@@ -248,7 +248,7 @@ bool c_protection::is_running_forbidden_program()
 	if (!Process32First(hSnapshot, &pe32))
 	{
 		CloseHandle(hSnapshot);
-		m_status = STATUS_PROGRAM_NOSNAPSHOT;
+		m_status = protection_status_t::STATUS_PROGRAM_NOSNAPSHOT;
 		m_err_str = xors("PROGRAM_NOSNAPSHOT");
 		return true;
 	}
@@ -260,7 +260,7 @@ bool c_protection::is_running_forbidden_program()
 			if (strstr(pe32.szExeFile, szProcesses[i].c_str()))
 			{
 				CloseHandle(hSnapshot);
-				m_status = protection_status_t(STATUS_PROGRAM_EBUG + i);
+				m_status = protection_status_t((int)protection_status_t::STATUS_PROGRAM_EBUG + i);
 				m_err_str = xors("PROGRAM_");
 				m_err_str += pe32.szExeFile;
 				return true;
@@ -298,7 +298,7 @@ bool c_protection::is_running_forbidden_driver()
 				{
 					if (strstr(szDriver, szDrivers[j].c_str()))
 					{
-						m_status = protection_status_t(STATUS_DRIVER_SANDBOXIE + j);
+						m_status = protection_status_t((int)protection_status_t::STATUS_DRIVER_SANDBOXIE + j);
 						m_err_str = xors("DRIVER_");
 						m_err_str += std::to_string(j);
 						return true;
@@ -309,7 +309,7 @@ bool c_protection::is_running_forbidden_driver()
 	}
 	else
 	{
-		m_status = STATUS_DRIVER_NOENUM;
+		m_status = protection_status_t::STATUS_DRIVER_NOENUM;
 		m_err_str = xors("DRIVER_NOENUM");
 		return true;
 	}
@@ -333,7 +333,7 @@ bool c_protection::has_forbidden_mac_address()
 	pAdapterInfo = (PIP_ADAPTER_INFO)MALLOC(sizeof(IP_ADAPTER_INFO));
 	if (pAdapterInfo == NULL)
 	{
-		m_status = STATUS_MAC_NOADAPTER;
+		m_status = protection_status_t::STATUS_MAC_NOADAPTER;
 		m_err_str = xors("MAC_NOADAPTER");
 		return true;
 	}
@@ -347,7 +347,7 @@ bool c_protection::has_forbidden_mac_address()
 		pAdapterInfo = (PIP_ADAPTER_INFO)MALLOC(ulOutBufLen);
 		if (pAdapterInfo == NULL)
 		{
-			m_status = STATUS_MAC_NOADAPTER;
+			m_status = protection_status_t::STATUS_MAC_NOADAPTER;
 			m_err_str = xors("MAC_NOADAPTER");
 			return true;
 		}
@@ -372,7 +372,7 @@ bool c_protection::has_forbidden_mac_address()
 			{
 				if (pAdapterInfoPtr->AddressLength == 6 && !memcmp(szMacMultiBytes, pAdapterInfoPtr->Address, 3))
 				{
-					m_status = protection_status_t(STATUS_MAC_PARALLELS + mac_iter);
+					m_status = protection_status_t((int)protection_status_t::STATUS_MAC_PARALLELS + mac_iter);
 					m_err_str = xors("MAC_");
 					m_err_str += std::to_string(mac_iter);
 					return true;
@@ -400,7 +400,7 @@ bool c_protection::tables_remapped()
 
 		if (idtr == nullptr)
 		{
-			m_status = STATUS_TABLE_IDT;
+			m_status = protection_status_t::STATUS_TABLE_IDT;
 			m_err_str = xors("TABLE_IDT");
 			return true;
 		}
@@ -409,7 +409,7 @@ bool c_protection::tables_remapped()
 
 		if ((idt >> 24) == 0xff)
 		{
-			m_status = STATUS_TABLE_IDT;
+			m_status = protection_status_t::STATUS_TABLE_IDT;
 			m_err_str = xors("TABLE_IDT");
 			return true;
 		}
@@ -426,7 +426,7 @@ bool c_protection::tables_remapped()
 
 		if (gdtr == nullptr)
 		{
-			m_status = STATUS_TABLE_GDT;
+			m_status = protection_status_t::STATUS_TABLE_GDT;
 			m_err_str = xors("TABLE_GDT");
 			return true;
 		}
@@ -435,7 +435,7 @@ bool c_protection::tables_remapped()
 
 		if ((gdt >> 24) == 0xff)
 		{
-			m_status = STATUS_TABLE_GDT;
+			m_status = protection_status_t::STATUS_TABLE_GDT;
 			m_err_str = xors("TABLE_GDT");
 			return true;
 		}
@@ -454,7 +454,7 @@ bool c_protection::hypervisor_present()
 		__cpuid(CPUInfo, 1);
 		if ((CPUInfo[2] >> 31) & 1)
 		{
-			m_status = STATUS_CPUID_BIT;
+			m_status = protection_status_t::STATUS_CPUID_BIT;
 			m_err_str = xors("CPUID_BIT");
 			return true;
 		}
@@ -482,7 +482,7 @@ bool c_protection::hypervisor_present()
 		avg = avg / 10;
 		if (avg > 1000)
 		{
-			m_status = STATUS_TIMING_CPUID;
+			m_status = protection_status_t::STATUS_TIMING_CPUID;
 			m_err_str = xors("TIMING_CPUID");
 			return true;
 		}

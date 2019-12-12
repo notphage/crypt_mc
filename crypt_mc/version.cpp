@@ -130,7 +130,7 @@ void c_context::load()
 	ctx.m_features.emplace_back(std::make_unique<c_positive_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_negative_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_negative_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));
-	ctx.m_features.emplace_back(std::make_unique<c_visuals>(&test_value));
+	//ctx.m_features.emplace_back(std::make_unique<c_visuals>(&test_value));
 }
 
 void c_context::unload()

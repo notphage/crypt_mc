@@ -42,7 +42,7 @@ long __stdcall hooked::swap_buffers(JNIEnv* jni, jclass caller, jobject a3)
 
 	ctx.m_frametime = delta / 1000.f;
 
-	auto mc = ctx.get_game(jni);
+	const auto mc = ctx.get_game(jni);
 	const auto self = mc->get_player();
 	const auto world = mc->get_world();
 

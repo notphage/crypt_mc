@@ -29,6 +29,7 @@ struct shared_mem_header_t
 
 class c_shared_mem_queue
 {
+	std::atomic_bool m_should_close = false;
 	mutable c_shared_mutex m_mutex;
 	shared_mem_header_t* m_out_header = nullptr;
 	shared_mem_header_t* m_in_header = nullptr;
@@ -99,8 +100,10 @@ public:
 	
 	~c_shared_mem_queue()
 	{
+		m_should_close = true;
 		UnmapViewOfFile(m_buffer);
 		CloseHandle(m_mapped_file);
+		m_message_thread.join();
 	}
 
 	void msg_thread() const
@@ -109,7 +112,7 @@ public:
 		{
 			this->wait_for_message();
 
-		} while (true);
+		} while (!m_should_close);
 	}
 
 	void set_callback(const std::function<void()>& callback)

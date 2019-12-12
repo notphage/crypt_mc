@@ -667,110 +667,64 @@ jobject c_player_forge_18X::get_item(jobject item_stack)
 	return jni->CallObjectMethod(item_stack, playerfields.mid_get_item);
 }
 
-
-
 std::vector<int> c_player_forge_18X::find_item(int min, int max, find_item_type item_type)
-
 {
-
 	std::vector<int> items;
 
-
-
 	for (auto i = min; i < max; ++i)
-
 	{
-
 		auto item_stack = get_stack(i);
 
 		if (item_stack)
-
 		{
-
 			auto item = get_item(item_stack);
 
-
-
 			if (item)
-
 			{
-
 				jclass clazz = nullptr;
 
 				switch (item_type)
-
 				{
+					case POTION:
+					{
+						clazz = playerfields.cls_item_potion;
 
-				case POTION:
+						break;
+					}
 
-				{
+					case SOUP:
+					{
+						clazz = playerfields.cls_item_soup;
 
-					clazz = playerfields.cls_item_potion;
+						break;
+					}
 
-					break;
+					case PEARL:
+					{
+						clazz = playerfields.item_ender_pearl_class;
+						break;
+					}
 
+					case ROD:
+					{
+						break;
+					}
+
+					default:
+					{
+						return items;
+
+					}
 				}
-
-
-
-				case SOUP:
-
-				{
-
-					clazz = playerfields.cls_item_soup;
-
-					break;
-
-				}
-
-
-
-				case PEARL:
-
-				{
-
-					clazz = playerfields.item_ender_pearl_class;
-
-					break;
-
-				}
-
-
-
-				case ROD:
-
-				{
-
-					break;
-
-				}
-
-
-
-				default:
-
-					return items;
-
-				}
-
-
 
 				if (clazz)
-
 					if (jni->IsInstanceOf(item, clazz))
-
 						items.push_back(i);
-
 			}
-
 		}
-
 	}
 
-
-
 	return items;
-
 }
 
 jboolean c_player_forge_18X::holding_weapon()
