@@ -103,7 +103,9 @@ public:
 		m_should_close = true;
 		UnmapViewOfFile(m_buffer);
 		CloseHandle(m_mapped_file);
-		m_message_thread.join();
+
+		if (m_message_thread.joinable())
+			m_message_thread.join();
 	}
 
 	void msg_thread() const

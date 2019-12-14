@@ -101,6 +101,10 @@ void c_context::load()
 		MH_CreateHook(get_time, &hooked::get_time, reinterpret_cast<void**>(&hooked::o_get_time));
 		MH_EnableHook(get_time);
 
+		auto gl_enable = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("lwjgl64.dll")), xors("Java_org_lwjgl_opengl_GL11_nglEnable"));
+		MH_CreateHook(gl_enable, &hooked::gl_enable, reinterpret_cast<void**>(&hooked::o_gl_enable));
+		MH_EnableHook(gl_enable);
+
 		auto strict_math_atan2 = LI_FN(GetProcAddress).cached()(LI_FN(GetModuleHandleA).cached()(xors("java.dll")), xors("Java_java_lang_StrictMath_atan2"));
 		MH_CreateHook(strict_math_atan2, &hooked::strict_math_atan2, reinterpret_cast<void**>(&hooked::o_strict_math_atan2));
 		MH_EnableHook(strict_math_atan2);
@@ -130,7 +134,7 @@ void c_context::load()
 	ctx.m_features.emplace_back(std::make_unique<c_positive_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_positive_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_negative_timer>(&ctx.m_settings.misc_timer, &ctx.m_settings.misc_negative_timer_key));
 	ctx.m_features.emplace_back(std::make_unique<c_velocity>(&ctx.m_settings.combat_velocity, &ctx.m_settings.combat_velocity_key));
-	//ctx.m_features.emplace_back(std::make_unique<c_visuals>(&test_value));
+	ctx.m_features.emplace_back(std::make_unique<c_visuals>(&test_value));
 }
 
 void c_context::unload()

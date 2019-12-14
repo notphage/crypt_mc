@@ -208,12 +208,6 @@
     <ClCompile Include="sdk_1.8.X.cpp">
       <Filter>SRC\SDK\Vanilla 1.8.X</Filter>
     </ClCompile>
-    <ClCompile Include="nUpdate.cpp">
-      <Filter>SRC\hooks</Filter>
-    </ClCompile>
-    <ClCompile Include="nGetTime.cpp">
-      <Filter>SRC\hooks</Filter>
-    </ClCompile>
     <ClCompile Include="fast_stop.cpp">
       <Filter>SRC\features\fast_stop</Filter>
     </ClCompile>
@@ -228,6 +222,15 @@
     </ClCompile>
     <ClCompile Include="fullbright.cpp">
       <Filter>SRC\features\fullbright</Filter>
+    </ClCompile>
+    <ClCompile Include="gl_enable.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="get_time.cpp">
+      <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="update.cpp">
+      <Filter>SRC\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

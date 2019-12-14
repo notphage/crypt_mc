@@ -395,6 +395,8 @@ public:
 	setting_t<bool> visuals_esp_invisible{ &m_holder, fnvc("visuals_esp_invisible"), false };
 	setting_t<bool> visuals_esp_bots{ &m_holder, fnvc("visuals_esp_bots"), false };
 	setting_t<bool> visuals_esp_healthbar{ &m_holder, fnvc("visuals_esp_healthbar"), false };
+	setting_t<bool> visuals_esp_box_outlined{ &m_holder, fnvc("visuals_esp_box_outlined"), true };
+	setting_t<color_t> visuals_esp_box_outlined_color{ &m_holder, fnvc("visuals_esp_box_outlined_color"), {0, 0, 0, 175} };
 	setting_t<bool> visuals_esp_box_filled{ &m_holder, fnvc("visuals_esp_box_filled"), false };
 	setting_t<color_t> visuals_esp_box_filled_color{ &m_holder, fnvc("visuals_esp_box_filled_color"), {255, 200, 69, 255} };
 	setting_t<bool> visuals_esp_snap_lines{ &m_holder, fnvc("visuals_esp_snap_lines"), false };

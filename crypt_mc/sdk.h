@@ -1008,7 +1008,7 @@ public:
 		              );
 	}
 
-	float Hue()
+	float to_hue()
 	{
 		typedef struct
 		{

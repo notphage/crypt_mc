@@ -42,12 +42,8 @@ void c_renderer::draw_begin()
 	m_last_enable_depth_test = LI_FN(glIsEnabled).cached()(GL_DEPTH_TEST);
 	m_last_enable_scissor_test = LI_FN(glIsEnabled).cached()(GL_SCISSOR_TEST);
 
-	//LI_FN(glEnable).cached()(GL_POINT_SMOOTH);
-	//LI_FN(glEnable).cached()(GL_LINE_SMOOTH);
-	//LI_FN(glEnable).cached()(GL_POLYGON_SMOOTH);
-	//LI_FN(glHint).cached()(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	//LI_FN(glHint).cached()(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	//LI_FN(glHint).cached()(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	LI_FN(glEnable).cached()(GL_LINE_SMOOTH);
+	LI_FN(glHint).cached()(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	LI_FN(glEnable).cached()(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	LI_FN(glBlendFunc).cached()(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -220,12 +216,12 @@ void c_renderer::draw_filled_rect(const render_list_t::ptr& render_list, const v
 		{ rect.x,			rect.y,			 color },
 		{ rect.x + rect.z,	rect.y,			 color },
 		{ rect.x,			rect.y + rect.w, color },
-
+	
 		{ rect.x + rect.z,	rect.y,			 color },
 		{ rect.x + rect.z,	rect.y + rect.w, color },
 		{ rect.x,			rect.y + rect.w, color }
 	};
-
+	
 	add_vertices(render_list, v, GL_TRIANGLES);
 }
 

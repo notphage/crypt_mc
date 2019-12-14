@@ -123,4 +123,16 @@ namespace math
 			up->z = -cr * sp * cy - sr * sy;
 		}
 	}
+
+	__forceinline void rotate2d(vec3& vec, float rot)
+	{
+		float s = 0.f, c = 0.f, x = 0.f, z = 0.f;
+		sin_cos(deg2rad(rot), &s, &c);
+
+		x = vec.x;
+		z = vec.z;
+
+		vec.x = (x * c) - (z * s);
+		vec.z = (x * s) + (z * c);
+	}
 }

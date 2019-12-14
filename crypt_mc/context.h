@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <array>
 #include <thread>
 #include <iterator>
 #include <sstream>
@@ -119,6 +120,7 @@ namespace hooked
 	extern long __stdcall swap_buffers(JNIEnv*, jclass, jobject);
 	extern long __stdcall get_update(JNIEnv*, jclass);
 	extern long __stdcall get_time(JNIEnv*, jclass);
+	extern long __stdcall gl_enable(JNIEnv*, jclass, jint, jlong);
 	extern long __stdcall strict_math_atan2(JNIEnv*, jclass);
 	extern long long __stdcall wnd_proc(HWND, uint32_t, uint64_t, int64_t);
 
@@ -126,5 +128,6 @@ namespace hooked
 	extern decltype(&get_update) o_get_update;
 	extern decltype(&get_time) o_get_time;
 	extern decltype(&strict_math_atan2) o_strict_math_atan2;
+	extern decltype(&gl_enable) o_gl_enable;
 	extern decltype(&wnd_proc) o_wnd_proc;
 }

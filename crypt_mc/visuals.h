@@ -4,11 +4,14 @@ class c_visuals : public c_feature
 {
 	struct esp_box_t
 	{
+		vec3 m_center;
+		std::array<vec3, 8> m_bbox;
 		int32_t minx, maxx, miny, maxy;
 		int32_t centerx, centery;
 
 		esp_box_t()
-			: minx(std::numeric_limits<int32_t>::max()), maxx(std::numeric_limits<int32_t>::min()), miny(std::numeric_limits<int32_t>::max()), maxy(std::numeric_limits<int32_t>::min())
+			: minx(std::numeric_limits<int32_t>::max()), maxx(std::numeric_limits<int32_t>::min()), miny(std::numeric_limits<int32_t>::max()), maxy(std::numeric_limits<int32_t>::min()),
+			  centerx(0), centery(0), m_bbox(), m_center()
 		{ }
 
 		bool create_player(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_player>& ent);
@@ -24,11 +27,12 @@ class c_visuals : public c_feature
 		{ }
 
 		void draw(JNIEnv* jni, const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world);
-		void draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha, const color_t& outline_color);
-		void draw_snaplines(const vec2& bot, const color_t& snaplines_color, const color_t& outline_color);
+		void draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha);
+		void draw_snaplines(const vec2& bot, const color_t& snaplines_color, bool outlined, const color_t& outline_color);
 	};
 
 	static void draw_ent_box(const color_t& color, esp_box_t& box, bool outlined, const color_t& outline_color);
+	static void draw_ent_3d_box(const color_t& color, esp_box_t& box, float yaw, bool outlined, const color_t& outline_color);
 	static void draw_ent_corner_box(const color_t& color, esp_box_t& box, bool outlined, const color_t& outline_color);
 	static void draw_ent_filled_box(const color_t& color, esp_box_t& box);
 

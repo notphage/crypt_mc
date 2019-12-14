@@ -41,6 +41,7 @@ namespace UI
 	{
 	public:
 		int m_draw_counter{};
+		bool m_first_draw{};
 
 		bool m_first_click{};
 		bool m_left_click{};
@@ -298,6 +299,9 @@ namespace UI
 			m_data.m_draw_counter++;
 			m_data.m_keyboard_input = g_input.get_keyboard_input();
 
+			if (m_data.m_first_draw)
+				m_data.m_first_draw = false;
+
 			if (g_input.is_key_pressed(ctx.m_settings.menu_key().key))
 			{
 				if (!m_was_open)
@@ -345,6 +349,10 @@ namespace UI
 			}
 
 			m_is_open = m_data.m_alpha > 0;
+
+			if (m_is_open && !m_was_open)
+				m_data.m_first_draw = true;
+
 			if (!m_is_open)
 				return false;
 
@@ -2007,7 +2015,13 @@ namespace UI
 			m_alpha_picker_bounds = vec2(m_picker_bounds.x, 10.f);
 			m_alpha_picker_end = m_alpha_picker_start + m_alpha_picker_bounds;
 
-			m_temp_col = { *r, *g, *b, *a };
+			if (data->m_first_draw)
+			{
+				m_temp_col = { *r, *g, *b, *a };
+				m_picker_col = { *r, *g, *b, *a };
+				m_picker_hue_val = m_picker_col.to_hue();
+				m_picker_alpha_val = *a;
+			}
 
 			// setup coord for next item
 			data->m_y += 15.f;
@@ -2017,6 +2031,8 @@ namespace UI
 			m_inside_picker = m_cursor_x > m_picker_start.x && m_cursor_x < m_picker_end.x && m_cursor_y > m_picker_start.y && m_cursor_y < m_picker_end.y;
 			m_inside_hue_picker = m_cursor_x > m_hue_picker_start.x && m_cursor_x < m_hue_picker_end.x && m_cursor_y > m_hue_picker_start.y && m_cursor_y < m_hue_picker_end.y;
 			m_inside_alpha_picker = m_cursor_x > m_alpha_picker_start.x && m_cursor_x < m_alpha_picker_end.x && m_cursor_y > m_alpha_picker_start.y && m_cursor_y < m_alpha_picker_end.y;
+
+			if (data->m_draw_counter)
 
 			if (m_is_inside && data->m_first_click && !data->m_ignore)
 			{

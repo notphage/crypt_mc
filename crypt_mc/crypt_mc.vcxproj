@@ -305,8 +305,9 @@
     <ClCompile Include="flight.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="fullbright.cpp" />
-    <ClCompile Include="nGetTime.cpp" />
-    <ClCompile Include="nUpdate.cpp" />
+    <ClCompile Include="gl_enable.cpp" />
+    <ClCompile Include="get_time.cpp" />
+    <ClCompile Include="update.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="hde64.cpp" />
     <ClCompile Include="hook.cpp" />

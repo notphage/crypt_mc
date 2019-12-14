@@ -20,25 +20,25 @@ bool c_visuals::esp_box_t::create_player(const std::shared_ptr<c_game>& mc, cons
 	vec3 prev_origin(ent->old_origin_x(), ent->old_origin_y(), ent->old_origin_z());
 	vec3 interp_origin = prev_origin + ((origin - prev_origin) * render_partial_ticks);
 
-	vec3 center = interp_origin + ((min + max) * 0.5f);
-	center.y += (ent_height / 1.75f);
+	m_center = interp_origin + ((min + max) * 0.5f);
+	m_center.y += (ent_height / 1.75f);
 
-	vec3 points[] =
+	m_bbox =
 	{
 		vec3(min.x, min.y, min.z),
 		vec3(min.x, max.y, min.z),
 		vec3(max.x, max.y, min.z),
 		vec3(max.x, min.y, min.z),
-		vec3(max.x, max.y, max.z),
-		vec3(min.x, max.y, max.z),
 		vec3(min.x, min.y, max.z),
+		vec3(min.x, max.y, max.z),
+		vec3(max.x, max.y, max.z),
 		vec3(max.x, min.y, max.z)
 	};
 
 	vec2 temp_point;
-	for (auto&& point : points)
+	for (auto&& point : m_bbox)
 	{
-		if (!ctx.w2s(center + point, temp_point))
+		if (!ctx.w2s(m_center + point, temp_point))
 			return false;
 
 		minx = math::min(minx, static_cast<int32_t>(temp_point.x));
@@ -47,7 +47,7 @@ bool c_visuals::esp_box_t::create_player(const std::shared_ptr<c_game>& mc, cons
 		maxy = math::max(maxy, static_cast<int32_t>(temp_point.y));
 	}
 
-	if (!ctx.w2s(center, temp_point))
+	if (!ctx.w2s(m_center, temp_point))
 		return false;
 
 	centerx = temp_point.x;
@@ -56,7 +56,7 @@ bool c_visuals::esp_box_t::create_player(const std::shared_ptr<c_game>& mc, cons
 	return true;
 }
 
-void c_visuals::draw_ent_box(const color_t& color, esp_box_t& box, bool outlined = true, const color_t& outline_color = color_t(0, 0, 0, 175))
+void c_visuals::draw_ent_box(const color_t& color, esp_box_t& box, bool outlined, const color_t& outline_color)
 {
 	float x = box.minx;
 	float y = box.miny;
@@ -72,7 +72,56 @@ void c_visuals::draw_ent_box(const color_t& color, esp_box_t& box, bool outlined
 	ctx.m_renderer->draw_rect({ x, y, w, h }, color);
 }
 
-void c_visuals::draw_ent_corner_box(const color_t& color, esp_box_t& box, bool outlined = true, const color_t& outline_color = color_t(0, 0, 0, 175))
+void c_visuals::draw_ent_3d_box(const color_t& color, esp_box_t& box, float yaw, bool outlined, const color_t& outline_color)
+{
+	for (vec3& point : box.m_bbox)
+		math::rotate2d(point, yaw);
+
+	std::array<vec2, 8> corners;
+
+	{
+		vec2 temp_point;
+		for (int i = 0; i <= 7; i++)
+		{
+			if (!ctx.w2s(box.m_center + box.m_bbox[i], temp_point))
+				return;
+
+			corners[i] = temp_point;
+		}
+	}
+
+	for (auto i = 1; i <= 4; i++)
+	{
+		ctx.m_renderer->draw_line({ corners[i - 1].x, corners[i - 1].y }, { corners[i % 4].x,	  corners[i % 4].y }, color);
+		ctx.m_renderer->draw_line({ corners[i - 1].x, corners[i - 1].y }, { corners[i + 3].x,	  corners[i + 3].y }, color);
+		ctx.m_renderer->draw_line({ corners[i + 3].x, corners[i + 3].y }, { corners[i % 4 + 4].x, corners[i % 4 + 4].y }, color);
+
+		if (outlined)
+		{
+			if (i % 2 == 0)
+			{
+				ctx.m_renderer->draw_line({ corners[i - 1].x, corners[i - 1].y + 1.f }, { corners[i % 4].x, corners[i % 4].y + 1.f }, outline_color);
+				ctx.m_renderer->draw_line({ corners[i - 1].x, corners[i - 1].y - 1.f }, { corners[i % 4].x, corners[i % 4].y - 1.f }, outline_color);
+
+				ctx.m_renderer->draw_line({ corners[i + 3].x, corners[i + 3].y + 1.f }, { corners[i % 4 + 4].x, corners[i % 4 + 4].y + 1.f }, outline_color);
+				ctx.m_renderer->draw_line({ corners[i + 3].x, corners[i + 3].y - 1.f }, { corners[i % 4 + 4].x, corners[i % 4 + 4].y - 1.f }, outline_color);
+			}
+			else
+			{
+				ctx.m_renderer->draw_line({ corners[i - 1].x + 1.f, corners[i - 1].y }, { corners[i % 4].x + 1.f , corners[i % 4].y }, outline_color);
+				ctx.m_renderer->draw_line({ corners[i - 1].x - 1.f, corners[i - 1].y }, { corners[i % 4].x - 1.f , corners[i % 4].y }, outline_color);
+
+				ctx.m_renderer->draw_line({ corners[i + 3].x + 1.f, corners[i + 3].y }, { corners[i % 4 + 4].x + 1.f, corners[i % 4 + 4].y }, outline_color);
+				ctx.m_renderer->draw_line({ corners[i + 3].x - 1.f, corners[i + 3].y }, { corners[i % 4 + 4].x - 1.f, corners[i % 4 + 4].y }, outline_color);
+			}
+
+			ctx.m_renderer->draw_line({ corners[i - 1].x + 1.f, corners[i - 1].y }, { corners[i + 3].x + 1.f, corners[i + 3].y }, outline_color);
+			ctx.m_renderer->draw_line({ corners[i - 1].x - 1.f, corners[i - 1].y }, { corners[i + 3].x - 1.f, corners[i + 3].y }, outline_color);
+		}
+	}
+}
+
+void c_visuals::draw_ent_corner_box(const color_t& color, esp_box_t& box, bool outlined, const color_t& outline_color)
 {
 	float x = box.minx;
 	float y = box.miny;
@@ -86,10 +135,10 @@ void c_visuals::draw_ent_corner_box(const color_t& color, esp_box_t& box, bool o
 	{
 		// top left
 		ctx.m_renderer->draw_line({ x - 1.f, y - 1.f }, { x + linew, y - 1.f }, outline_color);
-		ctx.m_renderer->draw_line({ x - 1.f, y - 1.f }, { x + linew, y - 1.f }, outline_color);
+		ctx.m_renderer->draw_line({ x - 1.f, y - 1.f }, { x - 1.f, y + lineh }, outline_color);
 
 		// bot left
-		ctx.m_renderer->draw_line({ x - 1.f, y + h - lineh }, { x - 1.f, y + h + 1.f }, outline_color);
+		ctx.m_renderer->draw_line({ x - 1.f, y + h - lineh }, { x - 1.f, y + h + 2.f }, outline_color);
 		ctx.m_renderer->draw_line({ x - 1.f, y + h + 1.f }, { x + linew, y + h + 1.f }, outline_color);
 
 		// top right
@@ -110,7 +159,7 @@ void c_visuals::draw_ent_corner_box(const color_t& color, esp_box_t& box, bool o
 	ctx.m_renderer->draw_line({ x + w, y }, { x + w, y + lineh }, color);
 
 	// bot left
-	ctx.m_renderer->draw_line({ x, y + h - lineh }, { x, y + h }, color);
+	ctx.m_renderer->draw_line({ x, y + h - lineh }, { x, y + h + 1.f }, color);
 	ctx.m_renderer->draw_line({ x, y + h }, { x + linew, y + h }, color);
 
 	// bot right
@@ -167,14 +216,18 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 	esp_box_t esp_box;
 	color_t box_color, box_filled_color, snapline_color, name_color, outline_color;
 	uint8_t alpha, alpha_flags;
+	bool outlined;
 
 	if (!esp_box.create_player(mc, self, m_player))
 		return;
+
+	outlined = ctx.m_settings.visuals_esp_box_outlined;
 
 	// setup colors
 	box_color = ctx.m_settings.visuals_esp_box_color;
 	box_filled_color = ctx.m_settings.visuals_esp_box_filled_color;
 	snapline_color = ctx.m_settings.visuals_esp_snap_lines_color;
+	outline_color = ctx.m_settings.visuals_esp_box_outlined_color;
 	name_color = color_t(255, 255, 255, 255);
 
 	if (m_player->is_invisible())
@@ -182,7 +235,6 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 	else if (m_player->is_sneaking())
 		name_color = color_t(255, 85, 85, 255);
 
-	outline_color = color_t(0, 0, 0, 175);
 	alpha = 175;
 	alpha_flags = 125;
 
@@ -196,29 +248,38 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 		{
 			case 0:
 			{
-				draw_ent_box(box_color, esp_box);
+				if (ctx.m_settings.visuals_esp_box_filled)
+					draw_ent_filled_box(box_filled_color, esp_box);
+
+				draw_ent_box(box_color, esp_box, outlined, outline_color);
+
 				break;
 			}
 			
 			case 1:
 			{
-				draw_ent_corner_box(box_color, esp_box);
+				if (ctx.m_settings.visuals_esp_box_filled)
+					draw_ent_filled_box(box_filled_color, esp_box);
+
+				draw_ent_corner_box(box_color, esp_box, outlined, outline_color);
+
 				break;
 			}
-		}
 
-		if (ctx.m_settings.visuals_esp_box_filled)
-		{
-			draw_ent_filled_box(box_filled_color, esp_box);
+			case 2:
+			{
+				draw_ent_3d_box(box_color, esp_box, m_player->get_yaw(), outlined, outline_color);
+				break;
+			}
 		}
 	}
 
 	if (ctx.m_settings.visuals_esp_names)
 	{
 		jstring j_name = m_player->get_name();
-
 		const char* char_string = jni->GetStringUTFChars(j_name, nullptr);
 		std::string contain_string(char_string);
+
 		jni->ReleaseStringUTFChars(j_name, char_string);
 		jni->DeleteLocalRef(j_name);
 
@@ -226,14 +287,16 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 	}
 
 	if (ctx.m_settings.visuals_esp_healthbar)
-		draw_health({ esp_box.minx, esp_box.maxy }, { esp_box.minx, esp_box.miny }, (int)m_player->get_health(), (int)m_player->get_max_health(), alpha, outline_color);
+		draw_health({ esp_box.minx, esp_box.maxy }, { esp_box.minx, esp_box.miny }, (int)m_player->get_health(), (int)m_player->get_max_health(), alpha);
 
-	//if (ctx.m_settings.visuals_esp_snap_lines)
-	//	draw_snaplines({ (esp_box.maxx + esp_box.minx) / 2.f, (float)esp_box.maxy }, snapline_color, outline_color);
+	if (ctx.m_settings.visuals_esp_snap_lines)
+		draw_snaplines({ (esp_box.maxx + esp_box.minx) / 2.f, (float)esp_box.maxy }, snapline_color, outlined, outline_color);
 }
 
-void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha, const color_t& outline_color)
+void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha)
 {
+	color_t outline_color(0, 0, 0, 175);
+
 	int h = math::clamp< int >(health, 0, max_health);
 
 	float fraction = h * 0.05f;
@@ -251,18 +314,18 @@ void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, int 
 	ctx.m_renderer->draw_line({ top.x - 4.f, top.y + pos }, { top.x - 4.f, bot.y + 1.f }, color);
 
 	if (health != max_health)
-	{
-		//ctx.m_surface.string(surface_font_t::sfont_esp_small, color_t(255, 255, 255, outline_color.a()), top.x - 5.f, top.y + pos - 5.0f, true, xors("%i"), health);
 		ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { top.x - 5.f, top.y + pos - 5.0f }, std::to_string(health), color_t(255, 255, 255, 255), TEXT_CENTER);
-	}
 }
 
-void c_visuals::esp_player_t::draw_snaplines(const vec2& bot, const color_t& snaplines_color, const color_t& outline_color)
+void c_visuals::esp_player_t::draw_snaplines(const vec2& bot, const color_t& snaplines_color, bool outlined, const color_t& outline_color)
 {
 	float bot_middle_screen = ctx.m_screen_w / 2.f;
 
-	ctx.m_renderer->draw_line({ bot_middle_screen + 1.f, (float)ctx.m_screen_h }, { bot.x - 1.f, bot.y + 1.f }, outline_color);
-	ctx.m_renderer->draw_line({ bot_middle_screen - 1.f, (float)ctx.m_screen_h }, { bot.x + 1.f, bot.y + 1.f }, outline_color);
+	if (outlined)
+	{
+		ctx.m_renderer->draw_line({ bot_middle_screen + 1.f, (float)ctx.m_screen_h }, { bot.x - 1.f, bot.y + 1.f }, outline_color);
+		ctx.m_renderer->draw_line({ bot_middle_screen - 1.f, (float)ctx.m_screen_h }, { bot.x + 1.f, bot.y + 1.f }, outline_color);
+	}
 															   
 	ctx.m_renderer->draw_line({ bot_middle_screen, (float)ctx.m_screen_h }, { bot.x, bot.y }, snaplines_color);
 }

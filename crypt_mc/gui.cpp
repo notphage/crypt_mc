@@ -285,6 +285,7 @@ void c_gui::tab_visuals()
 	static UI::c_multi_dropdown box_options;
 	static UI::c_color_picker box_filled_color;
 	static UI::c_color_picker snaplines_color;
+	static UI::c_color_picker outline_color;
 
 	static UI::c_groupbox fullbright_groupbox;
 	static UI::c_checkbox fullbright_checkbox;
@@ -294,7 +295,7 @@ void c_gui::tab_visuals()
 	{
 		box_groupbox.start(menu.data(), xors("box"));
 		{
-			box_mode.handle(menu.data(), xors("mode"), { xors("2d"), xors("corner") }, &ctx.m_settings.visuals_esp_box_mode);
+			box_mode.handle(menu.data(), xors("mode"), { xors("2d"), xors("corner"), xors("3d") }, &ctx.m_settings.visuals_esp_box_mode);
 			box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr(), ctx.m_settings.visuals_esp_box_color().a_ptr());
 			box_conditions.handle(menu.data(), xors("conditions"), {
 				{&ctx.m_settings.visuals_esp_invisible, xors("invisible")},
@@ -305,7 +306,8 @@ void c_gui::tab_visuals()
 				{&ctx.m_settings.visuals_esp_names, xors("name")},
 				{&ctx.m_settings.visuals_esp_healthbar, xors("healthbar")},
 				{&ctx.m_settings.visuals_esp_box_filled, xors("filled")},
-				//{&ctx.m_settings.visuals_esp_snap_lines, xors("snaplines")}
+				{&ctx.m_settings.visuals_esp_snap_lines, xors("snaplines")},
+				{&ctx.m_settings.visuals_esp_box_outlined, xors("outlined")},
 			});
 			
 			if (ctx.m_settings.visuals_esp_box_filled)
@@ -313,6 +315,9 @@ void c_gui::tab_visuals()
 			
 			if (ctx.m_settings.visuals_esp_snap_lines)
 				snaplines_color.handle(menu.data(), xors("snapline color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().a_ptr());
+
+			if (ctx.m_settings.visuals_esp_box_outlined)
+				outline_color.handle(menu.data(), xors("outline color"), ctx.m_settings.visuals_esp_box_outlined_color().r_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().g_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().b_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().a_ptr());
 		}
 		box_groupbox.end(menu.data(), &ctx.m_settings.visuals_esp_box);
 
@@ -339,6 +344,7 @@ void c_gui::tab_visuals()
 	box_color.picker(menu.data());
 	box_filled_color.picker(menu.data());
 	snaplines_color.picker(menu.data());
+	outline_color.picker(menu.data());
 }
 
 void c_gui::tab_movement()
