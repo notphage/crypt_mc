@@ -113,7 +113,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 
 	if (left_mouse_down)
 	{
-		if (ctx.m_settings.combat_auto_clicker_jitter && util::random(0, 100) <= ctx.m_settings.combat_auto_clicker_jitter_chance)
+		if (ctx.m_settings.combat_auto_clicker_jitter && !in_inventory && util::random(0, 100) <= ctx.m_settings.combat_auto_clicker_jitter_chance)
 		{
 			float sens = mc->get_mouse_sensitivity() * 0.6f + 0.2f;
 			float step = pow(sens, 3) * 8.0f;
@@ -133,7 +133,7 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 				if (!self->get_stack(i))
 					ret = false;
 
-			if (ret)
+			if (ret && ctx.m_settings.combat_auto_clicker_prevent_unrefill)
 			{
 				reset();
 				return;
@@ -143,6 +143,22 @@ void c_auto_clicker::on_update(const std::shared_ptr<c_game>& mc, const std::sha
 
 		if (ctx.m_settings.combat_auto_clicker_auto_block && auto_block)
 		{
+			if (!self->holding_sword())
+			{
+				if (!m_right_click)
+				{
+					g_input.release_mouse(false);
+
+					auto_block = false;
+					m_right_click = true;
+				}
+
+				if (auto_block)
+					auto_block = false;
+
+				return;
+			}
+
 			if (m_right_click)
 			{
 				g_input.press_mouse(false);

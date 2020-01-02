@@ -270,6 +270,7 @@ public:
 	setting_t<int> combat_auto_clicker_block_delay{ &m_holder, fnvc("combat_auto_clicker_block_delay"), 495 };
 	setting_t<float> combat_auto_clicker_jitter_intensity{ &m_holder, fnvc("combat_auto_clicker_jitter_intensity"), 0.1f };
 	setting_t<bool> combat_auto_clicker_item_whitelist{ &m_holder, fnvc("combat_auto_clicker_item_whitelist"), false };
+	setting_t<bool> combat_auto_clicker_prevent_unrefill{ &m_holder, fnvc("combat_auto_clicker_prevent_unrefill"), true };
 	setting_t<bool> combat_auto_clicker_inventory{ &m_holder, fnvc("combat_auto_clicker_inventory"), true };
 	setting_t<bool> combat_auto_clicker_break_blocks{ &m_holder, fnvc("combat_auto_clicker_break_blocks"), true };
 	setting_t<bool> combat_auto_clicker_auto_block{ &m_holder, fnvc("combat_auto_clicker_auto_block"), false };
@@ -392,15 +393,27 @@ public:
 	setting_t<bool> visuals_esp_box{ &m_holder, fnvc("visuals_esp_box"), false };
 	setting_t<int> visuals_esp_box_mode{ &m_holder, fnvc("visuals_esp_box_mode"), 0 };
 	setting_t<color_t> visuals_esp_box_color{ &m_holder, fnvc("visuals_esp_box_color"), {255, 200, 69, 255} };
-	setting_t<bool> visuals_esp_invisible{ &m_holder, fnvc("visuals_esp_invisible"), false };
-	setting_t<bool> visuals_esp_bots{ &m_holder, fnvc("visuals_esp_bots"), false };
+	setting_t<bool> visuals_esp_box_invisible{ &m_holder, fnvc("visuals_esp_box_invisible"), false };
+	setting_t<bool> visuals_esp_box_nakeds{ &m_holder, fnvc("visuals_esp_box_nakeds"), false };
+	setting_t<bool> visuals_esp_box_bots{ &m_holder, fnvc("visuals_esp_bots"), false };
 	setting_t<bool> visuals_esp_healthbar{ &m_holder, fnvc("visuals_esp_healthbar"), false };
 	setting_t<bool> visuals_esp_box_outlined{ &m_holder, fnvc("visuals_esp_box_outlined"), true };
 	setting_t<color_t> visuals_esp_box_outlined_color{ &m_holder, fnvc("visuals_esp_box_outlined_color"), {0, 0, 0, 175} };
 	setting_t<bool> visuals_esp_box_filled{ &m_holder, fnvc("visuals_esp_box_filled"), false };
 	setting_t<color_t> visuals_esp_box_filled_color{ &m_holder, fnvc("visuals_esp_box_filled_color"), {255, 200, 69, 255} };
 	setting_t<bool> visuals_esp_snap_lines{ &m_holder, fnvc("visuals_esp_snap_lines"), false };
+	setting_t<int> visuals_esp_snap_lines_mode{ &m_holder, fnvc("visuals_esp_snap_lines_mode"), 0 };
+	setting_t<bool> visuals_esp_snap_lines_invisible{ &m_holder, fnvc("visuals_esp_snap_lines_invisible"), false };
+	setting_t<bool> visuals_esp_snap_lines_nakeds{ &m_holder, fnvc("visuals_esp_snap_lines_nakeds"), false };
+	setting_t<bool> visuals_esp_snap_lines_bots{ &m_holder, fnvc("visuals_esp_snap_lines_bots"), false };
+	setting_t<bool> visuals_esp_snap_lines_distance{ &m_holder, fnvc("visuals_esp_snap_lines_distance"), false };
+	setting_t<int> visuals_esp_snap_lines_distance_blocks{ &m_holder, fnvc("visuals_esp_snap_lines_distance_blocks"), 64 };
+	setting_t<bool> visuals_esp_snap_lines_outlined{ &m_holder, fnvc("visuals_esp_snap_lines_outlined"), true };
+	setting_t<color_t> visuals_esp_snap_lines_outlined_color{ &m_holder, fnvc("visuals_esp_snap_lines_outlined_color"), {0, 0, 0, 175} };
 	setting_t<color_t> visuals_esp_snap_lines_color{ &m_holder, fnvc("visuals_esp_snap_lines_color"), {255, 200, 69, 255} };
+	setting_t<color_t> visuals_esp_snap_lines_near_color{ &m_holder, fnvc("visuals_esp_snap_lines_color"), {255, 0, 0, 255} };
+	setting_t<color_t> visuals_esp_snap_lines_far_color{ &m_holder, fnvc("visuals_esp_snap_lines_color"), {0, 255, 0, 255} };
+	setting_t<int> visuals_esp_snap_lines_origin{ &m_holder, fnvc("visuals_esp_snap_lines_origin"), 0 };
 	setting_t<bool> visuals_esp_names{ &m_holder, fnvc("visuals_esp_names"), false };
 
 	setting_t<bool> visuals_fullbright{ &m_holder, fnvc("visuals_fullbright"), false };

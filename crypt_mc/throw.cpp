@@ -177,7 +177,8 @@ int c_base_throw::stage_switch(const std::shared_ptr<c_player>& self, int slot)
 
 			if (GetTickCount64() - m_delay > m_current_delay)
 			{
-				g_input.press_mouse(false);
+				//g_input.press_mouse(false);
+				self->send_use_item(self->get_held_item_stack());
 				++m_stage;
 				m_delay = GetTickCount64();
 				m_current_delay = ctx.m_settings.player_throw_delay + util::random(-(ctx.m_settings.player_throw_delay * 0.2f), ctx.m_settings.player_throw_delay * 0.35f);
@@ -193,7 +194,7 @@ int c_base_throw::stage_switch(const std::shared_ptr<c_player>& self, int slot)
 
 			if (GetTickCount64() - m_delay > m_current_delay)
 			{
-				g_input.release_mouse(false);
+				//g_input.release_mouse(false);
 				self->set_current_slot(m_old_slot);
 
 				m_old_slot = -1;

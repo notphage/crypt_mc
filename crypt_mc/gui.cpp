@@ -88,6 +88,7 @@ void c_gui::tab_combat()
 					{&ctx.m_settings.combat_auto_clicker_break_blocks, xors("break blocks")},
 					{&ctx.m_settings.combat_auto_clicker_auto_block, xors("auto block")},
 					{&ctx.m_settings.combat_auto_clicker_item_whitelist, xors("item whitelist")},
+					{&ctx.m_settings.combat_auto_clicker_prevent_unrefill, xors("prevent unrefill")},
 					{&ctx.m_settings.combat_auto_clicker_jitter, xors("jitter")}
 				});
 		}
@@ -284,8 +285,18 @@ void c_gui::tab_visuals()
 	static UI::c_multi_dropdown box_conditions;
 	static UI::c_multi_dropdown box_options;
 	static UI::c_color_picker box_filled_color;
+	static UI::c_color_picker box_outline_color;
+
+	static UI::c_enable_groupbox snaplines_groupbox;
+	static UI::c_multi_dropdown snaplines_conditions;
+	static UI::c_multi_dropdown snaplines_options;
+	static UI::c_dropdown snaplines_color_mode;
 	static UI::c_color_picker snaplines_color;
-	static UI::c_color_picker outline_color;
+	static UI::c_color_picker snaplines_outline_color;
+	static UI::c_color_picker snaplines_near_color;
+	static UI::c_color_picker snaplines_far_color;
+	static UI::c_dropdown snaplines_origin;
+	static UI::c_slider snaplines_max_distance;
 
 	static UI::c_groupbox fullbright_groupbox;
 	static UI::c_checkbox fullbright_checkbox;
@@ -298,29 +309,84 @@ void c_gui::tab_visuals()
 			box_mode.handle(menu.data(), xors("mode"), { xors("2d"), xors("corner"), xors("3d") }, &ctx.m_settings.visuals_esp_box_mode);
 			box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr(), ctx.m_settings.visuals_esp_box_color().a_ptr());
 			box_conditions.handle(menu.data(), xors("conditions"), {
-				{&ctx.m_settings.visuals_esp_invisible, xors("invisible")},
-				{&ctx.m_settings.visuals_esp_bots, xors("bots")}
+				{&ctx.m_settings.visuals_esp_box_invisible, xors("ignore invisible")},
+				{&ctx.m_settings.visuals_esp_box_nakeds, xors("ignore nakeds")},
+				{&ctx.m_settings.visuals_esp_box_bots, xors("ignore bots")}
 			});
 
 			box_options.handle(menu.data(), xors("options"), {
 				{&ctx.m_settings.visuals_esp_names, xors("name")},
 				{&ctx.m_settings.visuals_esp_healthbar, xors("healthbar")},
 				{&ctx.m_settings.visuals_esp_box_filled, xors("filled")},
-				{&ctx.m_settings.visuals_esp_snap_lines, xors("snaplines")},
 				{&ctx.m_settings.visuals_esp_box_outlined, xors("outlined")},
 			});
 			
 			if (ctx.m_settings.visuals_esp_box_filled)
 				box_filled_color.handle(menu.data(), xors("filled color"), ctx.m_settings.visuals_esp_box_filled_color().r_ptr(), ctx.m_settings.visuals_esp_box_filled_color().g_ptr(), ctx.m_settings.visuals_esp_box_filled_color().b_ptr(), ctx.m_settings.visuals_esp_box_filled_color().a_ptr());
-			
-			if (ctx.m_settings.visuals_esp_snap_lines)
-				snaplines_color.handle(menu.data(), xors("snapline color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().a_ptr());
 
 			if (ctx.m_settings.visuals_esp_box_outlined)
-				outline_color.handle(menu.data(), xors("outline color"), ctx.m_settings.visuals_esp_box_outlined_color().r_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().g_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().b_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().a_ptr());
+				box_outline_color.handle(menu.data(), xors("outline color"), ctx.m_settings.visuals_esp_box_outlined_color().r_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().g_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().b_ptr(), ctx.m_settings.visuals_esp_box_outlined_color().a_ptr());
 		}
 		box_groupbox.end(menu.data(), &ctx.m_settings.visuals_esp_box);
 
+		snaplines_groupbox.start(menu.data(), xors("snaplines"));
+		{
+			snaplines_origin.handle(menu.data(), xors("origin"), { xors("bottom"), xors("middle"), xors("feet") }, &ctx.m_settings.visuals_esp_snap_lines_origin);
+			snaplines_conditions.handle(menu.data(), xors("conditions"), 
+				{
+					{&ctx.m_settings.visuals_esp_snap_lines_invisible, xors("ignore invisible")},
+					{&ctx.m_settings.visuals_esp_snap_lines_nakeds, xors("ignore nakeds")},
+					{&ctx.m_settings.visuals_esp_snap_lines_bots, xors("ignore bots")}
+				});
+
+			snaplines_options.handle(menu.data(), xors("options"),
+				{
+					{&ctx.m_settings.visuals_esp_snap_lines_distance, xors("max distance")},
+					{&ctx.m_settings.visuals_esp_snap_lines_outlined, xors("outlined")}
+				});
+
+			snaplines_color_mode.handle(menu.data(), xors("color mode"), { xors("static"), xors("distance"), xors("health") }, &ctx.m_settings.visuals_esp_snap_lines_mode);
+
+			switch (ctx.m_settings.visuals_esp_snap_lines_mode)
+			{
+				case 0: // static
+				{
+					snaplines_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_snap_lines_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_color().a_ptr());
+
+					break;
+				}
+
+				case 1: // distance
+				{
+					snaplines_near_color.handle(menu.data(), xors("near color"), ctx.m_settings.visuals_esp_snap_lines_near_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_near_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_near_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_near_color().a_ptr());
+					snaplines_far_color.handle(menu.data(), xors("far color"), ctx.m_settings.visuals_esp_snap_lines_far_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_far_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_far_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_far_color().a_ptr());
+
+					break;
+				}
+
+				default:
+					break;
+			}
+
+			if (ctx.m_settings.visuals_esp_snap_lines_outlined)
+				snaplines_outline_color.handle(menu.data(), xors("outlined color"), ctx.m_settings.visuals_esp_snap_lines_outlined_color().r_ptr(), ctx.m_settings.visuals_esp_snap_lines_outlined_color().g_ptr(), ctx.m_settings.visuals_esp_snap_lines_outlined_color().b_ptr(), ctx.m_settings.visuals_esp_snap_lines_outlined_color().a_ptr());
+
+			if (ctx.m_settings.visuals_esp_snap_lines_distance)
+				snaplines_max_distance.handle(menu.data(), xors("max distance"), &ctx.m_settings.visuals_esp_snap_lines_distance_blocks, 1, 64, 1, xors("blocks"));
+		}
+		snaplines_groupbox.end(menu.data(), &ctx.m_settings.visuals_esp_snap_lines);
+
+		box_mode.dropdown(menu.data());
+		box_conditions.dropdown(menu.data());
+		box_options.dropdown(menu.data());
+		snaplines_origin.dropdown(menu.data());
+		snaplines_conditions.dropdown(menu.data());
+		snaplines_options.dropdown(menu.data());
+		snaplines_color_mode.dropdown(menu.data());
+	}
+
+	menu.column_right();
+	{
 		fullbright_groupbox.start(menu.data(), xors("fullbright"));
 		{
 			fullbright_checkbox.handle(menu.data(), xors("enable"), &ctx.m_settings.visuals_fullbright);
@@ -330,21 +396,16 @@ void c_gui::tab_visuals()
 		}
 		fullbright_groupbox.end(menu.data());
 
-		box_mode.dropdown(menu.data());
-		box_conditions.dropdown(menu.data());
-		box_options.dropdown(menu.data());
 		fullbright_key.dropdown(menu.data());
-	}
-
-	menu.column_right();
-	{
-
 	}
 
 	box_color.picker(menu.data());
 	box_filled_color.picker(menu.data());
+	box_outline_color.picker(menu.data());
 	snaplines_color.picker(menu.data());
-	outline_color.picker(menu.data());
+	snaplines_near_color.picker(menu.data());
+	snaplines_far_color.picker(menu.data());
+	snaplines_outline_color.picker(menu.data());
 }
 
 void c_gui::tab_movement()

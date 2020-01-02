@@ -164,6 +164,7 @@ struct game_fields
 	jclass cls_lwjgl_sys_impl = nullptr;
 	jclass cls_lwjgl_display = nullptr;
 	jclass cls_lwjgl_mouse = nullptr;
+	jclass cls_vec3 = nullptr;
 
 	jfieldID fid_minecraft;
 	jfieldID fid_entity_renderer_obj;
@@ -195,6 +196,7 @@ struct game_fields
 
 	jmethodID mid_get_key_code = nullptr;
 	jmethodID mid_screen_constructor = nullptr;
+	jmethodID mid_vec3_constructor = nullptr;
 	jmethodID mid_get_string_width = nullptr;
 	jmethodID mid_draw_string_with_shadow = nullptr;
 	jmethodID mid_enabled_light_map = nullptr;
@@ -323,11 +325,12 @@ std::vector<std::shared_ptr<c_player>> c_world_18X::get_players()
 	std::vector<std::shared_ptr<c_player>> players;
 
 	const jobject obj_player_ents = jni->GetObjectField(world_instance, worldfields.fid_players);
-	const jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
+	if (!obj_player_ents)
+		return players;
 
+	const jobjectArray arr_player_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_player_ents, worldfields.mid_to_array));
 	if (!arr_player_ents)
 	{
-		jni->DeleteLocalRef(arr_player_ents);
 		jni->DeleteLocalRef(obj_player_ents);
 		return players;
 	}
@@ -475,6 +478,8 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 	}
 
 	auto local_player = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_player);
+	if (!local_player)
+		return;
 
 	if (jni->IsSameObject(local_player, player_instance))
 	{
@@ -510,6 +515,8 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 			playerfields.holding_block = false;
 		}
 	}
+
+	jni->DeleteLocalRef(local_player);
 }
 
 bool c_player_18X::is_same(const std::shared_ptr<c_player>& other)
@@ -519,7 +526,20 @@ bool c_player_18X::is_same(const std::shared_ptr<c_player>& other)
 
 jobject c_player_18X::get_stack(jint slot)
 {
-	return jni->CallObjectMethod(jni->CallObjectMethod(jni->GetObjectField(player_instance, playerfields.fid_inventory), playerfields.mid_get_slot, slot), playerfields.mid_get_stack);
+	auto obj_inventory = jni->GetObjectField(player_instance, playerfields.fid_inventory);
+	if (!obj_inventory)
+		return nullptr;
+
+	auto obj_slot = jni->CallObjectMethod(obj_inventory, playerfields.mid_get_slot, slot);
+	if (!obj_slot)
+		return nullptr;
+
+	auto res = jni->CallObjectMethod(obj_slot, playerfields.mid_get_stack);
+
+	jni->DeleteLocalRef(obj_inventory);
+	jni->DeleteLocalRef(obj_slot);
+
+	return res;
 }
 
 jobject c_player_18X::get_effects(jobject potion, jobject item_stack)
@@ -550,12 +570,29 @@ jint c_player_18X::get_effects_id(jobject effects)
 
 jint c_player_18X::get_potion_id(jobject effect)
 {
-	return jni->CallIntMethod(effect, playerfields.mid_potion_id);
+	auto res = jni->CallIntMethod(effect, playerfields.mid_potion_id);
+
+	jni->DeleteLocalRef(effect);
+
+	return res;
 }
 
 jint c_player_18X::get_speed_amplifier()
 {
-	return jni->CallIntMethod(jni->CallObjectMethod(player_instance, playerfields.mid_get_active_potion_effect, jni->GetStaticObjectField(playerfields.cls_potion, playerfields.fid_move_speed)), playerfields.mid_get_amplifier);
+	auto obj_move_speed = jni->GetStaticObjectField(playerfields.cls_potion, playerfields.fid_move_speed);
+	if (!obj_move_speed)
+		return 0;
+
+	auto obj_active_potion_affect = jni->CallObjectMethod(player_instance, playerfields.mid_get_active_potion_effect, obj_move_speed);
+	if (!obj_active_potion_affect)
+		return 0;
+
+	auto res = jni->CallIntMethod(obj_active_potion_affect, playerfields.mid_get_amplifier);
+
+	jni->DeleteLocalRef(obj_move_speed);
+	jni->DeleteLocalRef(obj_active_potion_affect);
+
+	return res;
 }
 
 jboolean c_player_18X::is_invisible()
@@ -658,9 +695,22 @@ jfloat c_player_18X::get_forward()
 	return jni->GetFloatField(player_instance, playerfields.fid_move_forward);
 }
 
+jobject c_player_18X::get_held_item_stack()
+{
+	return jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item);
+}
+
 jobject c_player_18X::get_held_item()
 {
-	return jni->CallObjectMethod(jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item), playerfields.mid_get_item);
+	auto obj_held_item = jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item);
+	if (!obj_held_item)
+		return nullptr;
+
+	auto res = jni->CallObjectMethod(obj_held_item, playerfields.mid_get_item);
+
+	jni->DeleteLocalRef(obj_held_item);
+
+	return res;
 }
 
 jobject c_player_18X::get_item(jobject item_stack)
@@ -684,31 +734,31 @@ std::vector<int> c_player_18X::find_item(int min, int max, find_item_type item_t
 				jclass clazz = nullptr;
 				switch (item_type)
 				{
-				case POTION:
-				{
-					clazz = playerfields.cls_item_potion;
-					break;
-				}
+					case POTION:
+					{
+						clazz = playerfields.cls_item_potion;
+						break;
+					}
 
-				case SOUP:
-				{
-					clazz = playerfields.cls_item_soup;
-					break;
-				}
+					case SOUP:
+					{
+						clazz = playerfields.cls_item_soup;
+						break;
+					}
 
-				case PEARL:
-				{
-					clazz = playerfields.item_ender_pearl_class;
-					break;
-				}
+					case PEARL:
+					{
+						clazz = playerfields.item_ender_pearl_class;
+						break;
+					}
 
-				case ROD:
-				{
-					break;
-				}
+					case ROD:
+					{
+						break;
+					}
 
-				default:
-					return items;
+					default:
+						return items;
 				}
 
 				if (clazz)
@@ -798,32 +848,80 @@ jdouble c_player_18X::motion_z()
 
 jdouble c_player_18X::aabb_min_x()
 {
-	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_min_x);
+	auto obj_aabb = jni->GetObjectField(player_instance, playerfields.fid_aabb);
+	if (!obj_aabb)
+		return false;
+
+	auto res = jni->GetDoubleField(obj_aabb, playerfields.fid_aabb_min_x);
+
+	jni->DeleteLocalRef(obj_aabb);
+
+	return res;
 }
 
 jdouble c_player_18X::aabb_min_y()
 {
-	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_min_y);
+	auto obj_aabb = jni->GetObjectField(player_instance, playerfields.fid_aabb);
+	if (!obj_aabb)
+		return false;
+
+	auto res = jni->GetDoubleField(obj_aabb, playerfields.fid_aabb_min_y);
+
+	jni->DeleteLocalRef(obj_aabb);
+
+	return res;
 }
 
 jdouble c_player_18X::aabb_min_z()
 {
-	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_min_z);
+	auto obj_aabb = jni->GetObjectField(player_instance, playerfields.fid_aabb);
+	if (!obj_aabb)
+		return false;
+
+	auto res = jni->GetDoubleField(obj_aabb, playerfields.fid_aabb_min_z);
+
+	jni->DeleteLocalRef(obj_aabb);
+
+	return res;
 }
 
 jdouble c_player_18X::aabb_max_x()
 {
-	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_max_x);
+	auto obj_aabb = jni->GetObjectField(player_instance, playerfields.fid_aabb);
+	if (!obj_aabb)
+		return false;
+
+	auto res = jni->GetDoubleField(obj_aabb, playerfields.fid_aabb_max_x);
+
+	jni->DeleteLocalRef(obj_aabb);
+
+	return res;
 }
 
 jdouble c_player_18X::aabb_max_y()
 {
-	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_max_y);
+	auto obj_aabb = jni->GetObjectField(player_instance, playerfields.fid_aabb);
+	if (!obj_aabb)
+		return false;
+
+	auto res = jni->GetDoubleField(obj_aabb, playerfields.fid_aabb_max_y);
+
+	jni->DeleteLocalRef(obj_aabb);
+
+	return res;
 }
 
 jdouble c_player_18X::aabb_max_z()
 {
-	return jni->GetDoubleField(jni->GetObjectField(player_instance, playerfields.fid_aabb), playerfields.fid_aabb_max_z);
+	auto obj_aabb = jni->GetObjectField(player_instance, playerfields.fid_aabb);
+	if (!obj_aabb)
+		return false;
+
+	auto res = jni->GetDoubleField(obj_aabb, playerfields.fid_aabb_max_z);
+
+	jni->DeleteLocalRef(obj_aabb);
+
+	return res;
 }
 
 jdouble c_player_18X::old_origin_x()
@@ -873,24 +971,27 @@ jfloat c_player_18X::get_max_health()
 
 jboolean c_player_18X::has_armor()
 {
-	const auto arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_armor_inventory));
-	if (!arr_item_stack)
-	{
-		jni->DeleteLocalRef(arr_item_stack);
+	auto obj_inventory = jni->GetObjectField(player_instance, playerfields.fid_inventory_player);
+	if (!obj_inventory)
 		return false;
-	}
+
+	const auto arr_item_stack = static_cast<jobjectArray>(jni->GetObjectField(obj_inventory, playerfields.fid_armor_inventory));
+	if (!arr_item_stack)
+		return false;
 
 
 	for (jint i = 0; i < jni->GetArrayLength(arr_item_stack); i++)
 	{
 		if (const auto obj = jni->GetObjectArrayElement(arr_item_stack, i); obj != nullptr)
 		{
+			jni->DeleteLocalRef(obj_inventory);
 			jni->DeleteLocalRef(arr_item_stack);
 			jni->DeleteLocalRef(obj);
 			return true;
 		}
 	}
 
+	jni->DeleteLocalRef(obj_inventory);
 	jni->DeleteLocalRef(arr_item_stack);
 	return false;
 }
@@ -927,17 +1028,44 @@ jint c_player_18X::get_ticks_existed()
 
 jint c_player_18X::get_current_slot()
 {
-	return jni->GetIntField(jni->GetObjectField(player_instance, playerfields.fid_inventory_player), playerfields.fid_current_slot);
+	auto obj_inventory = jni->GetObjectField(player_instance, playerfields.fid_inventory_player);
+	if (!obj_inventory)
+		return 0;
+
+	auto res = jni->GetIntField(obj_inventory, playerfields.fid_current_slot);
+
+	jni->DeleteLocalRef(obj_inventory);
+
+	return res;
 }
 
 jboolean c_player_18X::send_use_item(jobject item_stack)
 {
+	if (!item_stack)
+		return false;
+
 	auto mc = ctx.get_game(jni);
 
 	if (!mc)
 		return false;
 
-	return jni->CallBooleanMethod(mc->get_player_controller(), playerfields.mid_send_use_item, player_instance, worldfields.obj_world, item_stack);
+	auto obj_player_controller = mc->get_player_controller();
+	if (!obj_player_controller)
+		return false;
+
+	auto obj_world = jni->GetObjectField(gamefields.obj_game, gamefields.fid_the_world);
+	if (!obj_world)
+	{
+		jni->DeleteLocalRef(obj_player_controller);
+		return false;
+	}
+
+	auto res = jni->CallBooleanMethod(obj_player_controller, playerfields.mid_send_use_item, player_instance, obj_world, item_stack);
+
+	jni->DeleteLocalRef(obj_player_controller);
+	jni->DeleteLocalRef(obj_world);
+
+	return res;
 }
 
 void c_player_18X::set_current_slot(jint slot)
@@ -1024,6 +1152,7 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.cls_enum = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("java/lang/Enum")));
 		gamefields.cls_keybinding = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avb")));
 		gamefields.cls_game_settings = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("avh")));
+		gamefields.cls_vec3 = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aui")));
 	
 		gamefields.fid_minecraft = jni->GetStaticFieldID(gamefields.minecraft, xors("S"), xors("Lave;"));
 		gamefields.fid_entity_renderer_obj = jni->GetFieldID(gamefields.minecraft, xors("o"), xors("Lbfk;"));
@@ -1053,7 +1182,8 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.fid_gamma = jni->GetFieldID(gamefields.cls_game_settings, xors("aJ"), xors("F")); // aI 1.8-1.8.8 aJ 1.8.9
 
 		gamefields.mid_ordinal = jni->GetMethodID(gamefields.cls_enum, xors("ordinal"), xors("()I"));
-		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;)V"));
+		gamefields.mid_screen_constructor = jni->GetMethodID(gamefields.cls_moving_object_position, xors("<init>"), xors("(Lpk;Laui;)V"));
+		gamefields.mid_vec3_constructor = jni->GetMethodID(gamefields.cls_vec3, xors("<init>"), xors("(DDD)V"));
 		gamefields.mid_get_string_width = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;)I"));
 		gamefields.mid_draw_string_with_shadow = jni->GetMethodID(gamefields.font_renderer, xors("a"), xors("(Ljava/lang/String;FFIZ)I"));
 		gamefields.mid_setup_camera_transform = jni->GetMethodID(gamefields.entity_renderer_class, xors("a"), xors("(FI)V"));
@@ -1091,7 +1221,6 @@ void c_game_18X::instantiate(JNIEnv* _jni)
 		gamefields.in_chat = false;
 	}
 }
-
 
 jboolean c_game_18X::in_game_has_focus()
 {
@@ -1216,7 +1345,20 @@ jint c_game_18X::get_string_width(jstring string)
 
 jint c_game_18X::get_sneak_key_code()
 {
-	return jni->CallIntMethod(jni->GetObjectField(jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings), gamefields.fid_key_bind_sneak), gamefields.mid_get_key_code);
+	auto obj_settings = jni->GetObjectField(gamefields.obj_game, gamefields.fid_game_settings);
+	if (!obj_settings)
+		return 0;
+
+	auto obj_sneak_key = jni->GetObjectField(obj_settings, gamefields.fid_key_bind_sneak);
+	if (!obj_sneak_key)
+		return 0;
+
+	auto res = jni->CallIntMethod(obj_sneak_key, gamefields.mid_get_key_code);
+
+	jni->DeleteLocalRef(obj_settings);
+	jni->DeleteLocalRef(obj_sneak_key);
+
+	return res;
 }
 
 jint c_game_18X::draw_string_with_shadow(jstring par1, jint par2, jint par3, jint par4)
@@ -1274,12 +1416,12 @@ void c_game_18X::set_pointed_entity(jobject ent)
 	return jni->SetObjectField(gamefields.obj_game, gamefields.fid_pointed_entity, ent);
 }
 
-void c_game_18X::set_object_mouse_over(jobject player)
+void c_game_18X::set_object_mouse_over(jobject player, const vec3& hit_position)
 {
 	if (!player)
 		return;
 
-	jni->SetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over, jni->NewObject(gamefields.cls_moving_object_position, gamefields.mid_screen_constructor, player));
+	jni->SetObjectField(gamefields.obj_game, gamefields.fid_object_mouse_over, jni->NewObject(gamefields.cls_moving_object_position, gamefields.mid_screen_constructor, player, jni->NewObject(gamefields.cls_vec3, gamefields.mid_vec3_constructor, hit_position.x, hit_position.y, hit_position.z)));
 }
 
 void c_game_18X::disable_light_map()

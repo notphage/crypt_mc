@@ -3,7 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 
-bool c_visuals::esp_box_t::create_player(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_player>& ent)
+bool c_visuals::esp_box_t::create_player(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& ent)
 {
 	jfloat render_partial_ticks = mc->get_render_partial_ticks();
 	jfloat ent_height = ent->get_height();
@@ -18,9 +18,9 @@ bool c_visuals::esp_box_t::create_player(const std::shared_ptr<c_game>& mc, cons
 	min.y = -(ent_height / 2.f);
 
 	vec3 prev_origin(ent->old_origin_x(), ent->old_origin_y(), ent->old_origin_z());
-	vec3 interp_origin = prev_origin + ((origin - prev_origin) * render_partial_ticks);
+	m_interp_origin = prev_origin + ((origin - prev_origin) * render_partial_ticks);
 
-	m_center = interp_origin + ((min + max) * 0.5f);
+	m_center = m_interp_origin + ((min + max) * 0.5f);
 	m_center.y += (ent_height / 1.75f);
 
 	m_bbox =
@@ -186,12 +186,6 @@ void c_visuals::on_swap_buffers(const std::shared_ptr<c_game>& mc, const std::sh
 		if (player->is_same(self) || player->get_health() <= 0 || player->is_dead())
 			continue;
 	
-		if (player->is_invisible() && !ctx.m_settings.visuals_esp_invisible)
-			continue;
-	
-		//if (player->is_bot() && !ctx.m_settings.visuals_esp_bots)
-		//	continue;
-	
 		vec3 self_origin(self->origin_x(), self->origin_y(), self->origin_z());
 		vec3 player_origin(player->origin_x(), player->origin_y(), player->origin_z());
 	
@@ -214,25 +208,32 @@ void c_visuals::on_swap_buffers(const std::shared_ptr<c_game>& mc, const std::sh
 void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world)
 {
 	esp_box_t esp_box;
-	color_t box_color, box_filled_color, snapline_color, name_color, outline_color;
+	color_t box_color, box_filled_color, name_color, box_outline_color, snaplines_outline_color;
 	uint8_t alpha, alpha_flags;
-	bool outlined;
+	bool box_outlined, snaplines_outlined, is_invisible, is_naked, is_sneaking, is_bot;
 
-	if (!esp_box.create_player(mc, self, m_player))
+	if (!esp_box.create_player(mc, m_player))
 		return;
 
-	outlined = ctx.m_settings.visuals_esp_box_outlined;
+	box_outlined = ctx.m_settings.visuals_esp_box_outlined;
+	snaplines_outlined = ctx.m_settings.visuals_esp_snap_lines_outlined;
 
 	// setup colors
 	box_color = ctx.m_settings.visuals_esp_box_color;
 	box_filled_color = ctx.m_settings.visuals_esp_box_filled_color;
-	snapline_color = ctx.m_settings.visuals_esp_snap_lines_color;
-	outline_color = ctx.m_settings.visuals_esp_box_outlined_color;
+	box_outline_color = ctx.m_settings.visuals_esp_box_outlined_color;
+	snaplines_outline_color = ctx.m_settings.visuals_esp_snap_lines_outlined_color;
 	name_color = color_t(255, 255, 255, 255);
 
-	if (m_player->is_invisible())
+	// setup flags
+	is_invisible = m_player->is_invisible();
+	is_naked = m_player->has_armor();
+	is_sneaking = m_player->is_invisible();
+	is_bot = false; // m_player->is_bot();
+
+	if (is_invisible)
 		name_color = color_t(85, 255, 255, 255);
-	else if (m_player->is_sneaking())
+	else if (is_sneaking)
 		name_color = color_t(255, 85, 85, 255);
 
 	alpha = 175;
@@ -240,10 +241,14 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 
 	// TODO: dormant system
 
-	outline_color.a(alpha);
+	box_outline_color.a(alpha);
+	snaplines_outline_color.a(alpha);
 
 	if (ctx.m_settings.visuals_esp_box)
 	{
+		if ((is_invisible && !ctx.m_settings.visuals_esp_box_invisible) || (is_naked && !ctx.m_settings.visuals_esp_box_nakeds) || (is_bot && !ctx.m_settings.visuals_esp_box_bots))
+			goto esp_box_skip;
+
 		switch (ctx.m_settings.visuals_esp_box_mode)
 		{
 			case 0:
@@ -251,7 +256,7 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 				if (ctx.m_settings.visuals_esp_box_filled)
 					draw_ent_filled_box(box_filled_color, esp_box);
 
-				draw_ent_box(box_color, esp_box, outlined, outline_color);
+				draw_ent_box(box_color, esp_box, box_outlined, box_outline_color);
 
 				break;
 			}
@@ -261,18 +266,20 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 				if (ctx.m_settings.visuals_esp_box_filled)
 					draw_ent_filled_box(box_filled_color, esp_box);
 
-				draw_ent_corner_box(box_color, esp_box, outlined, outline_color);
+				draw_ent_corner_box(box_color, esp_box, box_outlined, box_outline_color);
 
 				break;
 			}
 
 			case 2:
 			{
-				draw_ent_3d_box(box_color, esp_box, m_player->get_yaw(), outlined, outline_color);
+				draw_ent_3d_box(box_color, esp_box, m_player->get_yaw(), box_outlined, box_outline_color);
 				break;
 			}
 		}
 	}
+
+esp_box_skip:
 
 	if (ctx.m_settings.visuals_esp_names)
 	{
@@ -289,8 +296,15 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 	if (ctx.m_settings.visuals_esp_healthbar)
 		draw_health({ esp_box.minx, esp_box.maxy }, { esp_box.minx, esp_box.miny }, (int)m_player->get_health(), (int)m_player->get_max_health(), alpha);
 
-	if (ctx.m_settings.visuals_esp_snap_lines)
-		draw_snaplines({ (esp_box.maxx + esp_box.minx) / 2.f, (float)esp_box.maxy }, snapline_color, outlined, outline_color);
+	if (ctx.m_settings.visuals_esp_snap_lines && (ctx.m_settings.visuals_esp_snap_lines_distance ? m_dist < ctx.m_settings.visuals_esp_snap_lines_distance_blocks : true))
+	{
+		if ((is_invisible && !ctx.m_settings.visuals_esp_snap_lines_invisible) || (is_naked && !ctx.m_settings.visuals_esp_snap_lines_nakeds) || (is_bot && !ctx.m_settings.visuals_esp_snap_lines_bots))
+			return; // goto esp_snap_line_skip;
+
+		draw_snaplines(mc, self, { (esp_box.maxx + esp_box.minx) / 2.f, (float)esp_box.maxy }, snaplines_outlined, snaplines_outline_color);
+	}
+
+//esp_snap_line_skip:
 }
 
 void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha)
@@ -317,15 +331,83 @@ void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, int 
 		ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { top.x - 5.f, top.y + pos - 5.0f }, std::to_string(health), color_t(255, 255, 255, 255), TEXT_CENTER);
 }
 
-void c_visuals::esp_player_t::draw_snaplines(const vec2& bot, const color_t& snaplines_color, bool outlined, const color_t& outline_color)
+void c_visuals::esp_player_t::draw_snaplines(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const vec2& end, bool outlined, const color_t& outline_color)
 {
-	float bot_middle_screen = ctx.m_screen_w / 2.f;
+	vec2 begin{};
+
+	switch (ctx.m_settings.visuals_esp_snap_lines_origin)
+	{
+		case 0:
+		{
+			begin.x = (float)ctx.m_screen_w / 2.f;
+			begin.y = (float)ctx.m_screen_h;
+
+			break;
+		}
+
+		case 1:
+		{
+			begin.x = (float)ctx.m_screen_w / 2.f;
+			begin.y = (float)ctx.m_screen_h / 2.f;
+
+			break;
+		}
+
+		case 2:
+		{
+			vec3 self_origin(self->origin_x(), self->aabb_min_y(), self->origin_z());
+			vec3 self_prev_origin(self->old_origin_x(), self->aabb_min_y(), self->old_origin_z());
+			vec3 self_interp_origin = self_prev_origin + ((self_origin - self_prev_origin) * mc->get_render_partial_ticks());
+
+			ctx.w2s(self_interp_origin, begin);
+
+			break;
+		}
+	}
+
+	color_t snaplines_color{};
+	switch (ctx.m_settings.visuals_esp_snap_lines_mode)
+	{
+		case 0: // static
+		{
+			snaplines_color = ctx.m_settings.visuals_esp_snap_lines_color;
+
+			break;
+		}
+
+		case 1: // distance
+		{
+			float dist = m_dist;
+			constexpr float max_dist = 64.f;
+			float h = math::clamp<float>(dist, 0.f, max_dist) / max_dist;
+
+			float near_color = ctx.m_settings.visuals_esp_snap_lines_near_color().to_hue();
+			float far_color = ctx.m_settings.visuals_esp_snap_lines_far_color().to_hue();
+
+			snaplines_color.from_hsv(math::lerp(far_color, near_color, h), 1.f, 1.f);
+			snaplines_color.a(255);
+
+			break;
+		}
+
+		case 2: // health
+		{
+			int health = m_player->get_health();
+			int max_health = m_player->get_max_health();
+			int h = math::clamp<int>(health, 0, max_health);
+
+			float fraction = h * 0.05f;
+			snaplines_color = { math::min(255 * (max_health - health) / max_health, 255), (int)(255.f * fraction), 0, 255 };
+
+			break;
+		}
+	}
 
 	if (outlined)
 	{
-		ctx.m_renderer->draw_line({ bot_middle_screen + 1.f, (float)ctx.m_screen_h }, { bot.x - 1.f, bot.y + 1.f }, outline_color);
-		ctx.m_renderer->draw_line({ bot_middle_screen - 1.f, (float)ctx.m_screen_h }, { bot.x + 1.f, bot.y + 1.f }, outline_color);
+		ctx.m_renderer->draw_line({ begin.x + 1.f, begin.y }, { end.x - 1.f, end.y + 1.f }, outline_color);
+		ctx.m_renderer->draw_line({ begin.x - 1.f, begin.y }, { end.x + 1.f, end.y + 1.f }, outline_color);
 	}
 															   
-	ctx.m_renderer->draw_line({ bot_middle_screen, (float)ctx.m_screen_h }, { bot.x, bot.y }, snaplines_color);
+	ctx.m_renderer->draw_line(begin, end, snaplines_color);
 }

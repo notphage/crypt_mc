@@ -68,7 +68,8 @@ void c_aim_assist::find_best_point(const std::shared_ptr<c_player>& self, const 
 		ray_trace_t ray_trace(trace_origin, dir_to_point);
 
 		float distance = 0.f;
-		if (!ray_trace.trace(player_mins, player_maxs, distance))
+		vec3 hit_position = {};
+		if (!ray_trace.trace(player_mins, player_maxs, distance, hit_position))
 			continue;
 
 		auto pitch_change = math::wrap_angle_to_180(p_pitch - pitch);

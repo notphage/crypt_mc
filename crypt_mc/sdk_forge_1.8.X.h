@@ -38,6 +38,7 @@ public:
 	jfloat get_strafing() override;
 	jfloat get_forward() override;
 	jobject get_held_item() override;
+	jobject get_held_item_stack() override;
 	jboolean holding_weapon() override;
 	jboolean holding_sword() override;
 	jboolean holding_axe() override;
@@ -164,7 +165,7 @@ public:
 	void set_gamma(jfloat) override;
 	void enable_light_map() override;
 	void set_pointed_entity(jobject ent) override;
-	void set_object_mouse_over(jobject player) override;
+	void set_object_mouse_over(jobject player, const vec3& hit_position) override;
 	void disable_light_map() override;
 	void setup_camera_transform(jfloat, int) override;
 

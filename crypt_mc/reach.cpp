@@ -17,14 +17,13 @@ void c_reach::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 	//Reach value
 	float target_distance = ctx.m_settings.combat_reach_distance;
 
-	const vec3 self_origin(self->origin_x(), self->origin_y(), self->origin_z());
-	const vec3 self_prev_origin(self->old_origin_x(), self->old_origin_y(), self->old_origin_z());
-	vec3 trace_origin = self_prev_origin + ((self_origin - self_prev_origin) * mc->get_render_partial_ticks());
-	trace_origin.y += self->get_eye_height();
+	const vec3 trace_origin(self->origin_x(), self->aabb_min_y() + self->get_eye_height(), self->origin_z());
 
 	const vec3 self_angle(self->get_pitch(), self->get_yaw(), 0.f);
 	vec3 self_forward;
 	math::angle_vectors(self_angle, &self_forward);
+
+	vec3 hit_position{};
 	
 	for (const auto& player : world->get_players())
 	{
@@ -56,7 +55,7 @@ void c_reach::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 		ray_trace_t ray_trace(trace_origin, self_forward);
 
 		float distance = 0.f;
-		if (!ray_trace.trace(player_mins, player_maxs, distance))
+		if (!ray_trace.trace(player_mins, player_maxs, distance, hit_position))
 			continue;
 
 		if (distance < target_distance)
@@ -69,6 +68,6 @@ void c_reach::on_atan2(const std::shared_ptr<c_game>& mc, const std::shared_ptr<
 	if (target_entity == nullptr || target_entity->player_instance == nullptr)
 		return;
 
-	mc->set_object_mouse_over(target_entity->player_instance);
+	mc->set_object_mouse_over(target_entity->player_instance, hit_position);
 	mc->set_pointed_entity(target_entity->player_instance);
 }

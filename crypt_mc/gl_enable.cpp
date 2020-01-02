@@ -11,12 +11,12 @@ long __stdcall hooked::gl_enable(JNIEnv* jni, jclass caller, jint cap, jlong fun
 		std::shared_ptr<c_stack_trace> stack_class = std::make_shared<c_stack_trace>();
 		stack_class->instantiate(jni);
 
-		stack_trace stack;
-		stack_class->get_stack_trace(5, stack);
+		stack_trace stack_18;
+		stack_class->get_stack_trace(5, stack_18);
 
-		if (stack.valid)
+		if (stack_18.valid)
 		{
-			if (stack.method_name == fnvc("func_78468_a") || stack.method_name == fnvc("a"))
+			if (stack_18.method_name == fnvc("func_78468_a") || stack_18.method_name == fnvc("a"))
 			{
 				const auto mc = ctx.get_game(jni);
 				const auto self = mc->get_player();
@@ -34,6 +34,35 @@ long __stdcall hooked::gl_enable(JNIEnv* jni, jclass caller, jint cap, jlong fun
 
 					ctx.m_world_to_screen_matrix = ctx.m_projection_matrix * ctx.m_view_matrix;
 					ctx.m_world_to_screen_matrix = glm::translate(ctx.m_world_to_screen_matrix, glm::f64vec3(-interp_camera_origin.x, -interp_camera_origin.y, -interp_camera_origin.z));
+				}
+			}
+			else
+			{
+				stack_trace stack_17;
+				stack_class->get_stack_trace(3, stack_17);
+
+				if (stack_17.valid)
+				{
+					if (stack_17.method_name == fnvc("func_78471_a") || stack_17.method_name == fnvc("a"))
+					{
+						const auto mc = ctx.get_game(jni);
+						const auto self = mc->get_player();
+						const auto world = mc->get_world();
+
+						if (self && world)
+						{
+							glGetDoublev(GL_MODELVIEW_MATRIX, glm::value_ptr(ctx.m_view_matrix));
+							glGetDoublev(GL_PROJECTION_MATRIX, glm::value_ptr(ctx.m_projection_matrix));
+
+							// Don't ajust to actual camera height, game doesn't
+							vec3 camera_origin(self->origin_x(), self->origin_y(), self->origin_z());
+							vec3 prev_camera_origin(self->old_origin_x(), self->old_origin_y(), self->old_origin_z());
+							vec3 interp_camera_origin = prev_camera_origin + ((camera_origin - prev_camera_origin) * mc->get_render_partial_ticks());
+
+							ctx.m_world_to_screen_matrix = ctx.m_projection_matrix * ctx.m_view_matrix;
+							ctx.m_world_to_screen_matrix = glm::translate(ctx.m_world_to_screen_matrix, glm::f64vec3(-interp_camera_origin.x, -interp_camera_origin.y, -interp_camera_origin.z));
+						}
+					}
 				}
 			}
 		}

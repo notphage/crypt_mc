@@ -2111,7 +2111,10 @@ namespace UI
 			ctx.m_renderer->draw_rect({ m_picker_window_start.x - 1.f, m_picker_window_start.y - 1.f, m_picker_window_bounds.x + 2.f, m_picker_window_bounds.y + 1.f }, color_t(0, 0, 0, data->m_alpha));
 			ctx.m_renderer->draw_filled_rect({ m_picker_window_start.x, m_picker_window_start.y, m_picker_window_bounds.x, m_picker_window_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
-			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(255, 255, 255, data->m_alpha), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(m_picker_col.r(), m_picker_col.g(), m_picker_col.b(), data->m_alpha));
+			color_t gradient_color{};
+			gradient_color.from_hsv(m_picker_hue_val, 1.f, 1.f);
+
+			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(255, 255, 255, data->m_alpha), color_t(gradient_color.r(), gradient_color.g(), gradient_color.b(), data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(gradient_color.r(), gradient_color.g(), gradient_color.b(), data->m_alpha));
 			ctx.m_renderer->draw_gradient_rect({ m_picker_start.x, m_picker_start.y, m_picker_bounds.x, m_picker_bounds.y }, color_t(0, 0, 0, 0), color_t(0, 0, 0, 0), color_t(0, 0, 0, data->m_alpha), color_t(0, 0, 0, data->m_alpha));
 
 			ctx.m_renderer->draw_rect({ m_picker_start.x + (m_picker_bounds.x * (round(100.f * m_picker_val_x) / 100.f)) - 2.5f, m_picker_start.y + (m_picker_bounds.y * (round(100.f * (1.f - m_picker_val_y)) / 100.f)) - 2.5f, 5.f, 5.f }, color_t(0, 0, 0, data->m_alpha));

@@ -104,8 +104,8 @@ std::pair<bool, bool> c_velocity::check_player_pos(const std::shared_ptr<c_game>
 			ray_trace_t forward_ray_trace(trace_origin, self_forward);
 
 			float foward_distance = 0.f;
-
-			if (forward_ray_trace.trace(forward_player_mins, forward_player_maxs, foward_distance))
+			vec3 hit_position = {};
+			if (forward_ray_trace.trace(forward_player_mins, forward_player_maxs, foward_distance, hit_position))
 			{
 				if (foward_distance < 6.0f)
 				{
@@ -119,8 +119,8 @@ std::pair<bool, bool> c_velocity::check_player_pos(const std::shared_ptr<c_game>
 			ray_trace_t backward_ray_trace(trace_origin, self_backward);
 
 			float backward_distance = 0.f;
-
-			if (backward_ray_trace.trace(behind_player_mins, behind_player_maxs, backward_distance))
+			vec3 hit_position = {};
+			if (backward_ray_trace.trace(behind_player_mins, behind_player_maxs, backward_distance, hit_position))
 			{
 				if (backward_distance < 6.0f)
 					player_behind = true;

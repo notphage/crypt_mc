@@ -1308,6 +1308,11 @@ protected:
 	JNIEnv* jni;
 
 public:
+	~c_player()
+	{
+		jni->DeleteLocalRef(player_instance);
+	}
+
 	jobject player_instance = nullptr;
 
 	virtual void instantiate(jobject, JNIEnv*) = 0;
@@ -1330,6 +1335,7 @@ public:
 	virtual jfloat get_strafing() = 0;
 	virtual jfloat get_forward() = 0;
 	virtual jobject get_held_item() = 0;
+	virtual jobject get_held_item_stack() = 0;
 	virtual jboolean holding_weapon() = 0;
 	virtual jboolean holding_sword() = 0;
 	virtual jboolean holding_axe() = 0;
@@ -1416,6 +1422,11 @@ protected:
 
 	jobject world_instance = nullptr;
 public:
+	~c_world()
+	{
+		jni->DeleteLocalRef(world_instance);
+	}
+
 	virtual void instantiate(jobject, JNIEnv*) = 0;
 	virtual std::vector<std::shared_ptr<c_player>> get_players() = 0;
 	virtual std::shared_ptr<c_block> get_block(jfloat, jfloat, jfloat) = 0;
@@ -1438,7 +1449,7 @@ public:
 	virtual void set_timer_speed(jfloat) = 0;
 	virtual void set_right_click_delay(jint) = 0;
 	virtual void set_pointed_entity(jobject ent) = 0;
-	virtual void set_object_mouse_over(jobject moving) = 0;
+	virtual void set_object_mouse_over(jobject moving, const vec3& hit_poisition) = 0;
 	virtual void set_in_focus() = 0;
 	virtual void set_mouse_grabbed(jboolean grabbed) = 0;
 	virtual void set_not_in_focus() = 0;
