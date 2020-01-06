@@ -227,8 +227,8 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 
 	// setup flags
 	is_invisible = m_player->is_invisible();
-	is_naked = m_player->has_armor();
-	is_sneaking = m_player->is_invisible();
+	is_naked = !m_player->has_armor();
+	is_sneaking = m_player->is_sneaking();
 	is_bot = false; // m_player->is_bot();
 
 	if (is_invisible)
@@ -246,12 +246,12 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 
 	if (ctx.m_settings.visuals_esp_box)
 	{
-		if ((is_invisible && !ctx.m_settings.visuals_esp_box_invisible) || (is_naked && !ctx.m_settings.visuals_esp_box_nakeds) || (is_bot && !ctx.m_settings.visuals_esp_box_bots))
+		if ((is_invisible && ctx.m_settings.visuals_esp_box_invisible) || (is_naked && ctx.m_settings.visuals_esp_box_nakeds) || (is_bot && ctx.m_settings.visuals_esp_box_bots))
 			goto esp_box_skip;
 
 		switch (ctx.m_settings.visuals_esp_box_mode)
 		{
-			case 0:
+			case 1:
 			{
 				if (ctx.m_settings.visuals_esp_box_filled)
 					draw_ent_filled_box(box_filled_color, esp_box);
@@ -261,7 +261,7 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 				break;
 			}
 			
-			case 1:
+			case 2:
 			{
 				if (ctx.m_settings.visuals_esp_box_filled)
 					draw_ent_filled_box(box_filled_color, esp_box);
@@ -271,15 +271,13 @@ void c_visuals::esp_player_t::draw(JNIEnv* jni, const std::shared_ptr<c_game>& m
 				break;
 			}
 
-			case 2:
+			case 3:
 			{
 				draw_ent_3d_box(box_color, esp_box, m_player->get_yaw(), box_outlined, box_outline_color);
 				break;
 			}
 		}
 	}
-
-esp_box_skip:
 
 	if (ctx.m_settings.visuals_esp_names)
 	{
@@ -294,12 +292,16 @@ esp_box_skip:
 	}
 
 	if (ctx.m_settings.visuals_esp_healthbar)
-		draw_health({ esp_box.minx, esp_box.maxy }, { esp_box.minx, esp_box.miny }, (int)m_player->get_health(), (int)m_player->get_max_health(), alpha);
+		draw_health({ esp_box.minx, esp_box.maxy }, { esp_box.minx, esp_box.miny }, alpha);
+
+	draw_flags(jni, self, esp_box);
+
+esp_box_skip:
 
 	if (ctx.m_settings.visuals_esp_snap_lines && (ctx.m_settings.visuals_esp_snap_lines_distance ? m_dist < ctx.m_settings.visuals_esp_snap_lines_distance_blocks : true))
 	{
-		if ((is_invisible && !ctx.m_settings.visuals_esp_snap_lines_invisible) || (is_naked && !ctx.m_settings.visuals_esp_snap_lines_nakeds) || (is_bot && !ctx.m_settings.visuals_esp_snap_lines_bots))
-			return; // goto esp_snap_line_skip;
+		if ((is_invisible && ctx.m_settings.visuals_esp_snap_lines_invisible) || (is_naked && ctx.m_settings.visuals_esp_snap_lines_nakeds) || (is_bot && ctx.m_settings.visuals_esp_snap_lines_bots))
+			return; //goto esp_snap_line_skip;
 
 		draw_snaplines(mc, self, { (esp_box.maxx + esp_box.minx) / 2.f, (float)esp_box.maxy }, snaplines_outlined, snaplines_outline_color);
 	}
@@ -307,9 +309,10 @@ esp_box_skip:
 //esp_snap_line_skip:
 }
 
-void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha)
+void c_visuals::esp_player_t::draw_health(const vec2& bot, const vec2& top, uint8_t alpha)
 {
 	color_t outline_color(0, 0, 0, 175);
+	int health = (int)m_player->get_health(), max_health = (int)m_player->get_max_health();
 
 	int h = math::clamp< int >(health, 0, max_health);
 
@@ -355,11 +358,8 @@ void c_visuals::esp_player_t::draw_snaplines(const std::shared_ptr<c_game>& mc, 
 
 		case 2:
 		{
-			vec3 self_origin(self->origin_x(), self->aabb_min_y(), self->origin_z());
-			vec3 self_prev_origin(self->old_origin_x(), self->aabb_min_y(), self->old_origin_z());
-			vec3 self_interp_origin = self_prev_origin + ((self_origin - self_prev_origin) * mc->get_render_partial_ticks());
-
-			ctx.w2s(self_interp_origin, begin);
+			begin.x = (float)ctx.m_screen_w / 2.f;
+			begin.y = (float)ctx.m_screen_h + 200.f;
 
 			break;
 		}
@@ -410,4 +410,83 @@ void c_visuals::esp_player_t::draw_snaplines(const std::shared_ptr<c_game>& mc, 
 	}
 															   
 	ctx.m_renderer->draw_line(begin, end, snaplines_color);
+}
+
+void c_visuals::esp_player_t::draw_flags(JNIEnv* jni, const std::shared_ptr<c_player>& self, const esp_box_t& box)
+{
+	uint8_t elements = 0;
+
+	if (ctx.m_settings.visuals_esp_box_flags_distance)
+	{
+		float x_pos = box.maxx + 4.f;
+		float y_pos = box.miny + 1.f + (12.f * elements++);
+		color_t clr(255, 255, 255, 255);
+
+		{
+			float hit_dist = 3.f;
+
+			if (ctx.m_settings.combat_reach)
+				hit_dist = ctx.m_settings.combat_reach_distance;
+
+			clr = m_dist < hit_dist ? color_t(0, 230, 0, 255) : color_t(230, 0, 0, 255);
+		}
+
+		char distance_str[8];
+		sprintf(distance_str, xors("%.2f"), m_dist);
+
+		ctx.m_renderer->string(ctx.m_renderer->get_font(font_t::font_normal), { x_pos, y_pos }, distance_str, clr);
+	}
+
+	if (ctx.m_settings.visuals_esp_box_flags_held_item && m_player->holding_item())
+	{
+		float x_pos = box.maxx + 4.f;
+		float y_pos = box.miny + 1.f + (12.f * elements++);
+		color_t clr(255, 255, 255, 255);
+
+		auto held_object = m_player->get_held_item();
+		if (held_object)
+		{
+			auto held_object_name = m_player->get_item_name(held_object);
+			if (held_object_name)
+			{
+				const char* char_string = jni->GetStringUTFChars(held_object_name, nullptr);
+				std::string contain_string(char_string);
+
+				jni->ReleaseStringUTFChars(held_object_name, char_string);
+				jni->DeleteLocalRef(held_object_name);
+
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_t::font_normal), { x_pos, y_pos }, contain_string, clr);
+			}
+
+			jni->DeleteLocalRef(held_object);
+		}
+	}
+
+	// TODO: Make is_blocking()
+	/*if (ctx.m_settings.visuals_esp_box_flags_blocking && m_player->is_blocking())
+	{
+		float x_pos = box.maxx + 4.f;
+		float y_pos = box.miny + 1.f + (12.f * elements++);
+		color_t clr(255, 255, 255, 255);
+
+		ctx.m_renderer->string(ctx.m_renderer->get_font(font_t::font_normal), { x_pos, y_pos }, xors("BLOCKING"), clr);
+	}*/
+
+	if (ctx.m_settings.visuals_esp_box_flags_sneaking && m_player->is_sneaking())
+	{
+		float x_pos = box.maxx + 4.f;
+		float y_pos = box.miny + 1.f + (12.f * elements++);
+		color_t clr(255, 255, 255, 255);
+
+		ctx.m_renderer->string(ctx.m_renderer->get_font(font_t::font_normal), { x_pos, y_pos }, xors("SNEAKING"), clr);
+	}
+
+	if (ctx.m_settings.visuals_esp_box_flags_invisible && m_player->is_invisible())
+	{
+		float x_pos = box.maxx + 4.f;
+		float y_pos = box.miny + 1.f + (12.f * elements++);
+		color_t clr(255, 255, 255, 255);
+
+		ctx.m_renderer->string(ctx.m_renderer->get_font(font_t::font_normal), { x_pos, y_pos }, xors("INVISIBLE"), clr);
+	}
 }

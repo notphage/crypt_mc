@@ -1336,6 +1336,8 @@ public:
 	virtual jfloat get_forward() = 0;
 	virtual jobject get_held_item() = 0;
 	virtual jobject get_held_item_stack() = 0;
+	virtual jstring get_item_name(jobject) = 0;
+	virtual jboolean holding_item() = 0;
 	virtual jboolean holding_weapon() = 0;
 	virtual jboolean holding_sword() = 0;
 	virtual jboolean holding_axe() = 0;

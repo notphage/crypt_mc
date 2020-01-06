@@ -81,6 +81,7 @@ struct player_fields
 	jfieldID fid_ticks_existed = nullptr;
 	jfieldID fid_distance_walked = nullptr;
 	jfieldID fid_prev_distance_walked = nullptr;
+	jfieldID fid_get_item_name = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -134,6 +135,7 @@ struct player_fields
 	jclass cls_inventory = nullptr;
 	jclass cls_aabb = nullptr;
 	jclass cls_item_soup = nullptr;
+	jclass cls_item = nullptr;
 
 	std::atomic_bool holding_weapon = false;
 	std::atomic_bool holding_sword = false;
@@ -398,6 +400,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.item_egg_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemEgg")));
 		playerfields.item_snowball_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemSnowball")));
 		playerfields.item_block_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.ItemBlock")));
+		playerfields.cls_item = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.item.Item")));
 
 		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70738_aO"), xors("I"));
 		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("field_70737_aN"), xors("I"));
@@ -445,6 +448,7 @@ void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_ticks_existed = jni->GetFieldID(playerfields.entity_player_class, xors("field_70173_aa"), xors("I"));
 		playerfields.fid_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("field_70140_Q"), xors("F"));
 		playerfields.fid_prev_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("field_70141_P"), xors("F"));
+		playerfields.fid_get_item_name = jni->GetFieldID(playerfields.cls_item, xors("field_77774_bZ"), xors("Ljava/lang/String;"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("func_70660_b"), xors("(Lnet/minecraft/potion/Potion;)Lnet/minecraft/potion/PotionEffect;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("func_76458_c"), xors("()I"));
@@ -692,6 +696,21 @@ jfloat c_player_forge_1710::get_forward()
 jobject c_player_forge_1710::get_held_item_stack()
 {
 	return jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item);
+}
+
+jstring c_player_forge_1710::get_item_name(jobject item)
+{
+	return (jstring)jni->GetObjectField(item, playerfields.fid_get_item_name);
+}
+
+jboolean c_player_forge_1710::holding_item()
+{
+	auto obj_held_item = get_held_item();
+
+	auto res = obj_held_item != nullptr;
+
+	jni->DeleteLocalRef(obj_held_item);
+	return res;
 }
 
 jobject c_player_forge_1710::get_held_item()

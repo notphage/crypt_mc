@@ -46,6 +46,7 @@ long __stdcall hooked::swap_buffers(JNIEnv* jni, jclass caller, jobject a3)
 	const auto world = mc->get_world();
 
 	//rendering shit goes here
+	ctx.m_color_manager.handle_colors();
 	ctx.m_renderer->draw_begin();
 	{
 		if (self && world)

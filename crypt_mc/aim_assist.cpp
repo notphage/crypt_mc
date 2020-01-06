@@ -82,8 +82,8 @@ void c_aim_assist::find_best_point(const std::shared_ptr<c_player>& self, const 
 			target_data.m_valid = true;
 			target_data.m_target = player;
 			target_data.m_distance = distance;
-			target_data.m_pitch_change = pitch_change;
-			target_data.m_yaw_change = yaw_change;
+			target_data.m_pitch_change = pitch_change * (ctx.m_frametime / 0.01f);
+			target_data.m_yaw_change = yaw_change * (ctx.m_frametime / 0.01f);
 		}
 	}
 }
@@ -181,9 +181,10 @@ void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::share
 	float random_h_scale = std::clamp(0.05f, 0.01f, 0.5f),
 		random_v_scale = std::clamp(0.03f, 0.01f, 0.5f),
 		random_h = 0.f,
-		random_v = 0.f;
+		random_v = 0.f,
+		framerate_correction = ctx.m_frametime / 0.01f;
 
-	if (util::random(0, 100) < 5)
+	if (util::random(0.f, 1.f / ctx.m_frametime) < 5.f)
 	{
 		random_h = util::random(-random_h_scale, random_h_scale);
 		random_v = util::random(-random_v_scale, random_v_scale);
@@ -191,16 +192,16 @@ void c_aim_assist::on_update(const std::shared_ptr<c_game>& mc, const std::share
 
 	float sens = mc->get_mouse_sensitivity() * 0.6f + 0.2f,
 		step = pow(sens, 3) * 8.0f,
-		yaw_change = util::convert_legit_value(step, limit_angle(target_data.m_yaw_change, ctx.m_settings.combat_aim_assist_h_speed) + random_h, util::random(1, 3)),
-		pitch_change = util::convert_legit_value(step, limit_angle(target_data.m_pitch_change, ctx.m_settings.combat_aim_assist_v_speed) + random_v, util::random(1, 3));
+		yaw_change = util::convert_legit_value(step, limit_angle(target_data.m_yaw_change, ctx.m_settings.combat_aim_assist_h_speed * framerate_correction) + random_h, util::random(1.f, 3.f) * framerate_correction),
+		pitch_change = util::convert_legit_value(step, limit_angle(target_data.m_pitch_change, ctx.m_settings.combat_aim_assist_v_speed * framerate_correction) + random_v, util::random(1.f, 3.f) * framerate_correction);
 
-	if (abs(target_data.m_yaw_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_yaw_change) >= util::convert_legit_value(step, random_h_scale, 1)))
+	if (abs(target_data.m_yaw_change) > (5.f * framerate_correction) || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_yaw_change) >= (util::convert_legit_value(step, random_h_scale, 1.f * framerate_correction))))
 		self->set_yaw(yaw + yaw_change);
 
-	if (ctx.m_settings.combat_aim_assist_vertical && (abs(target_data.m_pitch_change) > 5 || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_pitch_change) >= util::convert_legit_value(step, random_h_scale, 1))))
+	if (ctx.m_settings.combat_aim_assist_vertical && (abs(target_data.m_pitch_change) > (5.f * framerate_correction) || (ctx.m_settings.combat_aim_assist_multipoint && abs(target_data.m_pitch_change) >= util::convert_legit_value(step, random_h_scale, 1.f * framerate_correction))))
 		self->set_pitch(pitch + pitch_change);
 	else if (random_v != 0.0f)
-		self->set_pitch(pitch + util::convert_legit_value(step, random_v, util::random(1, 3)));
+		self->set_pitch(pitch + util::convert_legit_value(step, random_v, util::random(1.f, 3.f) * framerate_correction));
 }
 
 float c_aim_assist::limit_angle(float change, float speed)
@@ -219,7 +220,7 @@ float c_aim_assist::limit_angle(float change, float speed)
 		ret = -speed;
 	}
 	
-	ret += util::random(-(fabs(ret) / 12), fabs(ret) / 12);
+	ret += util::random(-(fabs(ret) / 12.f), fabs(ret) / 12.f);
 
 	return ret;
 }

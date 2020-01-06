@@ -37,6 +37,7 @@ typedef HWND hwnd_t;
 #include "input.h"
 #include "settings.h"
 #include "client.h"
+#include "color_manager.h"
 #include "glm/glm.hpp"
 
 enum MC_VERSION
@@ -70,6 +71,7 @@ public:
 
 	std::shared_ptr<c_renderer> m_renderer;
 	std::shared_ptr<c_gui> m_gui;
+	c_color_manager m_color_manager;
 	c_settings m_settings;
 	c_client m_client;
 
@@ -86,7 +88,6 @@ public:
 
 	std::atomic<client_flavor> m_client_flavor = VANILLA;
 
-public:
 	void load();
 	void unload();
 

@@ -84,6 +84,7 @@ struct player_fields
 	jfieldID fid_ticks_existed = nullptr;
 	jfieldID fid_distance_walked = nullptr;
 	jfieldID fid_prev_distance_walked = nullptr;
+	jfieldID fid_get_item_name = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -137,6 +138,7 @@ struct player_fields
 	jclass cls_inventory = nullptr;
 	jclass cls_aabb = nullptr;
 	jclass cls_item_soup = nullptr;
+	jclass cls_item = nullptr;
 
 	std::atomic_bool holding_weapon = false;
 	std::atomic_bool holding_sword = false;
@@ -411,6 +413,7 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.item_egg_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("ack")));
 		playerfields.item_snowball_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aed")));
 		playerfields.item_block_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("abh")));
+		playerfields.cls_item = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("adb")));
 
 		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("ay"), xors("I"));
 		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("ax"), xors("I"));
@@ -421,9 +424,9 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_old_xorigin = jni->GetFieldID(playerfields.entity_class, xors("S"), xors("D"));
 		playerfields.fid_old_yorigin = jni->GetFieldID(playerfields.entity_class, xors("T"), xors("D"));
 		playerfields.fid_old_zorigin = jni->GetFieldID(playerfields.entity_class, xors("U"), xors("D"));
-		playerfields.fid_xorigin = jni->GetFieldID(playerfields.entity_class, xors("S"), xors("D"));
-		playerfields.fid_yorigin = jni->GetFieldID(playerfields.entity_class, xors("T"), xors("D"));
-		playerfields.fid_zorigin = jni->GetFieldID(playerfields.entity_class, xors("U"), xors("D"));
+		playerfields.fid_xorigin = jni->GetFieldID(playerfields.entity_class, xors("s"), xors("D"));
+		playerfields.fid_yorigin = jni->GetFieldID(playerfields.entity_class, xors("t"), xors("D"));
+		playerfields.fid_zorigin = jni->GetFieldID(playerfields.entity_class, xors("u"), xors("D"));
 		playerfields.fid_is_dead = jni->GetFieldID(playerfields.entity_class, xors("K"), xors("Z"));
 		playerfields.fid_collided_vertically = jni->GetFieldID(playerfields.entity_class, xors("F"), xors("Z"));
 		playerfields.fid_collided_horizontally = jni->GetFieldID(playerfields.entity_class, xors("E"), xors("Z"));
@@ -452,11 +455,11 @@ void c_player_1710::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_ticks_existed = jni->GetFieldID(playerfields.entity_player_class, xors("aa"), xors("I"));
 		playerfields.fid_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("P"), xors("F"));
 		playerfields.fid_prev_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("O"), xors("F"));
-
 		playerfields.fid_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aJ"), xors("F"));
 		playerfields.fid_prev_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aI"), xors("F"));
 		playerfields.fid_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("bs"), xors("F"));
 		playerfields.fid_prev_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("br"), xors("F"));
+		playerfields.fid_get_item_name = jni->GetFieldID(playerfields.cls_item, xors("m"), xors("Ljava/lang/String;"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("b"), xors("(Lrv;)Lrw;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("c"), xors("()I"));
@@ -706,6 +709,21 @@ jfloat c_player_1710::get_forward()
 jobject c_player_1710::get_held_item_stack()
 {
 	return jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item);
+}
+
+jstring c_player_1710::get_item_name(jobject item)
+{
+	return (jstring)jni->GetObjectField(item, playerfields.fid_get_item_name);
+}
+
+jboolean c_player_1710::holding_item()
+{
+	auto obj_held_item = get_held_item();
+
+	auto res = obj_held_item != nullptr;
+
+	jni->DeleteLocalRef(obj_held_item);
+	return res;
 }
 
 jobject c_player_1710::get_held_item()

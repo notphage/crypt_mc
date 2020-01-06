@@ -82,6 +82,7 @@ struct player_fields
 	jfieldID fid_type_of_hit = nullptr;
 	jfieldID fid_distance_walked = nullptr;
 	jfieldID fid_prev_distance_walked = nullptr;
+	jfieldID fid_get_item_name = nullptr;
 
 	jmethodID mid_get_active_potion_effect = nullptr;
 	jmethodID mid_get_amplifier = nullptr;
@@ -135,6 +136,7 @@ struct player_fields
 	jclass cls_inventory = nullptr;
 	jclass cls_aabb = nullptr;
 	jclass cls_item_soup = nullptr;
+	jclass cls_item = nullptr;
 
 	std::atomic_bool holding_weapon = false;
 	std::atomic_bool holding_sword = false;
@@ -402,6 +404,7 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.item_egg_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("zg")));
 		playerfields.item_snowball_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("aaw")));
 		playerfields.item_block_class = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("yo")));
+		playerfields.cls_item = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("zw")));
 
 		playerfields.fid_max_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("av"), xors("I"));
 		playerfields.fid_hurt_time = jni->GetFieldID(playerfields.cls_entity_living_base, xors("au"), xors("I"));
@@ -442,11 +445,11 @@ void c_player_18X::instantiate(jobject player_object, JNIEnv* _jni)
 		playerfields.fid_aabb_max_z = jni->GetFieldID(playerfields.cls_aabb, xors("f"), xors("D"));
 		playerfields.fid_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("M"), xors("F"));
 		playerfields.fid_prev_distance_walked = jni->GetFieldID(playerfields.entity_class, xors("L"), xors("F"));
-
 		playerfields.fid_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aF"), xors("F"));
 		playerfields.fid_prev_camera_pitch = jni->GetFieldID(playerfields.cls_entity_living_base, xors("aE"), xors("F"));
 		playerfields.fid_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("bo"), xors("F"));
 		playerfields.fid_prev_camera_yaw = jni->GetFieldID(playerfields.entity_player_class, xors("bn"), xors("F"));
+		playerfields.fid_get_item_name = jni->GetFieldID(playerfields.cls_item, xors("l"), xors("Ljava/lang/String;"));
 
 		playerfields.mid_get_active_potion_effect = jni->GetMethodID(playerfields.cls_entity_living_base, xors("b"), xors("(Lpe;)Lpf;"));
 		playerfields.mid_get_amplifier = jni->GetMethodID(playerfields.cls_potion_effect, xors("c"), xors("()I"));
@@ -698,6 +701,21 @@ jfloat c_player_18X::get_forward()
 jobject c_player_18X::get_held_item_stack()
 {
 	return jni->CallObjectMethod(player_instance, playerfields.mid_get_held_item);
+}
+
+jstring c_player_18X::get_item_name(jobject item)
+{
+	return (jstring)jni->GetObjectField(item, playerfields.fid_get_item_name);
+}
+
+jboolean c_player_18X::holding_item()
+{
+	auto obj_held_item = get_held_item();
+
+	auto res = obj_held_item != nullptr;
+
+	jni->DeleteLocalRef(obj_held_item);
+	return res;
 }
 
 jobject c_player_18X::get_held_item()

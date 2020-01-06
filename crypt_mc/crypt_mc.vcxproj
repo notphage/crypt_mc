@@ -298,6 +298,7 @@
     <ClCompile Include="auto_clicker.cpp" />
     <ClCompile Include="buffer.cpp" />
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="color_manager.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fast_place.cpp" />
     <ClCompile Include="fast_stop.cpp" />
@@ -351,6 +352,7 @@
     <ClInclude Include="auto_clicker.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="color_manager.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="fast_place.h" />
     <ClInclude Include="fast_stop.h" />

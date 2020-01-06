@@ -26,7 +26,7 @@ namespace util
 	{
 		angle *= 0.15f;
 
-		float steps = angle < 0.0f ? floorf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 3.f) * angle * 5.0f) : ceilf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 5.f) * angle * 5.0f);
+		float steps = angle < 0.0f ? floorf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 3.f) * angle * 5.0f) : ceilf(std::clamp(util::random(0.5f * speed, (0.5f * speed) + 0.5f), 1.f, 3.f) * angle * 5.0f);
 
 		return steps * step * 0.15f;
 	};

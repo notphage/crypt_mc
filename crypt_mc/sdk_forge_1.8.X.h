@@ -39,6 +39,8 @@ public:
 	jfloat get_forward() override;
 	jobject get_held_item() override;
 	jobject get_held_item_stack() override;
+	jstring get_item_name(jobject) override;
+	jboolean holding_item() override;
 	jboolean holding_weapon() override;
 	jboolean holding_sword() override;
 	jboolean holding_axe() override;

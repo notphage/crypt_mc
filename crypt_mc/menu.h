@@ -41,6 +41,7 @@ namespace UI
 	{
 	public:
 		int m_draw_counter{};
+		int m_draw_counter_open{};
 		bool m_first_draw{};
 
 		bool m_first_click{};
@@ -52,9 +53,10 @@ namespace UI
 
 		float m_x{};
 		float m_y{};
-		float m_fade_speed;
+		float m_fade_speed{};
 		color_t m_color = color_t(181, 0, 41, 255);
 		int m_alpha = 0;
+		int m_last_alpha = 0;
 		float m_animation_progress = 0.f;
 		bool m_active = true;
 	};
@@ -330,31 +332,23 @@ namespace UI
 				ctx.m_menu_opening = m_should_open && m_data.m_alpha < 255;
 				ctx.m_menu_open = m_data.m_alpha == 255 && !ctx.m_menu_closing && !ctx.m_menu_opening;
 
-				static float sinebow_t = 0.f;
-				sinebow_t += 0.01f;
-				if (sinebow_t > 1.f)
-					sinebow_t = 0.f;
-
-				static color_t sinebow;
-				sinebow = color_t{ (int)(255.f * (powf(sin(M_PI * (sinebow_t + 0.f / 3.f)), 2.f))),
-								   (int)(255.f * (powf(sin(M_PI * (sinebow_t + 1.f / 3.f)), 2.f))),
-								   (int)(255.f * (powf(sin(M_PI * (sinebow_t + 2.f / 3.f)), 2.f))) };
-
-				if (ctx.m_settings.gui_rainbow)
-					ctx.m_settings.gui_accent_color() = (m_data.m_color = sinebow);
-				else
-					m_data.m_color = color;
+				m_data.m_color = color;
 
 				*m_data.m_color.a_ptr() = m_data.m_alpha;
 			}
 
 			m_is_open = m_data.m_alpha > 0;
 
-			if (m_is_open && !m_was_open)
+			if (!m_is_open)
+			{
+				m_data.m_draw_counter_open = 0;
+				return false;
+			}
+
+			if (m_data.m_draw_counter_open == 0)
 				m_data.m_first_draw = true;
 
-			if (!m_is_open)
-				return false;
+			m_data.m_draw_counter_open++;
 
 			g_input.get_cursor_pos(m_cursor_x, m_cursor_y);
 
@@ -1931,16 +1925,18 @@ namespace UI
 		int m_elem_tracker = -1;
 
 		bool m_is_open{};
+		bool m_rainbow_mode{};
 		bool m_inside_picker_window{};
 		bool m_inside_picker{};
 		bool m_inside_hue_picker{};
 		bool m_inside_alpha_picker{};
+		bool m_inside_rainbow_box{};
 		int m_draw_tick{};
 
 		float m_picker_hue_val = 0.f;
-		float m_picker_val_x = 0.f;
-		float m_picker_val_y = 0.f;
-		float m_picker_alpha_val = 1.f;
+		float m_picker_val_x = 1.f;
+		float m_picker_val_y = 1.f;
+		float m_picker_alpha_val = 255.f;
 
 		vec2 m_box_start{};
 		vec2 m_box_end{};
@@ -1961,6 +1957,10 @@ namespace UI
 		vec2 m_alpha_picker_start{};
 		vec2 m_alpha_picker_end{};
 		vec2 m_alpha_picker_bounds{};
+
+		vec2 m_rainbow_box_start{};
+		vec2 m_rainbow_box_bounds{};
+		vec2 m_rainbow_box_end{};
 	public:
 		void draw(c_window_data* data)
 		{
@@ -2015,12 +2015,28 @@ namespace UI
 			m_alpha_picker_bounds = vec2(m_picker_bounds.x, 10.f);
 			m_alpha_picker_end = m_alpha_picker_start + m_alpha_picker_bounds;
 
+			m_rainbow_box_start = vec2(m_alpha_picker_end.x + 5.f, m_alpha_picker_start.y);
+			m_rainbow_box_bounds = vec2(10.f, 10.f);
+			m_rainbow_box_end = m_rainbow_box_start + m_rainbow_box_bounds;
+
+			m_temp_col = { *r, *g, *b, *a };
 			if (data->m_first_draw)
 			{
-				m_temp_col = { *r, *g, *b, *a };
 				m_picker_col = { *r, *g, *b, *a };
 				m_picker_hue_val = m_picker_col.to_hue();
 				m_picker_alpha_val = *a;
+			}
+
+			if (m_rainbow_mode)
+			{
+				ctx.m_color_manager.add_color(c_color_manager::sinebow, &m_rainbow_mode, { r, g, b });
+
+				m_temp_col.a((int)m_picker_alpha_val);
+
+				*r = m_temp_col.r();
+				*g = m_temp_col.g();
+				*b = m_temp_col.b();
+				*a = m_temp_col.a();
 			}
 
 			// setup coord for next item
@@ -2031,8 +2047,7 @@ namespace UI
 			m_inside_picker = m_cursor_x > m_picker_start.x && m_cursor_x < m_picker_end.x && m_cursor_y > m_picker_start.y && m_cursor_y < m_picker_end.y;
 			m_inside_hue_picker = m_cursor_x > m_hue_picker_start.x && m_cursor_x < m_hue_picker_end.x && m_cursor_y > m_hue_picker_start.y && m_cursor_y < m_hue_picker_end.y;
 			m_inside_alpha_picker = m_cursor_x > m_alpha_picker_start.x && m_cursor_x < m_alpha_picker_end.x && m_cursor_y > m_alpha_picker_start.y && m_cursor_y < m_alpha_picker_end.y;
-
-			if (data->m_draw_counter)
+			m_inside_rainbow_box = m_cursor_x > m_rainbow_box_start.x && m_cursor_x < m_rainbow_box_end.x && m_cursor_y > m_rainbow_box_start.y&& m_cursor_y < m_rainbow_box_end.y;
 
 			if (m_is_inside && data->m_first_click && !data->m_ignore)
 			{
@@ -2051,7 +2066,7 @@ namespace UI
 
 			if (m_is_open && data->m_left_click && m_inside_picker_window)
 			{
-				if (m_inside_picker && (m_elem_tracker == -1 || m_elem_tracker == 0))
+				if (m_inside_picker && (m_elem_tracker == -1 || m_elem_tracker == 0) && !m_rainbow_mode)
 				{
 					if (data->m_first_click)
 						m_elem_tracker = 0;
@@ -2060,7 +2075,7 @@ namespace UI
 					m_picker_val_y = 1.f - std::clamp((m_cursor_y - m_picker_start.y) / (m_picker_bounds.y - 1.f), 0.f, 1.f);
 				}
 
-				if (m_inside_hue_picker && (m_elem_tracker == -1 || m_elem_tracker == 1))
+				if (m_inside_hue_picker && (m_elem_tracker == -1 || m_elem_tracker == 1) && !m_rainbow_mode)
 				{
 					if (data->m_first_click)
 						m_elem_tracker = 1;
@@ -2077,6 +2092,15 @@ namespace UI
 					m_picker_alpha_val = std::clamp(((m_cursor_x - m_alpha_picker_start.x) / (m_alpha_picker_bounds.x)) * 255.f, 0.f, 255.f);
 				}
 
+				if (m_inside_rainbow_box && (m_elem_tracker == -1 || m_elem_tracker == 3))
+				{
+					if (data->m_first_click)
+					{
+						m_elem_tracker = 3;
+						m_rainbow_mode = !m_rainbow_mode;
+					}
+				}
+				
 				m_temp_col.from_hsv(m_picker_hue_val, m_picker_val_x, m_picker_val_y);
 				m_temp_col.a((int)m_picker_alpha_val);
 
@@ -2084,6 +2108,7 @@ namespace UI
 				*g = m_temp_col.g();
 				*b = m_temp_col.b();
 				*a = m_temp_col.a();
+				
 			}
 			else
 			{
@@ -2139,6 +2164,8 @@ namespace UI
 
 			ctx.m_renderer->draw_gradient_rect({ m_alpha_picker_start.x, m_alpha_picker_start.y, m_alpha_picker_bounds.x, m_alpha_picker_bounds.y }, color_t(0, 0, 0, data->m_alpha), color_t(255, 255, 255, data->m_alpha), color_t(0, 0, 0, data->m_alpha), color_t(255, 255, 255, data->m_alpha));
 			ctx.m_renderer->draw_line({ m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (round(m_picker_alpha_val) / 255.f)), m_alpha_picker_start.y - 2.f }, { m_alpha_picker_start.x + (m_alpha_picker_bounds.x * (round(m_picker_alpha_val) / 255.f)), m_alpha_picker_end.y + 2.f }, color_t(0, 0, 0, data->m_alpha));
+
+			ctx.m_renderer->draw_filled_rect({ m_rainbow_box_start.x, m_rainbow_box_start.y, m_rainbow_box_bounds.x, m_rainbow_box_bounds.y }, m_temp_col);
 		}
 	};
 

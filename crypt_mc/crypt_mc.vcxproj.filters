@@ -107,6 +107,9 @@
     <Filter Include="SRC\features\fullbright">
       <UniqueIdentifier>{c34f2759-2cd6-4415-8ac2-7a390927ee0f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SRC\hack\color_manager">
+      <UniqueIdentifier>{2f81a616-4e71-4ca1-9d45-3155792ed4d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aim_assist.cpp">
@@ -231,6 +234,9 @@
     </ClCompile>
     <ClCompile Include="update.cpp">
       <Filter>SRC\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="color_manager.cpp">
+      <Filter>SRC\hack\color_manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -389,6 +395,9 @@
     </ClInclude>
     <ClInclude Include="fullbright.h">
       <Filter>SRC\features\fullbright</Filter>
+    </ClInclude>
+    <ClInclude Include="color_manager.h">
+      <Filter>SRC\hack\color_manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -401,6 +401,10 @@ public:
 	setting_t<color_t> visuals_esp_box_outlined_color{ &m_holder, fnvc("visuals_esp_box_outlined_color"), {0, 0, 0, 175} };
 	setting_t<bool> visuals_esp_box_filled{ &m_holder, fnvc("visuals_esp_box_filled"), false };
 	setting_t<color_t> visuals_esp_box_filled_color{ &m_holder, fnvc("visuals_esp_box_filled_color"), {255, 200, 69, 255} };
+	setting_t<bool> visuals_esp_box_flags_distance{ &m_holder, fnvc("visuals_esp_box_flags_distance"), false };
+	setting_t<bool> visuals_esp_box_flags_held_item{ &m_holder, fnvc("visuals_esp_box_flags_held_item"), false };
+	setting_t<bool> visuals_esp_box_flags_sneaking{ &m_holder, fnvc("visuals_esp_box_flags_sneaking"), false };
+	setting_t<bool> visuals_esp_box_flags_invisible{ &m_holder, fnvc("visuals_esp_box_flags_invisible"), false };
 	setting_t<bool> visuals_esp_snap_lines{ &m_holder, fnvc("visuals_esp_snap_lines"), false };
 	setting_t<int> visuals_esp_snap_lines_mode{ &m_holder, fnvc("visuals_esp_snap_lines_mode"), 0 };
 	setting_t<bool> visuals_esp_snap_lines_invisible{ &m_holder, fnvc("visuals_esp_snap_lines_invisible"), false };
@@ -415,7 +419,6 @@ public:
 	setting_t<color_t> visuals_esp_snap_lines_far_color{ &m_holder, fnvc("visuals_esp_snap_lines_color"), {0, 255, 0, 255} };
 	setting_t<int> visuals_esp_snap_lines_origin{ &m_holder, fnvc("visuals_esp_snap_lines_origin"), 0 };
 	setting_t<bool> visuals_esp_names{ &m_holder, fnvc("visuals_esp_names"), false };
-
 	setting_t<bool> visuals_fullbright{ &m_holder, fnvc("visuals_fullbright"), false };
 	setting_t<keysetting_t> visuals_fullbright_key{ &m_holder, fnvc("visuals_fullbright_key"), {} };
 

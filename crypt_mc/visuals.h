@@ -27,8 +27,9 @@ class c_visuals : public c_feature
 		{ }
 
 		void draw(JNIEnv* jni, const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world);
-		void draw_health(const vec2& bot, const vec2& top, int health, int max_health, uint8_t alpha);
+		void draw_health(const vec2& bot, const vec2& top, uint8_t alpha);
 		void draw_snaplines(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const vec2& end, bool outlined, const color_t& outline_color);
+		void draw_flags(JNIEnv* jni, const std::shared_ptr<c_player>& self, const esp_box_t& box);
 	};
 
 	static void draw_ent_box(const color_t& color, esp_box_t& box, bool outlined, const color_t& outline_color);

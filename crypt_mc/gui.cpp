@@ -99,7 +99,7 @@ void c_gui::tab_combat()
 			if (ctx.m_settings.combat_reach)
 				reach_key.handle(menu.data(), "", &ctx.m_settings.combat_reach_key, keytype_t::kt_all);
 
-			reach_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_reach_distance, 3.f, 6.f, 0.01f, xors("%.2f"));
+			reach_distance.handle(menu.data(), xors("distance"), &ctx.m_settings.combat_reach_distance, 3.f, 7.f, 0.01f, xors("%.2f"));
 			reach_hitchance.handle(menu.data(), xors("hitchance"), &ctx.m_settings.combat_reach_hitchance, 1, 100, 1, xors("%"));
 			
 			if (ctx.m_settings.combat_reach_hitboxes)
@@ -233,7 +233,7 @@ void c_gui::tab_player()
 					{&ctx.m_settings.player_throwdebuff_weakness, xors("weakness")},
 				});
 
-			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 75, 250, 1, xors("ms"));
+			throw_delay.handle(menu.data(), xors("delay"), &ctx.m_settings.player_throw_delay, 0, 250, 1, xors("ms"));
 		}
 		throw_groupbox.end(menu.data(), &ctx.m_settings.player_throw);
 
@@ -284,6 +284,7 @@ void c_gui::tab_visuals()
 	static UI::c_color_picker box_color;
 	static UI::c_multi_dropdown box_conditions;
 	static UI::c_multi_dropdown box_options;
+	static UI::c_multi_dropdown box_flags;
 	static UI::c_color_picker box_filled_color;
 	static UI::c_color_picker box_outline_color;
 
@@ -306,7 +307,7 @@ void c_gui::tab_visuals()
 	{
 		box_groupbox.start(menu.data(), xors("box"));
 		{
-			box_mode.handle(menu.data(), xors("mode"), { xors("2d"), xors("corner"), xors("3d") }, &ctx.m_settings.visuals_esp_box_mode);
+			box_mode.handle(menu.data(), xors("mode"), { xors("none"), xors("2d"), xors("corner"), xors("3d") }, &ctx.m_settings.visuals_esp_box_mode);
 			box_color.handle(menu.data(), xors("color"), ctx.m_settings.visuals_esp_box_color().r_ptr(), ctx.m_settings.visuals_esp_box_color().g_ptr(), ctx.m_settings.visuals_esp_box_color().b_ptr(), ctx.m_settings.visuals_esp_box_color().a_ptr());
 			box_conditions.handle(menu.data(), xors("conditions"), {
 				{&ctx.m_settings.visuals_esp_box_invisible, xors("ignore invisible")},
@@ -319,6 +320,13 @@ void c_gui::tab_visuals()
 				{&ctx.m_settings.visuals_esp_healthbar, xors("healthbar")},
 				{&ctx.m_settings.visuals_esp_box_filled, xors("filled")},
 				{&ctx.m_settings.visuals_esp_box_outlined, xors("outlined")},
+			});
+
+			box_flags.handle(menu.data(), xors("flags"), {
+				{&ctx.m_settings.visuals_esp_box_flags_distance, xors("distance")},
+				{&ctx.m_settings.visuals_esp_box_flags_held_item, xors("held item")},
+				{&ctx.m_settings.visuals_esp_box_flags_sneaking, xors("sneaking")},
+				{&ctx.m_settings.visuals_esp_box_flags_invisible, xors("invisible")},
 			});
 			
 			if (ctx.m_settings.visuals_esp_box_filled)
@@ -379,6 +387,7 @@ void c_gui::tab_visuals()
 		box_mode.dropdown(menu.data());
 		box_conditions.dropdown(menu.data());
 		box_options.dropdown(menu.data());
+		box_flags.dropdown(menu.data());
 		snaplines_origin.dropdown(menu.data());
 		snaplines_conditions.dropdown(menu.data());
 		snaplines_options.dropdown(menu.data());
