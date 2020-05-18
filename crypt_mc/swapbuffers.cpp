@@ -24,6 +24,7 @@ long __stdcall hooked::swap_buffers(JNIEnv* jni, jclass caller, jobject a3)
 
 		ctx.m_renderer = std::make_shared<c_renderer>();
 		ctx.m_renderer->m_render_list = ctx.m_renderer->make_render_list();
+		ctx.m_renderer->m_menu_element_list = ctx.m_renderer->make_render_list();
 		ctx.m_renderer->m_font_context = ctx.m_renderer->make_font_context();
 		ctx.m_renderer->m_fonts[font_normal] = ctx.m_renderer->create_font(xors("tahoma"), 12);
 		ctx.m_gui = std::make_shared<c_gui>();
@@ -56,7 +57,8 @@ long __stdcall hooked::swap_buffers(JNIEnv* jni, jclass caller, jobject a3)
 		ctx.m_gui->background();
 		ctx.m_gui->draw();
 
-		ctx.m_renderer->draw_scene();
+		ctx.m_renderer->draw_scene(ctx.m_renderer->m_render_list);
+		ctx.m_renderer->draw_scene(ctx.m_renderer->m_menu_element_list);
 	}
 	ctx.m_renderer->draw_end();
 

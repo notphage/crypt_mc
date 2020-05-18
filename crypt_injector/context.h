@@ -47,7 +47,7 @@ class c_context
 public:
 	HINSTANCE m_instance = nullptr;
 	HWND m_window;
-	uint64_t m_version = 2;
+	uint64_t m_version = 3;
 	int32_t m_selected_cheat = -1;
 	bool m_block_keyinput = false;
 	std::vector<std::byte> m_buffer;

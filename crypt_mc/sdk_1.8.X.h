@@ -6,12 +6,17 @@ class c_block_18X : public c_block
 {
 public:
 	void instantiate(jobject, JNIEnv*) override;
+
+	jint get_xpos() override;
+	jint get_ypos() override;
+	jint get_zpos() override;
 };
 
 class c_class_loader_18X : public c_class_loader
 {
 public:
 	void instantiate(JNIEnv*) override;
+
 	jclass find_class(const char*) override;
 };
 
@@ -123,8 +128,9 @@ class c_world_18X : public c_world
 {
 public:
 	void instantiate(jobject, JNIEnv*) override;
+
 	std::vector<std::shared_ptr<c_player>> get_players() override;
-	std::shared_ptr<c_block> get_block(jfloat, jfloat, jfloat) override;
+	std::vector<std::shared_ptr<c_block>> get_loaded_blocks() override;
 };
 
 class c_game_18X : public c_game

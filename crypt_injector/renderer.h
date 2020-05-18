@@ -1,42 +1,45 @@
 #pragma once
+#include <stdint.h>
+#include <memory>
 
-#include <d3d9.h>
-#include <d3dx9.h>
-#pragma comment(lib, "d3d9.lib")
-#pragma comment(lib, "d3dx9.lib")
-
-class c_font;
+#include "sdk.h"
 #include "font.h"
+
+#define GL_ARRAY_BUFFER                   0x8892
+#define GL_ARRAY_BUFFER_BINDING           0x8894
+#define GL_COLOR_ATTACHMENT0              0x8CE0
+#define GL_COMPILE_STATUS                 0x8B81
+#define GL_CURRENT_PROGRAM                0x8B8D
+#define GL_DYNAMIC_DRAW                   0x88E8
+#define GL_ELEMENT_ARRAY_BUFFER           0x8893
+#define GL_ELEMENT_ARRAY_BUFFER_BINDING   0x8895
+#define GL_FRAGMENT_SHADER                0x8B30
+#define GL_FRAMEBUFFER                    0x8D40
+#define GL_FRAMEBUFFER_COMPLETE           0x8CD5
+#define GL_FUNC_ADD                       0x8006
+#define GL_INVALID_FRAMEBUFFER_OPERATION  0x0506
+#define GL_MAJOR_VERSION                  0x821B
+#define GL_MINOR_VERSION                  0x821C
+#define GL_STATIC_DRAW                    0x88E4
+#define GL_STREAM_DRAW                    0x88E0
+#define GL_TEXTURE0                       0x84C0
+#define GL_VERTEX_SHADER                  0x8B31
+
+typedef char GLchar;
+typedef ptrdiff_t GLintptr;
+typedef ptrdiff_t GLsizeiptr;
 
 namespace topology
 {
-	bool is_topology_list(D3DPRIMITIVETYPE topology);
-	int topology_order(D3DPRIMITIVETYPE topology);
+	int topology_order(size_t topology);
 };
-
-template <typename type>
-void safe_release(type& com_ptr)
-{
-	static_assert(std::is_pointer<type>::value,
-		"com_ptr is not a pointer");
-
-	static_assert(std::is_base_of<IUnknown, std::remove_pointer<type>::type>::value,
-		"com_ptr is not a pointer to a com object");
-
-	if (com_ptr)
-	{
-		com_ptr->Release();
-		com_ptr = nullptr;
-	}
-}
 
 struct font_handle_t
 {
 	font_handle_t() = default;
-
-	explicit font_handle_t(const std::size_t id)
+	explicit font_handle_t(std::size_t id)
 		: m_id(id)
-	{ }
+	{}
 
 	std::size_t m_id;
 };
@@ -45,44 +48,27 @@ struct vertex_t
 {
 	vertex_t() = default;
 
-	vertex_t(float x, float y, float z, float w, const color_t& col = {}, const vec2& tex = {})
-		: m_pos(x, y, z, w), m_col(col.argb()), m_tex(tex)
-	{}
-
-	vertex_t(float x, float y, float z, const color_t& col = {}, const vec2& tex = {})
-		: m_pos(x, y, z, 0.f), m_col(col.argb()), m_tex(tex)
-	{}
-
 	vertex_t(float x, float y, const color_t& col = {}, const vec2& tex = {})
-		: m_pos(x, y, 0.f, 0.f), m_col(col.argb()), m_tex(tex)
-	{}
-
-	vertex_t(const vec4& pos, const color_t& col = {}, const vec2& tex = {})
-		: m_pos(pos.x, pos.y, pos.z, pos.w), m_col(col.argb()), m_tex(tex)
-	{}
-
-	vertex_t(const vec3& pos, const color_t& col = {}, const vec2& tex = {})
-		: m_pos(pos.x, pos.y, pos.z, 0.f), m_col(col.argb()), m_tex(tex)
+		: m_pos(x, y), m_col(col), m_tex(tex)
 	{}
 
 	vertex_t(const vec2& pos, const color_t& col = {}, const vec2& tex = {})
-		: m_pos(pos.x, pos.y, 0.f, 0.f), m_col(col.argb()), m_tex(tex)
+		: m_pos(pos.x, pos.y), m_col(col), m_tex(tex)
 	{}
 
-	vec4 m_pos;
-	uint32_t m_col;
+	vec2 m_pos;
+	color_t m_col;
 	vec2 m_tex;
 };
 
 struct batch_t
 {
-	batch_t(size_t count, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr)
-		: m_count(count), m_topology(topology), m_texture(texture)
-	{ }
+	batch_t(size_t count, size_t topology, size_t tex_id, const vec4& clip_rect);
 
 	size_t m_count;
-	D3DPRIMITIVETYPE m_topology;
-	IDirect3DTexture9* m_texture;
+	size_t m_topology;
+	size_t m_tex_id;
+	vec4 m_clip_rect;
 };
 
 class render_list_t
@@ -91,116 +77,104 @@ class render_list_t
 
 	friend class c_renderer;
 	friend class c_font;
-
 public:
 	render_list_t() = delete;
-	render_list_t(std::size_t max_vertices);
 
-	void clear();
+	render_list_t(std::size_t max_verts = 0)
+	{
+		vertices.reserve(max_verts);
+	}
 
-	std::vector<vertex_t> vertices;
-	std::vector<batch_t> batches;
+	~render_list_t()
+	{ }
+
+	void clear()
+	{
+		vertices.clear();
+		batches.clear();
+	}
+
+protected:
+	std::vector<vertex_t>	vertices;
+	std::vector<batch_t>	batches;
 };
 
 enum font_t
 {
-	font_title,
 	font_normal,
+	font_title,
 
 	font_num
 };
 
 class c_renderer : std::enable_shared_from_this<c_renderer>
 {
-	IDirect3D9* m_d3d = nullptr;
-	IDirect3DDevice9* m_device = nullptr;
-	std::size_t m_max_vertices = 0;
+	uint32_t m_last_active_texture = 0;
+	uint32_t m_last_blend_src_rgb = 0;
+	uint32_t m_last_blend_dst_rgb = 0;
+	uint32_t m_last_blend_src_alpha = 0;
+	uint32_t m_last_blend_dst_alpha = 0;
+	uint32_t m_last_blend_equation_rgb = 0;
+	uint32_t m_last_blend_equation_alpha = 0;
+	int32_t m_last_program = 0;
+	int32_t m_last_texture = 0;
+	int32_t m_last_sampler = 0;
+	int32_t m_last_array_buffer = 0;
+	int32_t m_last_polygon_mode[2]{};
+	int32_t m_last_viewport[4]{};
+	int32_t m_last_scissor_box[4]{};
+	uint8_t m_last_enable_blend = 0;
+	uint8_t m_last_enable_cull_face = 0;
+	uint8_t m_last_enable_depth_test = 0;
+	uint8_t m_last_enable_scissor_test = 0;
 
-	IDirect3DVertexBuffer9* vertex_buffer = nullptr;
+	static const std::size_t m_max_vertices = 12288;
 
-	IDirect3DSurface9* m_backbuffer = nullptr;
-	D3DSURFACE_DESC m_backbuffer_desc{};
-
-	render_list_t::ptr m_render_list{};
 	std::vector<std::unique_ptr<c_font>> fonts;
+public:
 	font_handle_t m_fonts[font_num];
 
-public:
-	c_renderer(std::size_t max_vertices);
-	~c_renderer();
+	render_list_t::ptr m_render_list{ };
+	render_list_t::ptr m_menu_element_list{ };
+	render_list_t::ptr make_render_list() const;
 
-	render_list_t::ptr make_render_list();
-
-	void start();
-	void reacquire();
+	bool start();
+	void reset();
 	void release();
-
-	void begin() const;
-	void end() const;
-
-	void render(const render_list_t::ptr& render_list);
-	void render();
-
-	IDirect3DDevice9* get_device() const
-	{
-		return m_device;
-	}
-
-	render_list_t::ptr& get_renderlist()
-	{
-		return m_render_list;
-	}
-
-	IDirect3DSurface9* get_backbuffer() const
-	{
-		return m_backbuffer;
-	}
-
-	D3DSURFACE_DESC& get_backbuffer_desc()
-	{
-		return m_backbuffer_desc;
-	}
+	void draw_begin();
+	void draw_scene(const render_list_t::ptr& render_list);
+	void draw_end();
 
 	font_handle_t get_font(font_t font)
 	{
 		return m_fonts[font];
 	}
 
-	font_handle_t create_font(const std::string& family, long size, std::uint8_t flags = 0, int width = 0);
+	font_handle_t create_font(const std::string& family, long size);
 
-	void add_vertex(const render_list_t::ptr& render_list, vertex_t& vertex, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr);
-	void add_vertex(vertex_t& vertex, D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr);
+	void add_vertex(const render_list_t::ptr& render_list, vertex_t& vertex, size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, 0.f, 0.f });
+	void add_vertex(vertex_t& vertex, size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, 0.f, 0.f });
 
 	template <std::size_t N>
-	void add_vertices(const render_list_t::ptr& render_list, vertex_t(&vertexArr)[N], D3DPRIMITIVETYPE topology, IDirect3DTexture9* texture = nullptr)
+	void add_vertices(const render_list_t::ptr& render_list, vertex_t(&vertexArr)[N], size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, 0.f, 0.f })
 	{
 		if (render_list->vertices.size() + N >= m_max_vertices)
 			return; //c_renderer::add_vertices - Vertex buffer exhausted! Increase the size of the vertex buffer or add a custom implementation.
 
 		if (std::empty(render_list->batches) || render_list->batches.back().m_topology != topology
-			|| render_list->batches.back().m_texture != texture)
-			render_list->batches.emplace_back(0, topology, texture);
+			|| render_list->batches.back().m_tex_id != tex_id || render_list->batches.back().m_clip_rect != clip_rect)
+			render_list->batches.emplace_back(0, topology, tex_id, clip_rect);
 
 		render_list->batches.back().m_count += N;
 
 		render_list->vertices.resize(std::size(render_list->vertices) + N);
-		memcpy(&render_list->vertices[std::size(render_list->vertices) - N], &vertexArr[0], N * sizeof(vertex_t));
-
-		switch (topology)
-		{
-			case D3DPT_LINESTRIP:
-			case D3DPT_TRIANGLESTRIP:
-				render_list->batches.emplace_back(0, D3DPT_FORCE_DWORD);
-
-			default:
-				break;
-		}
+		std::memcpy(&render_list->vertices[std::size(render_list->vertices) - N], &vertexArr[0], N * sizeof(vertex_t));
 	}
 
 	template <std::size_t N>
-	void add_vertices(vertex_t(&vertexArr)[N], size_t topology, IDirect3DTexture9* texture = nullptr)
+	void add_vertices(vertex_t(&vertexArr)[N], size_t topology, size_t tex_id = 0, const vec4& clip_rect = { 0.f, 0.f, 0.f, 0.f })
 	{
-		add_vertices(m_render_list, vertexArr, topology, texture);
+		add_vertices(m_render_list, vertexArr, topology, tex_id, clip_rect);
 	}
 
 	void draw_pixel(const vec2& pos, const color_t& color);
@@ -226,6 +200,6 @@ public:
 
 	vec2 get_text_extent(const font_handle_t& font, const std::string& text);
 	uint32_t max_characters_to_fit(const font_handle_t& font, const std::string& text, uint32_t max_width);
-	void string(const render_list_t::ptr& render_list, const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags = TEXT_LEFT);
+	void string(const render_list_t::ptr& render_list, const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags = TEXT_LEFT); // TEXT_LEFT
 	void string(const font_handle_t& font, const vec2& pos, const std::string& text, const color_t& color, std::uint16_t flags = TEXT_LEFT);
 };

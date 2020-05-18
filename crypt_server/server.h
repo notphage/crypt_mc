@@ -158,6 +158,8 @@ public:
 			m_ssl = nullptr;
 		}
 
+		ERR_remove_state(0);
+
 		if (m_thread.joinable())
 			m_thread.join();
 	}
@@ -196,6 +198,8 @@ struct ip_infraction_t
 class c_server
 {
 	SSL_CTX* m_ssl_ctx = nullptr;
+	BIO* m_cbio = nullptr;
+	BIO* m_kbio = nullptr;
 	
 	std::vector<std::shared_ptr<c_client_handler>> m_clients{};
 	std::vector<ip_infraction_t> m_ip_infractions{};
@@ -208,6 +212,7 @@ class c_server
 	void bind_socket();
 public:
 	explicit c_server(int16_t port);
+	~c_server();
 
 	bool add_infraction(const std::shared_ptr<c_client_handler>& client);
 	bool is_ip_banned(const sockaddr_in& client);

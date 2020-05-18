@@ -320,7 +320,7 @@ public:
 
 	//Player features
 	setting_t<bool> player_throw{ &m_holder, fnvc("player_throw"), false };
-	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 50 };
+	setting_t<int> player_throw_delay{ &m_holder, fnvc("player_throw_delay"), 125 };
 
 	setting_t<keysetting_t> player_throwhealing_key{ &m_holder, fnvc("player_throwhealing_key"), {} };
 	setting_t<bool> player_throwhealing_potions{ &m_holder, fnvc("player_throwhealing_potions"), true };
@@ -427,7 +427,6 @@ public:
 	setting_t<keysetting_t> hide_key{ &m_holder, fnvc("hide_key"), {} };
 	setting_t<color_t> gui_accent_color{ &m_holder, fnvc("gui_accent_color"), { 181, 0, 41, 255 } };
 	setting_t<int> gui_fade_speed{ &m_holder, fnvc("menu_fade_speed"), 35 };
-	setting_t<bool> gui_rainbow{ &m_holder, fnvc("gui_rainbow"), false };
 	setting_t<bool> log_use_accent_color{ &m_holder, fnvc("log_use_accent_color"), false };
 	setting_t<color_t> log_color{ &m_holder, fnvc("log_color"), { 181, 0, 41, 255 } };
 	setting_t<bool> watermark{ &m_holder, fnvc("watermark"), true };

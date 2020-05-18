@@ -17,7 +17,7 @@ class c_client
 	void run_shared_mem();
 public:
 	c_client()
-		: m_shared_mem_stage(shared_mem_stage::STAGE_CREATE), m_shared_mem_thread(std::thread(&c_client::run_shared_mem, this)),
+		: m_shared_mem_stage(shared_mem_stage::STAGE_CREATE), m_shared_mem_thread(&c_client::run_shared_mem, this),
 		 m_mem_queue(xors("Spotify"), 0x100000, c_shared_mem_queue::mode::client)
 	{ }
 

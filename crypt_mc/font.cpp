@@ -28,7 +28,7 @@ void c_font::draw_text(const std::unique_ptr<render_list_t>& render_list, vec2 p
 	fonsSetColor(m_renderer->m_font_context, glfonsRGBA(color.r(), color.g(), color.b(), color.a()));
 	fonsSetAlign(m_renderer->m_font_context, flags);
 
-	fonsDrawText(m_renderer->m_font_context, pos.x, pos.y + 10.f, text.c_str(), nullptr);
+	fonsDrawText(m_renderer->m_font_context, render_list, pos.x, pos.y + 10.f, text.c_str(), nullptr);
 }
 
 vec2 c_font::get_text_extent(const std::string_view& text)

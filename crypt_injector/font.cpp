@@ -1,302 +1,42 @@
-#include "context.h" 
+#include "context.h"
 
-c_font::c_font(IDirect3DDevice9* device, const std::string& family, long height, std::uint8_t flags, int width)
-	: m_device(device), m_family(family), m_height(height), m_flags(flags), m_spacing(0), m_texture(nullptr), m_width(width)
+#include "glew/glew.h"
+#include "glew/wglew.h"
+
+#include "fontstash.h"
+#include "glfontstash.h"
+
+extern FONScontext* g_font_context;
+
+c_font::c_font(const std::string& font, float size)
+	: m_font(font), m_size(size)
 {
-	reacquire();
+	static std::string base_path(xors("C:\\Windows\\Fonts\\"));
+	static std::string extension(xors(".ttf"));
+	m_id = fonsAddFont(g_font_context, font.c_str(), (base_path + font + extension).c_str());
 }
 
-void c_font::reacquire()
+void c_font::draw_text(const std::unique_ptr<render_list_t>& render_list, vec2 pos, const std::string& text, color_t color, std::uint16_t flags)
 {
-	HDC gdi_ctx = nullptr;
+	fonsSetSize(g_font_context, m_size);
+	fonsSetFont(g_font_context, m_id);
+	fonsSetColor(g_font_context, glfonsRGBA(color.r(), color.g(), color.b(), color.a()));
+	fonsSetAlign(g_font_context, flags);
 
-	HGDIOBJ gdi_font = nullptr;
-	HGDIOBJ prev_gdi_font = nullptr;
-	HBITMAP bitmap = nullptr;
-	HGDIOBJ prev_bitmap = nullptr;
-
-	text_scale = 1.0f;
-
-	gdi_ctx = LI_FN(CreateCompatibleDC).cached()(nullptr);
-	LI_FN(SetMapMode).cached()(gdi_ctx, MM_TEXT);
-
-	create_gdi_font(gdi_ctx, &gdi_font);
-
-	if (!gdi_font)
-		return;
-
-	prev_gdi_font = LI_FN(SelectObject).cached()(gdi_ctx, gdi_font);
-
-	tex_width = tex_height = 128;
-
-	HRESULT hr = S_OK;
-	while (D3DERR_MOREDATA == (hr = paint_alphabet(gdi_ctx, true)))
-	{
-		tex_width *= 2;
-		tex_height *= 2;
-	}
-
-	if (FAILED(hr))
-		return;
-
-	D3DCAPS9 d3dCaps;
-	m_device->GetDeviceCaps(&d3dCaps);
-
-	if (tex_width > static_cast<long>(d3dCaps.MaxTextureWidth))
-	{
-		text_scale = static_cast<float>(d3dCaps.MaxTextureWidth) / tex_width;
-		tex_width = tex_height = d3dCaps.MaxTextureWidth;
-
-		bool first_iteration = true;
-
-		do
-		{
-			if (!first_iteration)
-				text_scale *= 0.9f;
-
-			LI_FN(DeleteObject).cached()(LI_FN(SelectObject).cached()(gdi_ctx, prev_gdi_font));
-
-			create_gdi_font(gdi_ctx, &gdi_font);
-
-			if (!gdi_font)
-				return;
-
-			prev_gdi_font = LI_FN(SelectObject).cached()(gdi_ctx, gdi_font);
-
-			first_iteration = false;
-		} while (D3DERR_MOREDATA == (hr = paint_alphabet(gdi_ctx, true)));
-	}
-
-	if (FAILED(m_device->CreateTexture(tex_width, tex_height, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &m_texture, nullptr)))
-		return;
-
-	DWORD* bitmap_bits = nullptr;
-
-	BITMAPINFO bitmap_ctx{};
-	bitmap_ctx.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bitmap_ctx.bmiHeader.biWidth = tex_width;
-	bitmap_ctx.bmiHeader.biHeight = -tex_height;
-	bitmap_ctx.bmiHeader.biPlanes = 1;
-	bitmap_ctx.bmiHeader.biCompression = BI_RGB;
-	bitmap_ctx.bmiHeader.biBitCount = 32;
-
-	bitmap = LI_FN(CreateDIBSection).cached()(gdi_ctx, &bitmap_ctx, DIB_RGB_COLORS, reinterpret_cast<void**>(&bitmap_bits), nullptr, 0);
-
-	prev_bitmap = LI_FN(SelectObject).cached()(gdi_ctx, bitmap);
-
-	LI_FN(SetTextColor).cached()(gdi_ctx, RGB(255, 255, 255));
-	LI_FN(SetBkColor).cached()(gdi_ctx, 0x00000000);
-	LI_FN(SetTextAlign).cached()(gdi_ctx, TA_TOP);
-
-	if (FAILED(paint_alphabet(gdi_ctx, false)))
-		return;
-
-	D3DLOCKED_RECT locked_rect;
-	m_texture->LockRect(0, &locked_rect, nullptr, 0);
-
-	auto dst_row = static_cast<std::uint8_t*>(locked_rect.pBits);
-
-	for (long y = 0; y < tex_height; y++)
-	{
-		auto dst = reinterpret_cast<std::uint32_t*>(dst_row);
-		for (long x = 0; x < tex_width; x++)
-		{
-			BYTE alpha = (bitmap_bits[tex_width * y + x] & 0xff);
-
-			if (alpha > 0)
-				* dst++ = ((alpha << 24) | 0x00FFFFFF);
-			else
-				*dst++ = 0;
-		}
-		dst_row += locked_rect.Pitch;
-	}
-
-	if (m_texture)
-		m_texture->UnlockRect(0);
-
-	LI_FN(SelectObject).cached()(gdi_ctx, prev_bitmap);
-	LI_FN(SelectObject).cached()(gdi_ctx, prev_gdi_font);
-	LI_FN(DeleteObject).cached()(bitmap);
-	LI_FN(DeleteObject).cached()(gdi_font);
-	LI_FN(DeleteDC).cached()(gdi_ctx);
+	fonsDrawText(g_font_context, render_list, pos.x, pos.y + 10.f, text.c_str(), nullptr);
 }
 
-void c_font::release()
+vec2 c_font::get_text_extent(const std::string_view& text)
 {
-	safe_release(m_texture);
+	vec4 bounds;
+	fonsSetFont(g_font_context, m_id);
+	fonsSetSize(g_font_context, m_size);
+	fonsTextBounds(g_font_context, 100, 100, text.data(), nullptr, (float*)& bounds);
+
+	return { bounds.z - bounds.x, bounds.w - bounds.y };
 }
 
-void c_font::create_gdi_font(HDC ctx, HGDIOBJ* gdi_font)
-{
-	auto scaling_factor = float(LI_FN(GetDeviceCaps).cached()(ctx, LOGPIXELSY)) / 96.f; // for the 4k niggas
-
-	int character_height = -LI_FN(MulDiv).cached()(m_height, static_cast<int>((LI_FN(GetDeviceCaps).cached()(ctx, LOGPIXELSY) / scaling_factor) * text_scale), 72);
-
-	DWORD bold = (m_flags & FONT_BOLD) ? FW_BOLD : 400;
-	DWORD italic = (m_flags & FONT_ITALIC) ? TRUE : FALSE;
-
-	*gdi_font = LI_FN(CreateFontA).cached()(character_height, m_width, 0, 0, bold, italic, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, m_family.c_str());
-}
-
-long c_font::paint_alphabet(HDC ctx, bool measure_only /*= false*/)
-{
-	SIZE size;
-	char chr[2] = "x";
-
-	if (0 == LI_FN(GetTextExtentPoint32A).cached()(ctx, chr, 1, &size))
-		return E_FAIL;
-
-	m_spacing = static_cast<long>(ceil(size.cy * 0.3f));
-
-	long x = m_spacing;
-	long y = 0;
-
-	for (char c = 32; c < 127; c++)
-	{
-		chr[0] = c;
-		if (0 == LI_FN(GetTextExtentPoint32A).cached()(ctx, chr, 1, &size))
-			return E_FAIL;
-
-		if (x + size.cx + m_spacing > tex_width)
-		{
-			x = m_spacing;
-			y += size.cy + 1;
-		}
-
-		if (y + size.cy > tex_height)
-			return D3DERR_MOREDATA;
-
-		if (!measure_only)
-		{
-			if (0 == LI_FN(ExtTextOutA).cached()(ctx, x + 0, y + 0, ETO_OPAQUE, nullptr, chr, 1, nullptr))
-				return E_FAIL;
-
-			tex_coords[c - 32][0] = (static_cast<float>(x + 0 - m_spacing)) / tex_width;
-			tex_coords[c - 32][1] = (static_cast<float>(y + 0 + 0)) / tex_height;
-			tex_coords[c - 32][2] = (static_cast<float>(x + size.cx + m_spacing)) / tex_width;
-			tex_coords[c - 32][3] = (static_cast<float>(y + size.cy + 0)) / tex_height;
-		}
-
-		x += size.cx + (2 * m_spacing);
-	}
-
-	return S_OK;
-}
-
-vec2 c_font::get_text_extent(const std::string& text)
-{
-	float row_width = 0.f;
-	float row_height = (tex_coords[0][3] - tex_coords[0][1]) * tex_height;
-	float width = 0.f;
-	float height = row_height;
-
-	for (const auto& c : text)
-	{
-		if (c == '\n')
-		{
-			row_width = 0.f;
-			height += row_height;
-		}
-
-		if (c < ' ')
-			continue;
-
-		float tx1 = tex_coords[c - 32][0];
-		float tx2 = tex_coords[c - 32][2];
-
-		row_width += (tx2 - tx1) * tex_width - 2.f * m_spacing;
-
-		if (row_width > width)
-			width = row_width;
-	}
-
-	return { width, height };
-}
-
-void c_font::draw_text(const std::unique_ptr<render_list_t>& render_list, vec2 pos, const std::string& text, const color_t& color, std::uint8_t flags)
-{
-	std::size_t num_to_skip = 0;
-
-	if (flags & (TEXT_RIGHT | TEXT_CENTERED))
-	{
-		vec2 size = get_text_extent(text);
-
-		if (flags & TEXT_RIGHT)
-			pos.x -= size.x;
-		else if (flags & TEXT_CENTERED_X)
-			pos.x -= 0.5f * size.x;
-
-		if (flags & TEXT_CENTERED_Y)
-			pos.y -= 0.5f * size.y;
-	}
-
-	pos.x -= m_spacing;
-
-	float start_x = pos.x;
-
-	for (const auto& c : text)
-	{
-		if (num_to_skip > 0 && num_to_skip-- > 0)
-			continue;
-
-		if (c == '\n')
-		{
-			pos.x = start_x;
-			pos.y += (tex_coords[0][3] - tex_coords[0][1]) * tex_height;
-		}
-
-		if (c < ' ')
-			continue;
-
-		float tx1 = tex_coords[c - 32][0];
-		float ty1 = tex_coords[c - 32][1];
-		float tx2 = tex_coords[c - 32][2];
-		float ty2 = tex_coords[c - 32][3];
-
-		float w = (tx2 - tx1) * tex_width / text_scale;
-		float h = (ty2 - ty1) * tex_height / text_scale;
-
-		if (c != ' ')
-		{
-			vertex_t v[] =
-			{
-				{ vec3{ pos.x - 0.5f,     pos.y - 0.5f + h, 0.9f }, color, vec2{ tx1, ty2 } },
-				{ vec3{ pos.x - 0.5f,     pos.y - 0.5f,     0.9f }, color, vec2{ tx1, ty1 } },
-				{ vec3{ pos.x - 0.5f + w, pos.y - 0.5f + h, 0.9f }, color, vec2{ tx2, ty2 } },
-
-				{ vec3{ pos.x - 0.5f + w, pos.y - 0.5f,     0.9f }, color, vec2{ tx2, ty1 } },
-				{ vec3{ pos.x - 0.5f + w, pos.y - 0.5f + h, 0.9f }, color, vec2{ tx2, ty2 } },
-				{ vec3{ pos.x - 0.5f,     pos.y - 0.5f,     0.9f }, color, vec2{ tx1, ty1 } }
-			};
-
-			if (flags & TEXT_SHADOW)
-			{
-				auto shadow_color = color_t(0, 0, 0, color.a());
-
-				for (auto& vtx : v) { vtx.m_col = shadow_color.argb(); vtx.m_pos.x += 1.f; }
-				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
-
-				for (auto& vtx : v) { vtx.m_pos.x -= 2.f; }
-				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
-
-				for (auto& vtx : v) { vtx.m_pos.x += 1.f; vtx.m_pos.y += 1.f; }
-				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
-
-				for (auto& vtx : v) { vtx.m_pos.y -= 2.f; }
-				ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
-
-				for (auto& vtx : v) { vtx.m_col = color.argb(); vtx.m_pos.y -= 1.f; }
-			}
-
-			ctx.m_renderer->add_vertices(render_list, v, D3DPT_TRIANGLELIST, m_texture);
-		}
-
-		pos.x += w - (2.f * m_spacing);
-	}
-}
-
-uint32_t c_font::max_characters_to_fit(const std::string& text, uint32_t max_width)
+size_t c_font::max_characters_to_fit(const std::string& text, size_t max_width)
 {
 	size_t first, last, middle, max;
 

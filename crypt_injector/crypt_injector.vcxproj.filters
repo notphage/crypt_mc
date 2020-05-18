@@ -35,9 +35,6 @@
     <Filter Include="SRC\client\hwid">
       <UniqueIdentifier>{6e27eeb6-c434-4c5d-bd6f-d1d39e7b6398}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\client\injection">
-      <UniqueIdentifier>{80e20270-2880-4410-a757-3fa3b960a402}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\syscall">
       <UniqueIdentifier>{039c0130-5d1c-4311-b30b-54ba27012910}</UniqueIdentifier>
     </Filter>
@@ -47,23 +44,23 @@
     <Filter Include="SRC\syscall\memory">
       <UniqueIdentifier>{bd5a6159-3141-441d-a15b-7b09d8cb8ca3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\client\injection\engines">
-      <UniqueIdentifier>{691f4114-de62-44bb-b1b3-53cf9e119be7}</UniqueIdentifier>
+    <Filter Include="SRC\client\injection">
+      <UniqueIdentifier>{8d45f9a0-8b4d-45a4-a315-9482f5ac4f7b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\client\injection\helpers">
-      <UniqueIdentifier>{152c794d-fd5e-4312-bb9b-a149f7357d1f}</UniqueIdentifier>
+    <Filter Include="SRC\client\injection\engines">
+      <UniqueIdentifier>{afadbdaf-9464-4863-8549-bb05bf3a18d3}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\client\injection\mappers">
-      <UniqueIdentifier>{2266de68-6213-485d-8649-3cbf84fc4cc5}</UniqueIdentifier>
+      <UniqueIdentifier>{27a684d2-15e7-48f6-bc41-5051ec43f758}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\client\injection\interop">
-      <UniqueIdentifier>{462daaa8-65e2-4fd4-9e10-c169b4dea794}</UniqueIdentifier>
+      <UniqueIdentifier>{ab089f07-ed7a-4e70-89a3-64a214e6d3c9}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRC\client\injection\wrappers">
-      <UniqueIdentifier>{ee4f5123-d91a-4f9a-b495-685a219e1e96}</UniqueIdentifier>
+      <UniqueIdentifier>{7690fe4e-b25c-4b03-8f9d-a192e3d8e50c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\client\injection\shellcode">
-      <UniqueIdentifier>{45e309a9-4568-403f-b674-567093841592}</UniqueIdentifier>
+    <Filter Include="SRC\client\injection\helpers">
+      <UniqueIdentifier>{f586910b-95c5-4a63-9467-89172387c9bd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -82,12 +79,6 @@
     <ClCompile Include="input.cpp">
       <Filter>SRC\window\input</Filter>
     </ClCompile>
-    <ClCompile Include="renderer.cpp">
-      <Filter>SRC\window\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="font.cpp">
-      <Filter>SRC\window\renderer\font</Filter>
-    </ClCompile>
     <ClCompile Include="gui.cpp">
       <Filter>SRC\window\gui</Filter>
     </ClCompile>
@@ -103,23 +94,35 @@
     <ClCompile Include="protection.cpp">
       <Filter>SRC\client\protection</Filter>
     </ClCompile>
-    <ClCompile Include="executor.cpp">
-      <Filter>SRC\client\injection\engines</Filter>
+    <ClCompile Include="renderer.cpp">
+      <Filter>SRC\window\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="shellcode.cpp">
-      <Filter>SRC\client\injection\engines</Filter>
+    <ClCompile Include="font.cpp">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClCompile>
-    <ClCompile Include="logger.cpp">
-      <Filter>SRC\client\injection\helpers</Filter>
+    <ClCompile Include="fontstash.cpp">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClCompile>
-    <ClCompile Include="ntdll.cpp">
-      <Filter>SRC\client\injection\helpers</Filter>
+    <ClCompile Include="glfontstash.cpp">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClCompile>
     <ClCompile Include="manualmapper.cpp">
       <Filter>SRC\client\injection\mappers</Filter>
     </ClCompile>
     <ClCompile Include="loadlibrary.cpp">
       <Filter>SRC\client\injection\mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="shellcode.cpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClCompile>
+    <ClCompile Include="executor.cpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClCompile>
+    <ClCompile Include="ntdll.cpp">
+      <Filter>SRC\client\injection\helpers</Filter>
     </ClCompile>
     <ClCompile Include="map_context.cpp">
       <Filter>SRC\client\injection\mappers</Filter>
@@ -130,9 +133,6 @@
     <ClCompile Include="process.cpp">
       <Filter>SRC\client\injection\interop</Filter>
     </ClCompile>
-    <ClCompile Include="thread.cpp">
-      <Filter>SRC\client\injection\interop</Filter>
-    </ClCompile>
     <ClCompile Include="api_set.cpp">
       <Filter>SRC\client\injection\wrappers</Filter>
     </ClCompile>
@@ -141,6 +141,9 @@
     </ClCompile>
     <ClCompile Include="portable_executable.cpp">
       <Filter>SRC\client\injection\wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="thread.cpp">
+      <Filter>SRC\client\injection\interop</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -173,12 +176,6 @@
     </ClInclude>
     <ClInclude Include="input.h">
       <Filter>SRC\window\input</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer.h">
-      <Filter>SRC\window\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="font.h">
-      <Filter>SRC\window\renderer\font</Filter>
     </ClInclude>
     <ClInclude Include="gui.h">
       <Filter>SRC\window\gui</Filter>
@@ -222,23 +219,38 @@
     <ClInclude Include="..\shared_mem.h">
       <Filter>SRC\client\shared_memory</Filter>
     </ClInclude>
-    <ClInclude Include="executor.hpp">
-      <Filter>SRC\client\injection\engines</Filter>
+    <ClInclude Include="renderer.h">
+      <Filter>SRC\window\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="shellcode.hpp">
-      <Filter>SRC\client\injection\engines</Filter>
+    <ClInclude Include="fontstash.h">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClInclude>
-    <ClInclude Include="logger.hpp">
-      <Filter>SRC\client\injection\helpers</Filter>
+    <ClInclude Include="glfontstash.h">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClInclude>
-    <ClInclude Include="ntdll.hpp">
-      <Filter>SRC\client\injection\helpers</Filter>
+    <ClInclude Include="stb_truetype.h">
+      <Filter>SRC\window\renderer\font</Filter>
+    </ClInclude>
+    <ClInclude Include="font.h">
+      <Filter>SRC\window\renderer\font</Filter>
     </ClInclude>
     <ClInclude Include="manualmapper.hpp">
       <Filter>SRC\client\injection\mappers</Filter>
     </ClInclude>
     <ClInclude Include="loadlibrary.hpp">
       <Filter>SRC\client\injection\mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="shellcode.hpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClInclude>
+    <ClInclude Include="executor.hpp">
+      <Filter>SRC\client\injection\engines</Filter>
+    </ClInclude>
+    <ClInclude Include="ntdll.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
     </ClInclude>
     <ClInclude Include="map_context.hpp">
       <Filter>SRC\client\injection\mappers</Filter>
@@ -247,9 +259,6 @@
       <Filter>SRC\client\injection\interop</Filter>
     </ClInclude>
     <ClInclude Include="process.hpp">
-      <Filter>SRC\client\injection\interop</Filter>
-    </ClInclude>
-    <ClInclude Include="thread.hpp">
       <Filter>SRC\client\injection\interop</Filter>
     </ClInclude>
     <ClInclude Include="api_set.hpp">
@@ -261,6 +270,9 @@
     <ClInclude Include="portable_executable.hpp">
       <Filter>SRC\client\injection\wrappers</Filter>
     </ClInclude>
+    <ClInclude Include="thread.hpp">
+      <Filter>SRC\client\injection\interop</Filter>
+    </ClInclude>
     <ClInclude Include="cast.hpp">
       <Filter>SRC\client\injection\helpers</Filter>
     </ClInclude>
@@ -270,30 +282,19 @@
     <ClInclude Include="maker.hpp">
       <Filter>SRC\client\injection\helpers</Filter>
     </ClInclude>
-    <ClInclude Include="transformer.hpp">
+    <ClInclude Include="safe_handle.hpp">
       <Filter>SRC\client\injection\helpers</Filter>
     </ClInclude>
-    <ClInclude Include="safe_handle.hpp">
-      <Filter>SRC\client\injection\wrappers</Filter>
-    </ClInclude>
     <ClInclude Include="safe_memory.hpp">
-      <Filter>SRC\client\injection\wrappers</Filter>
+      <Filter>SRC\client\injection\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="transformer.hpp">
+      <Filter>SRC\client\injection\helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="syscall_stub.asm">
       <Filter>SRC\syscall</Filter>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="dllmain_call_x64_entry.asm">
-      <Filter>SRC\client\injection\shellcode</Filter>
-    </None>
-    <None Include="dllmain_hijack_x64_entry.asm">
-      <Filter>SRC\client\injection\shellcode</Filter>
-    </None>
-    <None Include="dllmain_call_64_exit.asm">
-      <Filter>SRC\client\injection\shellcode</Filter>
-    </None>
   </ItemGroup>
 </Project>

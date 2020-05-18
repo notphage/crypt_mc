@@ -127,6 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -224,12 +225,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="shared_mem_server.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\shared_mem.h" />
-    <ClInclude Include="..\shared_mutex.h" />
-    <ClInclude Include="..\shared_queue.h" />
-    <ClInclude Include="..\shared_signal.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

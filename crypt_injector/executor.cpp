@@ -231,6 +231,12 @@ bool injection::executor::handle_create_exit(map_ctx& ctx, native::process& proc
 		return false;
 	}
 
+	if (!thread.terminate())
+	{
+		logger::log_error("Failed to terminate shellcode thread");
+		return false;
+	}
+
 	// SUCCESSFULLY RAN SHELLCODE, MEMORY GET'S FREED BY HANDLER
 	// WHEN IT GOES OUT OF SCOPE
 	return true;

@@ -36,6 +36,7 @@ void c_window::create() const
 	wc.lpfnWndProc = &wnd_proc;
 	wc.hInstance = ctx.m_instance;
 	wc.lpszClassName = CLASS_NAME;
+	wc.style = CS_OWNDC;
 
 	LI_FN(RegisterClassA).cached()(&wc);
 
@@ -71,19 +72,17 @@ void c_window::create() const
 	LI_FN(SetWindowPos).cached()(hwnd, HWND_TOPMOST, (desk_rect.right / 2) - 160, (desk_rect.bottom / 2) - 120, ctx.m_screen_w, ctx.m_screen_h, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 	LI_FN(ShowWindow).cached()(hwnd, SW_SHOW);
 
-	ctx.m_renderer = std::make_unique<c_renderer>(8192);
+	ctx.m_renderer = std::make_unique<c_renderer>();
 
 	ctx.m_renderer->start();
 }
 
 void c_window::render()
 {
-	ctx.m_renderer->begin();
-
+	ctx.m_renderer->draw_begin();
 	m_gui.draw();
-
-	ctx.m_renderer->render();
-	ctx.m_renderer->end();
+	ctx.m_renderer->draw_scene(ctx.m_renderer->m_render_list);
+	ctx.m_renderer->draw_end();
 }
 
 void c_window::end()

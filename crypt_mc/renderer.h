@@ -104,6 +104,9 @@ protected:
 enum font_t
 {
 	font_normal,
+	font_fury_title_serif,
+	font_fury_header_serif,
+	font_fury_normal_serif,
 
 	font_num
 };
@@ -128,7 +131,7 @@ class c_renderer : std::enable_shared_from_this<c_renderer>
 	uint8_t m_last_enable_cull_face = 0;
 	uint8_t m_last_enable_depth_test = 0;
 	uint8_t m_last_enable_scissor_test = 0;
-	
+
 	static const std::size_t m_max_vertices = 12288;
 
 	std::vector<std::unique_ptr<c_font>> fonts;
@@ -137,11 +140,12 @@ public:
 	FONScontext* make_font_context() const;
 	font_handle_t m_fonts[font_num];
 
-	render_list_t::ptr	m_render_list{ };
+	render_list_t::ptr m_render_list{ };
+	render_list_t::ptr m_menu_element_list{ };
 	render_list_t::ptr make_render_list() const;
 
 	void draw_begin();
-	void draw_scene();
+	void draw_scene(const render_list_t::ptr& render_list);
 	void draw_end();
 
 	font_handle_t get_font(font_t font)

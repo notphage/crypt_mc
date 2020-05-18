@@ -14,7 +14,7 @@ class c_aim_assist : public c_feature
 	void find_best_point(const std::shared_ptr<c_player>& self, const std::shared_ptr<c_player>& player, const vec3& trace_origin, target_t& target_data);
 	void find_target(const std::shared_ptr<c_game>& mc, const std::shared_ptr<c_player>& self, const std::shared_ptr<c_world>& world, target_t& best_target_data);
 	float limit_angle(float change, float speed);
-;
+
 public:
 	c_aim_assist(bool* setting, keysetting_t* keybind = nullptr)
 		: c_feature(setting, keybind)

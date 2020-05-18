@@ -13,6 +13,7 @@ enum class mem_type_t : uint64_t
 {
 	MEM_INIT,
 	MEM_HOOK,
+	MEM_CLOSE,
 	MEM_PING
 };
 
@@ -33,6 +34,11 @@ struct c_mem_init_packet : c_mem_packet
 struct c_mem_hook_packet : c_mem_packet
 {
 	uintptr_t m_hook_addr;
+};
+
+struct c_mem_close_packet : c_mem_packet
+{
+	bool m_force_close;
 };
 
 struct c_mem_ping_packet : c_mem_packet
@@ -108,6 +114,18 @@ public:
 		xor_mem_packet(hook_mem_packet);
 
 		return hook_mem_packet;
+	}
+
+	c_mem_close_packet create_close_mem_packet(bool force_close)
+	{
+		c_mem_close_packet close_mem_packet{};
+		create_base_mem_packet(close_mem_packet, mem_type_t::MEM_CLOSE);
+
+		close_mem_packet.m_force_close = force_close;
+
+		xor_mem_packet(close_mem_packet);
+
+		return close_mem_packet;
 	}
 
 	c_mem_ping_packet create_ping_mem_packet(uint64_t last_hash)

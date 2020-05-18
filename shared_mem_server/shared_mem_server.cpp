@@ -4,6 +4,7 @@
 #include <functional>
 #include <mutex>
 #include <conio.h>
+#include <atomic>
 
 #include "../shared_mem.h"
 #include "../shared_queue.h"
@@ -41,7 +42,7 @@ int main()
 		printf("Init message pushed\n");
 
 	uint64_t expected_cookie = fnv1a_u64(fnv1a_u64(start_cookie));
-	while (true)
+	for (int i = 0; i < 3; i++)
 	{
 		mem_message_t msg{};
 		if (!shared_mem_queue.wait_for_message())
@@ -72,6 +73,14 @@ int main()
 
 		expected_cookie = fnv1a_u64(ping_packet->m_hash);
 	}
+
+	auto close_packet = g_mem_handler.create_close_mem_packet(false);
+
+	const mem_message_t close_msg(reinterpret_cast<uint8_t*>(&close_packet), sizeof close_packet);
+	if (!shared_mem_queue.push_message(close_msg))
+		printf("Failed to push messaged\n");
+	else
+		printf("Init message pushed\n");
 
 	_getch();
 }

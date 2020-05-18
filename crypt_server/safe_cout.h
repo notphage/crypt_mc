@@ -13,8 +13,16 @@ struct safe_ostream
 		guarded_impl(const guarded_impl&) = delete;
 		void operator=(const guarded_impl&) = delete;
 		guarded_impl(std::ostream& ostream, std::mutex& mutex)
-			: ostream_(ostream), guard_(mutex), ofstream_("logs/connection.log", std::ios::out | std::ios::app | std::ios::binary)
+			: ostream_(ostream), ofstream_(), guard_(mutex)
 		{
+			ofstream_.open("connection.log", std::ios::out | std::ios::app | std::ios::binary);
+			if (!ofstream_.is_open())
+			{
+				ofstream_.clear();
+				ofstream_.open("connection.log", std::ios::out);
+				ofstream_.close();
+				ofstream_.open("connection.log", std::ios::out | std::ios::app | std::ios::binary);
+			}
 		}
 
 		~guarded_impl()

@@ -53,12 +53,35 @@ void c_client::run_shared_mem()
 				
 				old = now;
 
+				if (m_mem_queue.is_message_available())
+				{
+					mem_message_t msg{};
+
+					if (!m_mem_queue.pop_message(msg))
+					{
+						m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
+						break;
+					}
+
+					c_mem_close_packet* close_packet = reinterpret_cast<c_mem_close_packet*>(msg.m_data.data());
+					if (!m_mem_handler.validate_mem_packet(*close_packet))
+					{
+						m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
+						break;
+					}
+
+					m_mem_handler.xor_mem_packet(*close_packet);
+
+					m_shared_mem_stage = close_packet->m_force_close ? shared_mem_stage::STAGE_FORCECLOSE : shared_mem_stage::STAGE_CLOSE;
+					break;
+				}
+
 				m_cookie = fnvr(m_cookie);
 				auto ping_packet = m_mem_handler.create_ping_mem_packet(m_cookie);
 
 				const mem_message_t msg(reinterpret_cast<uint8_t*>(&ping_packet), sizeof ping_packet);
 
-				if (!m_mem_queue.push_message(msg))
+				if (!m_mem_queue.push_message(msg) || m_mem_queue.get_out_message_count() > 1)
 					m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
 
 				break;
@@ -74,15 +97,8 @@ void c_client::run_shared_mem()
 			{
 				ctx.unload();
 
-				auto ping_packet = m_mem_handler.create_ping_mem_packet(0);
-
-				const mem_message_t msg(reinterpret_cast<uint8_t*>(&ping_packet), sizeof ping_packet);
-
-				if (!m_mem_queue.push_message(msg))
-					m_shared_mem_stage = shared_mem_stage::STAGE_FORCECLOSE;
-
 				m_mem_queue.m_init = false;
-				
+
 				return;
 			}
 

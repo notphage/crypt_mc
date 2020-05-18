@@ -68,19 +68,19 @@ void c_renderer::draw_begin()
 	LI_FN(glMatrixMode).cached()(GL_MODELVIEW);
 	LI_FN(glPushMatrix).cached()();
 	LI_FN(glLoadIdentity).cached()();
+}
 
-	const auto vtx_buffer = m_render_list->vertices.data();
+void c_renderer::draw_scene(const render_list_t::ptr& render_list)
+{
+	int32_t pos = 0;
+
+	const auto vtx_buffer = render_list->vertices.data();
 	LI_FN(glVertexPointer).cached()(2, GL_FLOAT, sizeof(vertex_t), (const GLvoid*)((const char*)vtx_buffer + offsetof(vertex_t, m_pos)));
 	LI_FN(glColorPointer).cached()(4, GL_UNSIGNED_BYTE, sizeof(vertex_t), (const GLvoid*)((const char*)vtx_buffer + offsetof(vertex_t, m_col)));
 	LI_FN(glTexCoordPointer).cached()(2, GL_FLOAT, sizeof(vertex_t), (const GLvoid*)((const char*)vtx_buffer + offsetof(vertex_t, m_tex)));
-}
-
-void c_renderer::draw_scene()
-{
-	std::size_t pos = 0;
 
 	// Normal Shapes
-	for (const auto& batch : m_render_list->batches)
+	for (const auto& batch : render_list->batches)
 	{
 		const int order = topology::topology_order(batch.m_topology);
 		if (batch.m_count && order > 0)
@@ -97,7 +97,7 @@ void c_renderer::draw_scene()
 		}
 	}
 
-	m_render_list->clear();
+	render_list->clear();
 }
 
 void c_renderer::draw_end()

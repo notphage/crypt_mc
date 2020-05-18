@@ -86,7 +86,7 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
 	LI_FN(glPopClientAttrib).cached()();
 }
 
-static void glfons__renderDraw(void* userPtr, const float* verts, const float* tcoords, const unsigned int* colors, int nverts)
+static void glfons__renderDraw(void* userPtr, const float* verts, const float* tcoords, const unsigned int* colors, int nverts, const std::unique_ptr<render_list_t>& render_list)
 {
 	GLFONScontext* gl = (GLFONScontext*)userPtr;
 	if (gl->tex == 0)
@@ -96,7 +96,7 @@ static void glfons__renderDraw(void* userPtr, const float* verts, const float* t
 	{
 		color_t col;
 		vertex_t vert(vec2{ verts[i * 2 + 0], verts[i * 2 + 1] }, col.from_rgba(colors[i]), vec2{ tcoords[i * 2 + 0], tcoords[i * 2 + 1] });
-		ctx.m_renderer->add_vertex(vert, GL_TRIANGLES, gl->tex);
+		ctx.m_renderer->add_vertex(render_list == nullptr ? ctx.m_renderer->m_render_list : render_list, vert, GL_TRIANGLES, gl->tex);
 	}
 
 	//glBindTexture(GL_TEXTURE_2D, gl->tex);

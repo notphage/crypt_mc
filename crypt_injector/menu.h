@@ -76,8 +76,8 @@ namespace UI
 			ctx.m_renderer->draw_gradient_rect({ m_start.x + 70.f, m_start.y + 2.f, 128.f, 4.f }, color_t(234, 10, 30), color_t(187, 10, 30), color_t(234, 10, 30), color_t(187, 10, 30));
 			ctx.m_renderer->draw_gradient_rect({ m_start.x + 198.f, m_start.y + 2.f, 120.f, 4.f }, color_t(187, 10, 30), color_t(234, 10, 30), color_t(187, 10, 30), color_t(234, 10, 30));
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 98, 10 }, xors("C"), color_t(234, 10, 30));
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 125, 10 }, xors("RYPT"), color_t(255, 255, 255));
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 93, 46 }, xors("C"), color_t(234, 10, 30));
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_title), { 120, 46 }, xors("RYPT"), color_t(255, 255, 255));
 		}
 
 	public:
@@ -153,8 +153,8 @@ namespace UI
 
 			if (m_text)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y - 2.f }, m_text, text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 3.f }, m_text, text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 21.f, m_start.y }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 20.f, m_start.y - 1.f }, m_text, text_color);
 			}
 		}
 
@@ -185,7 +185,7 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ m_start.x + 1.f, m_start.y + 1.f, m_bounds.x - 2.f , m_bounds.y - 1.f }, color);
 
 			if (m_text)
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + m_bounds.x * 0.41f, m_start.y + (m_bounds.y * 0.5f) - 8.f }, m_text, m_is_inside && data->m_left_click ? data->m_color : color_t(153, 153, 153, data->m_alpha));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + m_bounds.x * 0.41f, m_start.y + (m_bounds.y * 0.5f) - 6.f }, m_text, m_is_inside && data->m_left_click ? data->m_color : color_t(153, 153, 153, data->m_alpha));
 		}
 
 		void handle(c_window_data* data, const char* text, const std::function<void()>& function)
@@ -327,8 +327,8 @@ namespace UI
 
 			if (m_text)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y - 2.f }, m_text, text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 3.f }, m_text, text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 1.f }, m_text, text_color);
 			}
 
 			// outer edge
@@ -338,7 +338,7 @@ namespace UI
 			ctx.m_renderer->draw_filled_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(36, 36, 36, data->m_alpha));
 
 			if (!m_items.empty())
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, m_items.at(*m_setting).c_str(), data->m_active ? color_t(153, 153, 153, data->m_alpha) : color_t(92, 92, 92, data->m_alpha));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 5.f }, m_items.at(*m_setting).c_str(), data->m_active ? color_t(153, 153, 153, data->m_alpha) : color_t(92, 92, 92, data->m_alpha));
 
 			// bester arrow
 			const color_t arrow_color(153, 153, 153, data->m_alpha);
@@ -404,7 +404,7 @@ namespace UI
 			for (size_t i = 0; i < count; i++)
 			{
 				float x = m_box_start.x + 10.f;
-				float y = m_end.y + 3.f + i * m_item_height;
+				float y = m_end.y + 5.f + i * m_item_height;
 
 				if (y + (m_item_height * 0.5f) > m_end.y + m_dropdown_end)
 					continue;
@@ -501,7 +501,7 @@ namespace UI
 						continue;
 
 					ctx.m_renderer->draw_filled_rect({ m_box_start.x, y, m_bounds.x, 16.f }, m_items.at(i).m_background);
-					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y - 1.f }, m_items.at(i).m_text, m_items.at(i).m_text_col);
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { x, y + 1.f }, m_items.at(i).m_text, m_items.at(i).m_text_col);
 				}
 			}
 		}
@@ -603,8 +603,8 @@ namespace UI
 
 			if (m_text)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y - 1.f }, m_text, text_shadow);
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y - 2.f }, m_text, text_color);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x + 1.f, m_start.y + 1.f }, m_text, text_shadow);
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_start.x, m_start.y }, m_text, text_color);
 			}
 
 			ctx.m_renderer->draw_rect({ m_box_start.x, m_box_start.y, m_bounds.x, m_bounds.y }, color_t(10, 10, 10, data->m_alpha));
@@ -612,7 +612,7 @@ namespace UI
 
 			if (strlen(m_setting) > 0)
 			{
-				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_end.x - 12.0f, m_box_start.y + 3.0f }, "x", color_t(150, 150, 150, data->m_alpha));
+				ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_end.x - 12.0f, m_box_start.y + 5.0f }, "x", color_t(150, 150, 150, data->m_alpha));
 
 				const bool inside_x = m_cursor_x > m_end.x - 14.0f && m_cursor_x < m_end.x - 4.0f && m_cursor_y > m_box_start.y && m_cursor_y < m_end.y;
 
@@ -641,7 +641,7 @@ namespace UI
 			{
 				// 1 step closer to skeet polish!?
 				if (strlen(m_setting) < 1)
-					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, xors("..."), color_t(100, 100, 100, data->m_alpha));
+					ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 5.f }, xors("..."), color_t(100, 100, 100, data->m_alpha));
 			}
 
 			if ((text_width > (m_bounds.x - 20.f)) && !m_is_waiting)
@@ -666,7 +666,7 @@ namespace UI
 				for (auto&& c : draw_text)
 					c = '*';
 
-			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 3.f }, draw_text.c_str(), color_t(153, 153, 153, data->m_alpha));
+			ctx.m_renderer->string(ctx.m_renderer->get_font(font_normal), { m_box_start.x + 10.f, m_box_start.y + 5.f }, draw_text.c_str(), color_t(153, 153, 153, data->m_alpha));
 
 			//m_draw_time += csgo.m_globals()->frametime;
 

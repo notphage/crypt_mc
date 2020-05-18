@@ -92,9 +92,6 @@
     <Filter Include="SRC\features\fast_stop">
       <UniqueIdentifier>{a57f4dbd-104a-4acc-ad18-69f00eaed0fd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC\features\safe_walk">
-      <UniqueIdentifier>{20264eb5-0d0b-4d01-8811-9dd010763d3b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SRC\render">
       <UniqueIdentifier>{e8089f30-5f27-443e-be54-381aee185cbd}</UniqueIdentifier>
     </Filter>
@@ -213,9 +210,6 @@
     </ClCompile>
     <ClCompile Include="fast_stop.cpp">
       <Filter>SRC\features\fast_stop</Filter>
-    </ClCompile>
-    <ClCompile Include="safe_walk.cpp">
-      <Filter>SRC\features\safe_walk</Filter>
     </ClCompile>
     <ClCompile Include="strict_math_atan2.cpp">
       <Filter>SRC\hooks</Filter>
@@ -389,9 +383,6 @@
     </ClInclude>
     <ClInclude Include="fast_stop.h">
       <Filter>SRC\features\fast_stop</Filter>
-    </ClInclude>
-    <ClInclude Include="safe_walk.h">
-      <Filter>SRC\features\safe_walk</Filter>
     </ClInclude>
     <ClInclude Include="fullbright.h">
       <Filter>SRC\features\fullbright</Filter>

@@ -19,8 +19,9 @@ public:
 	{ }
 
 	void disconnect();
-	void force_disconnect() const;
+	void force_disconnect();
 	int send();
+	int send(void* data, size_t size);
 	int receive();
 
 	void set_tls(SSL* ssl)

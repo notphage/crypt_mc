@@ -3,9 +3,14 @@
 
 struct block_fields
 {
+	jfieldID fid_tile_entity_xpos = nullptr;
+	jfieldID fid_tile_entity_ypos = nullptr;
+	jfieldID fid_tile_entity_zpos = nullptr;
+
 	jmethodID mid_from_block = nullptr;
 
-	jclass block = nullptr;
+	jclass cls_block = nullptr;
+	jclass cls_tile_entity = nullptr;
 };
 
 struct class_loader_fields
@@ -23,6 +28,8 @@ struct class_loader_fields
 struct world_fields
 {
 	jfieldID fid_players = nullptr;
+	jfieldID fid_loaded_tile_entity_list = nullptr;
+
 	jmethodID mid_get_block = nullptr;
 	jmethodID mid_get_ent = nullptr;
 	jmethodID mid_to_array = nullptr;
@@ -32,7 +39,7 @@ struct world_fields
 	jclass world = nullptr;
 	jclass entity_renderer = nullptr;
 	jclass cls_list = nullptr;
-	jclass cls_block_air = nullptr;
+	jclass cls_tile_entity = nullptr;
 };
 
 struct player_fields
@@ -233,9 +240,10 @@ static world_fields worldfields;
 static player_fields playerfields;
 static game_fields gamefields;
 
-void c_block_forge_1710::instantiate(jobject block_instance, JNIEnv* _jni)
+void c_block_forge_1710::instantiate(jobject block_object, JNIEnv* _jni)
 {
 	jni = _jni;
+	block_instance = block_object;
 
 	static bool init_fields = false;
 
@@ -246,13 +254,32 @@ void c_block_forge_1710::instantiate(jobject block_instance, JNIEnv* _jni)
 		if (!class_loader)
 			return;
 
-		blockfields.block = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.block.Block")));
-		blockfields.mid_from_block = jni->GetStaticMethodID(blockfields.block, xors("func_149682_b"), xors("(Lnet/minecraft/block/Block;)I"));
+		blockfields.cls_block = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.block.Block")));
+		blockfields.cls_tile_entity = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.tileentity.TileEntity")));
+
+		blockfields.fid_tile_entity_xpos = jni->GetFieldID(blockfields.cls_tile_entity, xors("field_145851_c"), xors("I"));
+		blockfields.fid_tile_entity_ypos = jni->GetFieldID(blockfields.cls_tile_entity, xors("field_145848_d"), xors("I"));
+		blockfields.fid_tile_entity_zpos = jni->GetFieldID(blockfields.cls_tile_entity, xors("field_145849_e"), xors("I"));
+
+		blockfields.mid_from_block = jni->GetStaticMethodID(blockfields.cls_block, xors("func_149682_b"), xors("(Lnet/minecraft/block/Block;)I"));
 
 		init_fields = true;
 	}
+}
 
-	id = jni->CallStaticIntMethod(blockfields.block, blockfields.mid_from_block, block_instance);
+jint c_block_forge_1710::get_xpos()
+{
+	return jni->GetIntField(block_instance, blockfields.fid_tile_entity_xpos);
+}
+
+jint c_block_forge_1710::get_ypos()
+{
+	return jni->GetIntField(block_instance, blockfields.fid_tile_entity_xpos);
+}
+
+jint c_block_forge_1710::get_zpos()
+{
+	return jni->GetIntField(block_instance, blockfields.fid_tile_entity_xpos);
 }
 
 void c_class_loader_forge_1710::instantiate(JNIEnv* _jni)
@@ -304,9 +331,10 @@ void c_world_forge_1710::instantiate(jobject world_object, JNIEnv* _jni)
 		worldfields.world = class_loader->find_class(xors("net.minecraft.world.World"));
 		worldfields.entity_renderer = class_loader->find_class(xors("net.minecraft.client.renderer.EntityRenderer"));
 		worldfields.cls_list = class_loader->find_class(xors("java.util.List"));
-		worldfields.cls_block_air = (jclass)jni->NewGlobalRef(class_loader->find_class(xors("net.minecraft.block.BlockAir")));
 
+		worldfields.fid_loaded_tile_entity_list = jni->GetFieldID(worldfields.world, xors("field_147482_g"), xors("Ljava/util/List;"));
 		worldfields.fid_players = jni->GetFieldID(worldfields.world, xors("field_73010_i"), xors("Ljava/util/List;"));
+
 		worldfields.mid_get_block = jni->GetMethodID(worldfields.world, xors("func_147439_a"), xors("(III)Lnet/minecraft/block/Block;"));
 		worldfields.mid_get_ent = jni->GetMethodID(worldfields.world, xors("func_73045_a"), xors("(I)Lnet/minecraft/entity/Entity;"));
 		worldfields.mid_to_array = jni->GetMethodID(worldfields.cls_list, xors("toArray"), xors("()[Ljava/lang/Object;"));
@@ -333,7 +361,8 @@ std::vector<std::shared_ptr<c_player>> c_world_forge_1710::get_players()
 		return players;
 	}
 
-	for (jint i = 0; i < jni->GetArrayLength(arr_player_ents); i++)
+	jsize arr_size = jni->GetArrayLength(arr_player_ents);
+	for (jint i = 0; i < arr_size; i++)
 	{
 		auto player_ptr = std::make_shared<c_player_forge_1710>();
 		player_ptr->instantiate(jni->NewGlobalRef(jni->GetObjectArrayElement(arr_player_ents, i)), jni);
@@ -346,17 +375,34 @@ std::vector<std::shared_ptr<c_player>> c_world_forge_1710::get_players()
 	return players;
 }
 
-std::shared_ptr<c_block> c_world_forge_1710::get_block(jfloat x, jfloat y, jfloat z)
+std::vector<std::shared_ptr<c_block>> c_world_forge_1710::get_loaded_blocks()
 {
-	auto block_class = jni->CallObjectMethod(world_instance, worldfields.mid_get_block, x, y, z);
+	std::vector<std::shared_ptr<c_block>> blocks;
 
-	if (!block_class)
-		return nullptr;
+	const jobject obj_loaded_tile_ents = jni->GetObjectField(world_instance, worldfields.fid_loaded_tile_entity_list);
+	if (!obj_loaded_tile_ents)
+		return blocks;
 
-	auto block_ptr = std::make_shared<c_block_forge_1710>();
-	block_ptr->instantiate(block_class, jni);
+	const jobjectArray arr_block_ents = static_cast<jobjectArray>(jni->CallObjectMethod(obj_loaded_tile_ents, worldfields.mid_to_array));
 
-	return block_ptr;
+	if (!arr_block_ents)
+	{
+		jni->DeleteLocalRef(obj_loaded_tile_ents);
+		return blocks;
+	}
+
+	jsize arr_size = jni->GetArrayLength(arr_block_ents);
+	for (jint i = 0; i < arr_size; i++)
+	{
+		auto block_ptr = std::make_shared<c_block_forge_1710>();
+		block_ptr->instantiate(jni->NewGlobalRef(jni->GetObjectArrayElement(arr_block_ents, i)), jni);
+		blocks.push_back(block_ptr);
+	}
+
+	jni->DeleteLocalRef(arr_block_ents);
+	jni->DeleteLocalRef(obj_loaded_tile_ents);
+
+	return blocks;
 }
 
 void c_player_forge_1710::instantiate(jobject player_object, JNIEnv* _jni)

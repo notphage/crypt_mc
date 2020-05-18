@@ -4,7 +4,6 @@
 #include "../shared_mem.h"
 #include "game_list.h"
 #include "../shared_queue.h"
-
 #include "process.hpp"
 #include "manualmapper.hpp"
 
@@ -42,6 +41,9 @@ class c_client
 
 		return true;
 	}
+
+	bool handle_connection();
+	bool handle_login();
 
 	void run_socket();
 	void run_shared_mem();

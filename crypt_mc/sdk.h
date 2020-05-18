@@ -7,6 +7,7 @@
 #include <memory>
 #include <functional>
 #include <tuple>
+#include <immintrin.h>
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
@@ -1276,9 +1277,17 @@ protected:
 	jint id = 0;
 	std::string name{};
 public:
+	~c_block()
+	{
+		jni->DeleteLocalRef(block_instance);
+	}
+
 	jobject block_instance = nullptr;
 
 	virtual void instantiate(jobject, JNIEnv*) = 0;
+	virtual jint get_xpos() = 0;
+	virtual jint get_ypos() = 0;
+	virtual jint get_zpos() = 0;
 
 	__forceinline jint get_id()
 	{
@@ -1431,7 +1440,7 @@ public:
 
 	virtual void instantiate(jobject, JNIEnv*) = 0;
 	virtual std::vector<std::shared_ptr<c_player>> get_players() = 0;
-	virtual std::shared_ptr<c_block> get_block(jfloat, jfloat, jfloat) = 0;
+	virtual std::vector<std::shared_ptr<c_block>> get_loaded_blocks() = 0;
 };
 
 class c_game

@@ -145,7 +145,8 @@
       <LinkTimeOptimization>true</LinkTimeOptimization>
       <RelaxIEEE>true</RelaxIEEE>
       <HideInlineMethods>true</HideInlineMethods>
-      <AdditionalOptions>-L/usr/local/ssl/lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-L/usr/local/ssl/lib -fpermissive %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>FullDebug</DebugInformationFormat>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;ssl;crypto;</LibraryDependencies>

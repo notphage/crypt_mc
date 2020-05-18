@@ -29,7 +29,6 @@
 #include "step.h"
 #include "anti_afk.h"
 #include "fast_stop.h"
-#include "safe_walk.h"
 #include "fullbright.h"
 
 int __stdcall enum_windows_proc(HWND hwnd, int64_t lparam)
@@ -122,7 +121,6 @@ void c_context::load()
 	ctx.m_features.emplace_back(std::make_unique<c_fast_stop>(&ctx.m_settings.movement_fast_stop, &ctx.m_settings.movement_fast_stop_key));
 	ctx.m_features.emplace_back(std::make_unique<c_flight>(&ctx.m_settings.movement_flight, &ctx.m_settings.movement_flight_key));
 	ctx.m_features.emplace_back(std::make_unique<c_reach>(&ctx.m_settings.combat_reach, &ctx.m_settings.combat_reach_key));
-	ctx.m_features.emplace_back(std::make_unique<c_safe_walk>(&ctx.m_settings.movement_safe_walk, &ctx.m_settings.movement_safe_walk_key));
 	ctx.m_features.emplace_back(std::make_unique<c_speed>(&ctx.m_settings.movement_speed, &ctx.m_settings.movement_speed_key));
 	ctx.m_features.emplace_back(std::make_unique<c_long_jump>(&ctx.m_settings.movement_speed, &ctx.m_settings.movement_longjump_key));
 	ctx.m_features.emplace_back(std::make_unique<c_sprint>(&ctx.m_settings.movement_sprint, &ctx.m_settings.movement_sprint_key));

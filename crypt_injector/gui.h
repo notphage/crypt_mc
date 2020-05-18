@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <iterator>
-#include "renderer.h"
 
 class c_gui
 {

@@ -24,7 +24,6 @@ void c_gui::background()
 		ctx.m_renderer->draw_filled_rect({ 0.f, 0.f, (float)ctx.m_screen_w, (float)ctx.m_screen_h }, color_t(1, 1, 1, 0.5f * menu.data()->m_alpha));
 }
 
-
 void c_gui::tab_combat()
 {
 	static UI::c_enable_groupbox auto_clicker_groupbox;
@@ -595,7 +594,6 @@ void c_gui::tab_misc()
 	static UI::c_key_bind menu_key;
 	static UI::c_color_picker menu_color;
 	static UI::c_slider menu_fade_speed;
-	static UI::c_checkbox rainbow_mode;
 
 	static UI::c_dropdown restriction;
 	static UI::c_dropdown config;
@@ -621,8 +619,6 @@ void c_gui::tab_misc()
 			menu_color.handle(menu.data(), xors("accent"), ctx.m_settings.gui_accent_color().r_ptr(), ctx.m_settings.gui_accent_color().g_ptr(), ctx.m_settings.gui_accent_color().b_ptr(), ctx.m_settings.gui_accent_color().a_ptr());
 			menu_fade_speed.handle(menu.data(), xors("fade speed"), &ctx.m_settings.gui_fade_speed, 1, 50);
 
-			rainbow_mode.handle(menu.data(), xors("rainbow mode"), &ctx.m_settings.gui_rainbow);
-
 			uninject.handle(menu.data(), xors("unload"), []
 				{
 					ctx.m_panic = true;
@@ -647,12 +643,12 @@ void c_gui::tab_misc()
 		timer_groupbox.start(menu.data(), xors("timer"));
 		{
 			if (ctx.m_settings.misc_timer)
-				timer_positive_key.handle(menu.data(), "positive", &ctx.m_settings.misc_positive_timer_key, keytype_t::kt_all);
+				timer_positive_key.handle(menu.data(), "positive", &ctx.m_settings.misc_positive_timer_key);
 			
 			timer_positive_speed.handle(menu.data(), xors("positive speed"), &ctx.m_settings.misc_timer_positive_speed, 1.f, 5.f, 0.01f);
 
 			if (ctx.m_settings.misc_timer)
-				timer_negative_key.handle(menu.data(), "negative", &ctx.m_settings.misc_negative_timer_key, keytype_t::kt_all);
+				timer_negative_key.handle(menu.data(), "negative", &ctx.m_settings.misc_negative_timer_key);
 
 			timer_negative_speed.handle(menu.data(), xors("negative speed"), &ctx.m_settings.misc_timer_negative_speed, .01f, 1.f, 0.01f);
 		}

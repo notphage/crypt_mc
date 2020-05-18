@@ -19,6 +19,8 @@
 #ifndef FONS_H
 #define FONS_H
 
+struct render_list_t;
+
 #define FONS_INVALID -1
 
 enum FONSflags
@@ -60,7 +62,7 @@ struct FONSparams
 	int (*renderCreate)(void* uptr, int width, int height);
 	int (*renderResize)(void* uptr, int width, int height);
 	void (*renderUpdate)(void* uptr, int* rect, const unsigned char* data);
-	void (*renderDraw)(void* uptr, const float* verts, const float* tcoords, const unsigned int* colors, int nverts);
+	void (*renderDraw)(void* uptr, const float* verts, const float* tcoords, const unsigned int* colors, int nverts, const std::unique_ptr<render_list_t>& render_list);
 	void (*renderDelete)(void* uptr);
 };
 
@@ -123,7 +125,7 @@ void fonsSetAlign(FONScontext* s, int align);
 void fonsSetFont(FONScontext* s, int font);
 
 // Draw text
-float fonsDrawText(FONScontext* s, float x, float y, const char* string, const char* end);
+float fonsDrawText(FONScontext* s, const std::unique_ptr<render_list_t>& render_list, float x, float y, const char* string, const char* end);
 
 // Measure text
 float fonsTextBounds(FONScontext* s, float x, float y, const char* string, const char* end, float* bounds);
@@ -1224,7 +1226,7 @@ static void fons__getQuad(FONScontext* stash, FONSfont* font,
 	*x += glyph->xadv;
 }
 
-static void fons__flush(FONScontext* stash)
+static void fons__flush(FONScontext* stash, const std::unique_ptr<render_list_t>& render_list = nullptr)
 {
 	// Flush texture
 	if (stash->dirtyRect[0] < stash->dirtyRect[2] && stash->dirtyRect[1] < stash->dirtyRect[3]) {
@@ -1240,7 +1242,7 @@ static void fons__flush(FONScontext* stash)
 	// Flush triangles
 	if (stash->nverts > 0) {
 		if (stash->params.renderDraw != NULL)
-			stash->params.renderDraw(stash->params.userPtr, stash->verts, stash->tcoords, stash->colors, stash->nverts);
+			stash->params.renderDraw(stash->params.userPtr, stash->verts, stash->tcoords, stash->colors, stash->nverts, render_list);
 		stash->nverts = 0;
 	}
 }
@@ -1289,6 +1291,7 @@ static float fons__getVertAlign(FONScontext* stash, FONSfont* font, int align, s
 }
 
 float fonsDrawText(FONScontext* stash,
+	const std::unique_ptr<render_list_t>& render_list,
 	float x, float y,
 	const char* str, const char* end)
 {
@@ -1337,7 +1340,7 @@ float fonsDrawText(FONScontext* stash,
 			fons__getQuad(stash, font, prevGlyphIndex, glyph, scale, state->spacing, &x, &y, &q);
 
 			if (stash->nverts + 6 > FONS_VERTEX_COUNT)
-				fons__flush(stash);
+				fons__flush(stash, render_list);
 
 			fons__vertex(stash, q.x0, q.y0, q.s0, q.t0, state->color);
 			fons__vertex(stash, q.x1, q.y1, q.s1, q.t1, state->color);
@@ -1349,7 +1352,7 @@ float fonsDrawText(FONScontext* stash,
 		}
 		prevGlyphIndex = glyph != NULL ? glyph->index : -1;
 	}
-	fons__flush(stash);
+	fons__flush(stash, render_list);
 
 	return x;
 }

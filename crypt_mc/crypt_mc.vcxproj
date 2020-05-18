@@ -123,8 +123,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>c:\hack\</OutDir>
     <TargetExt>.dll</TargetExt>
-    <IncludePath>$(ProjectDir)..\include;$(JDK_DIR)\include;$(JDK_DIR)\include\win32;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\lib;$(JDK_DIR)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(ProjectDir)..\include;C:\Program Files\Java\jdk1.8.0_241\include;C:\Program Files\Java\jdk1.8.0_241\include\win32;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\lib;C:\Program Files\Java\jdk1.8.0_241\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Public|x64'">
     <OutDir>c:\hack\</OutDir>
@@ -321,7 +321,6 @@
     <ClCompile Include="raytrace.cpp" />
     <ClCompile Include="reach.cpp" />
     <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="safe_walk.cpp" />
     <ClCompile Include="sdk.cpp" />
     <ClCompile Include="sdk_1.7.10.cpp" />
     <ClCompile Include="sdk_1.8.X.cpp" />
@@ -376,7 +375,6 @@
     <ClInclude Include="raytrace.h" />
     <ClInclude Include="reach.h" />
     <ClInclude Include="renderer.h" />
-    <ClInclude Include="safe_walk.h" />
     <ClInclude Include="sdk.h" />
     <ClInclude Include="sdk_1.7.10.h" />
     <ClInclude Include="sdk_forge_1.7.10.h" />

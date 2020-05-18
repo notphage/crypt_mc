@@ -25,6 +25,11 @@ long __stdcall hooked::get_time(JNIEnv* jni, jclass caller)
 					stack.method_name == fnvc("p") ||
 					stack.method_name == fnvc("s")) // func_71407_l
 				{
+					auto blocks = world->get_loaded_blocks();
+					printf("%i\n", blocks.size());
+					for (auto&& block : blocks)
+						printf("%i %i %i\n", block->get_xpos(), block->get_ypos(), block->get_zpos());
+
 					for (auto&& feature : ctx.m_features)
 						feature->run(jni, mc, self, world, feature_type::FEATURE_GET_TIME);
 				}

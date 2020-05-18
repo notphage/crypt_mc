@@ -39,8 +39,8 @@ bool injection::manualmapper::uninject(injection::executor::mode execution_mode)
 		if (!call_exitpoint(ctx))
 			return false;
 
-		//if (!unmap_image(ctx))
-		//	return false;
+		if (!unmap_image(ctx))
+			return false;
 	}
 
 	return true;

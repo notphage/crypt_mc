@@ -1,9 +1,6 @@
 #pragma once
 #include "context.h"
 
-#define UTL_FUNCTION( x,y,w,h ) [&]( const float& x, const float& y, const float& w, const float& h )
-#define UTL_UNUSED true
-
 namespace UI
 {
 	class c_control
@@ -1759,6 +1756,8 @@ namespace UI
 
 			m_start = vec2(data->m_x + 20.f, data->m_y);
 			m_box_start = vec2(m_start.x, m_start.y);
+
+			items.at(0);
 
 			data->m_y += 25.f;
 

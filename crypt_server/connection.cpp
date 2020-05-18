@@ -9,7 +9,7 @@ int c_connection::send_impl(const void* data, size_t size) const
 
 	while (size > 0)
 	{
-		if ((bytes_sent = SSL_write(m_ssl, data_ptr, size)) == -1)
+		if ((bytes_sent = SSL_write(m_ssl, data_ptr, (int)size)) == -1)
 			return -1;
 
 		data_ptr += bytes_sent;
@@ -38,7 +38,7 @@ int c_connection::receive_impl(void* data, size_t size) const
 
 	while (size > 0)
 	{
-		if ((bytes_recv = SSL_read(m_ssl, data_ptr, size)) <= 0)
+		if ((bytes_recv = SSL_read(m_ssl, data_ptr, (int)size)) <= 0)
 			return -1;
 
 		data_ptr += bytes_recv;
@@ -50,6 +50,20 @@ int c_connection::receive_impl(void* data, size_t size) const
 
 void c_connection::disconnect()
 {
+	if (!m_buffer.empty())
+	{
+		m_buffer.clear();
+		m_buffer.shrink_to_fit();
+	}
+
+	//int err = 0;
+	//socklen_t size = sizeof(err);
+	//int check = getsockopt(m_conn_socket, SOL_SOCKET, SO_ERROR, &err, &size);
+	//if (check == 0)
+	//{
+	//	SSL_shutdown(m_ssl);
+	//}
+
 	if (shutdown(m_conn_socket, SHUT_RDWR) < 0)
 	{
 		printf("> Client %s | Errored on disconnect (%s)\n", m_ip.c_str(), strerror(errno));
@@ -62,8 +76,14 @@ void c_connection::disconnect()
 	close(m_conn_socket);
 }
 
-void c_connection::force_disconnect() const
+void c_connection::force_disconnect()
 {
+	if (!m_buffer.empty())
+	{
+		m_buffer.clear();
+		m_buffer.shrink_to_fit();
+	}
+
 	close(m_conn_socket);
 	printf("> Client %s | Disconnected forcefully\n", m_ip.c_str());
 }
@@ -77,12 +97,30 @@ int c_connection::send()
 		if ((result = send_impl(m_buffer.data(), size)) != 1)
 			m_buffer.clear();
 
+	if (result == 1)
+	{
+		m_buffer.clear();
+		m_buffer.shrink_to_fit();
+	}
+
+	return result;
+}
+
+int c_connection::send(void* data, size_t size)
+{
+	int result = 0;
+
+	if ((result = send_impl(&size, sizeof size)) == 1)
+		if ((result = send_impl(data, size)) != 1)
+			m_buffer.clear();
+
 	return result;
 }
 
 int c_connection::receive()
 {
 	m_buffer.clear();
+	m_buffer.shrink_to_fit();
 
 	size_t size = 0;
 	int result = 0;

@@ -75,6 +75,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\nasm.props" />
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
@@ -114,7 +115,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -238,6 +239,8 @@
     <ClCompile Include="connection.cpp" />
     <ClCompile Include="executor.cpp" />
     <ClCompile Include="font.cpp" />
+    <ClCompile Include="fontstash.cpp" />
+    <ClCompile Include="glfontstash.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="hwid.cpp" />
     <ClCompile Include="input.cpp" />
@@ -254,9 +257,6 @@
     <ClCompile Include="protection.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="shellcode.cpp" />
-    <None Include="dllmain_call_64_exit.asm">
-      <FileType>Document</FileType>
-    </None>
     <ClCompile Include="syscall.cpp" />
     <ClCompile Include="thread.cpp" />
     <ClCompile Include="window.cpp" />
@@ -278,7 +278,9 @@
     <ClInclude Include="context.h" />
     <ClInclude Include="executor.hpp" />
     <ClInclude Include="font.h" />
+    <ClInclude Include="fontstash.h" />
     <ClInclude Include="game_list.h" />
+    <ClInclude Include="glfontstash.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="hwid.h" />
@@ -301,6 +303,7 @@
     <ClInclude Include="safe_memory.hpp" />
     <ClInclude Include="sdk.h" />
     <ClInclude Include="shellcode.hpp" />
+    <ClInclude Include="stb_truetype.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="syscall.h" />
     <ClInclude Include="thread.hpp" />
@@ -309,12 +312,6 @@
     <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dllmain_call_x64_entry.asm">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="dllmain_hijack_x64_entry.asm">
-      <FileType>Document</FileType>
-    </None>
     <MASM Include="syscall_stub.asm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -324,6 +321,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\nasm.targets" />
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

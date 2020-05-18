@@ -36,7 +36,7 @@ class c_context
 {
 public:
 	std::unique_ptr<c_server> m_server;
-	uint64_t m_required_version = 2;
+	uint64_t m_required_version = 3;
 };
 
 extern c_context ctx;
